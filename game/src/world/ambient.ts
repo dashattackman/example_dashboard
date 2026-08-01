@@ -78,10 +78,11 @@ export async function createAmbientCast(
   const rand = makeRand(0xca57);
   const people: Person[] = [];
 
-  // Lane ends ride the corner's exported bounds so walkers spawn/despawn just
-  // past the playable edge, never mid-block in front of the camera.
-  const zSouth = corner.bounds.minZ + 1; // ≈ -33
-  const zNorth = corner.bounds.maxZ - 2; // ≈ 86
+  // Lane ends sit WELL past the playable bounds (fog swallows ~15m beyond),
+  // so the wrap teleport happens out of sight even when the player stands at
+  // a lane end staring up the avenue (playtest r2 m6).
+  const zSouth = corner.bounds.minZ - 14; // ≈ -48
+  const zNorth = corner.bounds.maxZ + 14; // ≈ 102
 
   const load = (body: string): Promise<CharacterRigHandle> =>
     loadCharacterRig(scene, { url: `${CHAR_DIR}${body}.glb`, targetHeight: 1.78 });
@@ -123,8 +124,20 @@ export async function createAmbientCast(
     { body: 'casual', laneX: -13.0, dirZ: 1, speed: 1.35 }, // west walk, northbound
     { body: 'skater', laneX: -14.9, dirZ: -1, speed: 1.6 }, // west walk, southbound
   ];
+
+  // ALL bodies download in PARALLEL (playtest r2 m1: serial awaits held boot
+  // hostage for ~6.5s; the browser pipelines these fine).
+  const wantJogger = phase === 'MORN' || phase === 'EVE';
+  const rigList = await Promise.all([
+    ...lanes.map((l) => load(l.body)),
+    load('vest'),
+    load('punk'),
+    ...(wantJogger ? [load('jogger')] : []),
+  ]);
+  let nextRig = 0;
+
   for (const lane of lanes) {
-    const rig = await load(lane.body);
+    const rig = rigList[nextRig++]!;
     const startZ = zSouth + rand() * (zNorth - zSouth);
     const p = addPerson(
       rig,
@@ -151,7 +164,7 @@ export async function createAmbientCast(
   // no sit clip, so: a believable stand — leaning by the bench, watching the
   // street with a neutral idle) ----------------------------------------------
   {
-    const rig = await load('vest');
+    const rig = rigList[nextRig++]!;
     addPerson(rig, 'sitter', 'vest', 3.9, WALK_Y, -3.9, -Math.PI / 2 + 0.25, () => [0, 0], false);
     rig.play('Idle_Neutral', { startFraction: rand() });
   }
@@ -159,7 +172,7 @@ export async function createAmbientCast(
   // --- storefront browser at LAGOON RECORDS (display windows z 2.2 / 6.2,
   // glass at x≈4.94): idles at one window, occasionally drifts to the other ---
   {
-    const rig = await load('punk');
+    const rig = rigList[nextRig++]!;
     const windows = [2.2, 6.2];
     let target = 0;
     let dwell = 6 + rand() * 8;
@@ -182,8 +195,8 @@ export async function createAmbientCast(
 
   // --- lakeside jogger (MORN/EVE — the lake light hours): out-and-back along
   // the cross street toward the shore ----------------------------------------
-  if (phase === 'MORN' || phase === 'EVE') {
-    const rig = await load('jogger');
+  if (wantJogger) {
+    const rig = rigList[nextRig++]!;
     const xWest = -60;
     const xEast = 22;
     let dirX: 1 | -1 = -1;
@@ -204,6 +217,12 @@ export async function createAmbientCast(
       if (!p.moves) continue;
       let vx = vx0;
       let vz = vz0;
+      // Forward direction BEFORE repulsion — head-on detection must not read
+      // the already-cancelled velocity (playtest r2 M2: radial push exactly
+      // opposed forward motion, walker stalled 0.07m inside Eli).
+      const fMag = Math.hypot(vx0, vz0);
+      const fx = fMag > 0.05 ? vx0 / fMag : 0;
+      const fz = fMag > 0.05 ? vz0 / fMag : 0;
       // Personal space: soft push away from Eli and every other cast member.
       // (Static roles still repel movers; movers never shove the statics.)
       const repel = (ox: number, oz: number): void => {
@@ -214,6 +233,21 @@ export async function createAmbientCast(
           const push = (AVOID_RADIUS - d) / AVOID_RADIUS;
           vx += (dx / d) * push * 1.6;
           vz += (dz / d) * push * 1.6;
+          // Head-on case: obstacle dead ahead → the radial push has no
+          // tangential component and just cancels forward motion. Detect it
+          // (|cross(fwd, toOther)| near zero while closing) and add a swirl:
+          // everyone steps to their own RIGHT, so mutual head-ons resolve
+          // left-shoulder-to-left-shoulder instead of mirror-dancing.
+          if (fMag > 0.05) {
+            const tox = -dx / d; // unit vector toward the obstacle
+            const toz = -dz / d;
+            const closing = fx * tox + fz * toz; // >0: it's ahead of us
+            const cross = fx * toz - fz * tox; // ~0: dead-on
+            if (closing > 0.5 && Math.abs(cross) < 0.35) {
+              vx += fz * push * 1.8; // right of forward = (fz, -fx)
+              vz += -fx * push * 1.8;
+            }
+          }
         }
       };
       repel(playerX, playerZ);

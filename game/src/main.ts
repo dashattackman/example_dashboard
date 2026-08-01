@@ -7,8 +7,10 @@ import { CameraRig } from './engine/cameraRig';
 import { attachDebug } from './engine/debug';
 import { createKit } from './engine/kit';
 import { createRigAnchor, loadCharacterRig } from './engine/characterRig';
+import type { CharacterRigHandle } from './engine/characterRig';
 import { buildBeautyCorner } from './world/beautyCorner';
 import { createAmbientCast } from './world/ambient';
+import type { AmbientCast } from './world/ambient';
 import { createTouchControls } from './ui/joystick';
 import type { Phase } from './sim/clock';
 
@@ -54,25 +56,8 @@ async function boot(): Promise<void> {
   player.position.set(...corner.playerSpawn);
   const rig = new CameraRig(scene, player);
 
-  // The Anchor, rigged: Eli's identity body (slate jacket / amber accent —
-  // assets-pipeline/build-cast.mjs) through the shared character pipeline.
-  const eli = await loadCharacterRig(scene, {
-    url: 'assets/characters/eli.glb',
-    targetHeight: 1.92,
-  });
-  eli.root.parent = player;
-  eli.play('Idle');
-
-  // Ambient cast — the corner is a place people live, not a diorama.
-  const ambient = await createAmbientCast(scene, corner, phase);
-  window.__ambientTest = {
-    ready: true,
-    count: ambient.people.length,
-    roles: ambient.people.map((p) => p.role),
-    positions: () => ambient.people.map((p) => p.position()),
-    skeletons: () => scene.skeletons.length,
-  };
-
+  // Controls, camera debug pose, and the perf overlay attach BEFORE any asset
+  // await — input must never be dead while glbs stream in (playtest r2 m1).
   const cam = new URLSearchParams(location.search).get('cam');
   if (cam) {
     const v = cam.split(',').map(Number);
@@ -83,13 +68,22 @@ async function boot(): Promise<void> {
   const input = createTouchControls(uiRoot);
   attachDebug(engine, scene, transport);
 
+  // Characters land progressively: the anchor moves (and the camera follows)
+  // from frame one; Eli's body and the ambient cast pop in as they arrive.
+  let eli: CharacterRigHandle | null = null;
+  let ambient: AmbientCast | null = null;
+
   const { minX, maxX, minZ, maxZ } = corner.bounds;
   let heading = 0;
   scene.onBeforeRenderObservable.add(() => {
     // engine.getDeltaTime(), NOT scene.deltaTime — the latter is declared in
     // Babylon's types but never assigned at runtime (playtest blocker B1:
     // dt locked to 16ms made walk speed frame-rate dependent).
-    const dt = Math.min(engine.getDeltaTime() / 1000, 0.1);
+    // Clamp at 0.25s: long hitches (tab-away, shader compile, GC) must not
+    // teleport anyone, but 0.1 was so tight that ANY sub-10fps stretch ran
+    // the whole world in slow motion while animations played full-rate —
+    // movement and clips must integrate the SAME clock (playtest r2 M1).
+    const dt = Math.min(engine.getDeltaTime() / 1000, 0.25);
     const mag = Math.hypot(input.x, input.y);
     if (mag > 0.12) {
       const speed = MOVE_SPEED * Math.min(mag, 1);
@@ -104,14 +98,37 @@ async function boot(): Promise<void> {
       player.rotation.y = heading;
       // Gait: joystick magnitude picks the clip, ground speed tunes its rate
       // (cross-fades handled by the rig; same-clip calls just retune speed).
-      if (mag < RUN_INPUT) eli.play('Walk', { speed: Math.min(Math.max(speed / 1.45, 0.7), 1.6) });
-      else eli.play('Run', { speed: Math.min(Math.max(speed / 3.8, 0.8), 1.35) });
+      if (mag < RUN_INPUT)
+        eli?.play('Walk', { speed: Math.min(Math.max(speed / 1.45, 0.7), 1.6) });
+      else eli?.play('Run', { speed: Math.min(Math.max(speed / 3.8, 0.8), 1.35) });
     } else {
-      eli.play('Idle');
+      eli?.play('Idle');
     }
-    ambient.update(dt, player.position.x, player.position.z);
+    ambient?.update(dt, player.position.x, player.position.z);
     rig.update(dt);
   });
+
+  // The Anchor, rigged: Eli's identity body (slate jacket / amber accent —
+  // assets-pipeline/build-cast.mjs) and the ambient cast download in PARALLEL.
+  const eliP = loadCharacterRig(scene, {
+    url: 'assets/characters/eli.glb',
+    targetHeight: 1.92,
+  }).then((r) => {
+    r.root.parent = player;
+    r.play('Idle');
+    eli = r;
+  });
+  const ambientP = createAmbientCast(scene, corner, phase).then((cast) => {
+    ambient = cast;
+    window.__ambientTest = {
+      ready: true,
+      count: cast.people.length,
+      roles: cast.people.map((p) => p.role),
+      positions: () => cast.people.map((p) => p.position()),
+      skeletons: () => scene.skeletons.length,
+    };
+  });
+  await Promise.all([eliP, ambientP]); // load failures still surface via boot()
 }
 
 // Phone-side failures must be visible AND phoned home (device telemetry →
@@ -133,6 +150,9 @@ function deviceReport(kind: 'error' | 'perf'): Record<string, unknown> {
 }
 
 function phoneHome(kind: 'error' | 'perf'): void {
+  // Dev/preview servers have no /api/report — skip the 404 noise entirely;
+  // production (CF Pages) is the only place the endpoint exists.
+  if (/^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname)) return;
   if (kind === 'error' && reported) return; // one error report per session
   if (kind === 'error') reported = true;
   const body = JSON.stringify(deviceReport(kind));
