@@ -43,8 +43,12 @@ export interface RigPlayOptions {
   fade?: number;
   /** Loop the clip. Default true (set false for punches/hits/death). */
   loop?: boolean;
-  /** Playback speed ratio. Default 1. */
+  /** Playback speed ratio. Default 1. Re-playing the SAME clip with a new
+   *  speed just retunes the running group (no restart, no fade). */
   speed?: number;
+  /** Start this far into the clip, as a 0..1 fraction — de-syncs a crowd
+   *  playing the same loop (8 walkers should not stride in unison). */
+  startFraction?: number;
 }
 
 export interface CharacterRigHandle {
@@ -70,6 +74,49 @@ export interface LoadCharacterRigOptions {
   url?: string;
   /** Rig is uniformly scaled so its rest-pose height matches this (meters). */
   targetHeight?: number;
+  /** Blob shadow under the figure. Default true. */
+  shadow?: boolean;
+}
+
+// One material set per SCENE, shared by every rig in it (Eli + the whole
+// ambient cast ride the same 3 materials — the "≤12 live materials" budget
+// stays honest as the cast grows). Owned by the scene: rig.dispose() leaves
+// them alone; scene disposal cleans them up.
+interface SharedRigMats {
+  body: StandardMaterial;
+  ink: StandardMaterial;
+  blob: StandardMaterial;
+}
+const sharedMats = new WeakMap<Scene, SharedRigMats>();
+
+function getSharedRigMats(scene: Scene): SharedRigMats {
+  let mats = sharedMats.get(scene);
+  if (!mats) {
+    const body = createCharacterMaterial(scene, 'rigMat');
+    const ink = new StandardMaterial('rigInkMat', scene);
+    ink.disableLighting = true;
+    ink.diffuseColor = Color3.Black();
+    ink.specularColor = Color3.Black();
+    ink.emissiveColor = Color3.FromHexString(PALETTE.ink);
+    const blob = new StandardMaterial('rigBlobMat', scene);
+    blob.disableLighting = true;
+    blob.diffuseColor = Color3.Black();
+    blob.emissiveColor = Color3.Black();
+    blob.alpha = 0.38;
+    mats = { body, ink, blob };
+    sharedMats.set(scene, mats);
+    scene.onDisposeObservable.addOnce(() => sharedMats.delete(scene));
+  }
+  return mats;
+}
+
+/** Plain transform node for pre-load camera targets / rig mount points.
+ *  Rationale: a camera-less scene.render() throws and permanently kills the
+ *  render loop (see rigHarness.ts), so boot code must create its camera target
+ *  BEFORE awaiting any rig download — this is the engine-facade way to get one
+ *  without world code importing @babylonjs (docs/05). */
+export function createRigAnchor(scene: Scene, name = 'rigAnchor'): TransformNode {
+  return new TransformNode(name, scene);
 }
 
 export async function loadCharacterRig(
@@ -89,14 +136,10 @@ export async function loadCharacterRig(
   if (!loadedRoot) throw new Error(`characterRig: no meshes in ${url}`);
 
   // --- Our shader pipeline: ONE rim/ramp material for the body (color rides
-  // in vertex colors, exactly like buildEli) + flat ink on the baked hull. The
-  // loader's PBR materials are discarded wholesale.
-  const mat = createCharacterMaterial(scene, 'rigMat');
-  const inkMat = new StandardMaterial('rigInkMat', scene);
-  inkMat.disableLighting = true;
-  inkMat.diffuseColor = Color3.Black();
-  inkMat.specularColor = Color3.Black();
-  inkMat.emissiveColor = Color3.FromHexString(PALETTE.ink);
+  // in vertex colors, exactly like buildEli) + flat ink on the baked hull —
+  // both shared scene-wide across every rig. The loader's PBR materials are
+  // discarded wholesale.
+  const { body: mat, ink: inkMat, blob: blobMat } = getSharedRigMats(scene);
 
   const meshes: Mesh[] = [];
   const oldMaterials = new Set<NonNullable<Mesh['material']>>();
@@ -107,7 +150,10 @@ export async function loadCharacterRig(
     m.isPickable = false;
     meshes.push(m);
   }
-  for (const old of oldMaterials) old.dispose(false, true);
+  for (const old of oldMaterials) {
+    if (old === mat || old === inkMat) continue; // never dispose the shared set
+    old.dispose(false, true);
+  }
   const bodies = meshes.filter((m) => m.material === mat);
   const mesh = bodies.reduce((a, b) => (b.getTotalVertices() > a.getTotalVertices() ? b : a));
 
@@ -121,17 +167,14 @@ export async function loadCharacterRig(
   loadedRoot.parent = root;
 
   // Blob shadow — parity with buildEli (docs/06: no dynamic shadows on BASE tier).
-  const blob = MeshBuilder.CreateDisc('rigBlob', { radius: 0.46, tessellation: 20 }, scene);
-  blob.rotation.x = Math.PI / 2;
-  blob.position.y = 0.015;
-  blob.isPickable = false;
-  const blobMat = new StandardMaterial('rigBlobMat', scene);
-  blobMat.disableLighting = true;
-  blobMat.diffuseColor = Color3.Black();
-  blobMat.emissiveColor = Color3.Black();
-  blobMat.alpha = 0.38;
-  blob.material = blobMat;
-  blob.parent = root;
+  if (opts.shadow !== false) {
+    const blob = MeshBuilder.CreateDisc('rigBlob', { radius: 0.46, tessellation: 20 }, scene);
+    blob.rotation.x = Math.PI / 2;
+    blob.position.y = 0.015;
+    blob.isPickable = false;
+    blob.material = blobMat;
+    blob.parent = root;
+  }
 
   // --- Clip playback with cross-fade. Weights ramp on the scene's animation
   // tick; groups that fade out fully are stopped (no idle mixer cost).
@@ -174,13 +217,19 @@ export async function loadCharacterRig(
   const play = (name: string, playOpts: RigPlayOptions = {}): void => {
     const group = groups.get(name);
     if (!group) throw new Error(`characterRig: unknown clip "${name}"`);
-    if (group === currentGroup && group.isPlaying) return;
+    if (group === currentGroup && group.isPlaying) {
+      // Same clip re-request: just retune the playback rate (Idle→Walk→Run is
+      // fade territory, but joystick magnitude wiggle inside one gait is not).
+      if (playOpts.speed !== undefined) group.speedRatio = playOpts.speed;
+      return;
+    }
     const fade = playOpts.fade ?? 0.18;
     const previous = currentGroup;
     currentGroup = group;
     currentName = name;
 
-    group.start(playOpts.loop ?? true, playOpts.speed ?? 1);
+    const from = group.from + (playOpts.startFraction ?? 0) * (group.to - group.from);
+    group.start(playOpts.loop ?? true, playOpts.speed ?? 1, from);
     const enqueue = (g: AnimationGroup, to: 0 | 1, from: number): void => {
       const existing = fades.find((f) => f.group === g);
       const weight = existing ? existing.weight : from;
@@ -211,9 +260,7 @@ export async function loadCharacterRig(
     dispose: () => {
       scene.onBeforeAnimationsObservable.remove(observer);
       for (const g of groups.values()) g.dispose();
-      inkMat.dispose();
-      mat.dispose(false, true);
-      blobMat.dispose();
+      // Shared scene-wide materials are NOT disposed — other rigs use them.
       root.dispose(false, true);
     },
   };

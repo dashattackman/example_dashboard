@@ -3,6 +3,32 @@
 All third-party assets in this tree are CC0 (public domain dedication) — credit
 is not legally required, but we keep provenance honest per CLAUDE.md.
 
+## characters/ — the cast (eli, punk, suit, worker, casual, skater, vest, jogger)
+
+- **Assets:** rigged + animated character bodies, all from Quaternius'
+  **Ultimate Animated Character Pack** (CC0 1.0 —
+  https://creativecommons.org/publicdomain/zero/1.0/), all on the pack's shared
+  62-joint `CharacterArmature` rig: Adventurer (→ `eli.glb`, `jogger.glb`),
+  Punk (→ `punk.glb`, `skater.glb`), Suit (→ `suit.glb`, `casual.glb`),
+  Worker (→ `worker.glb`, `vest.glb`).
+- **Author:** Quaternius — https://quaternius.com
+  (https://quaternius.com/packs/ultimateanimatedcharacter.html)
+- **Obtained via:** the cloud asset channel (GitHub raw/LFS; quaternius.com and
+  asset CDNs are unreachable from the build container). Mirror URLs are pinned
+  in `game/assets-pipeline/build-cast.mjs`: Adventurer from
+  `adityaagurav/OceanCleanup2` (Git LFS, filename stamped "Adventurer by
+  Quaternius"); Punk/Suit/Worker from `JonathanOll/supermarket-alone`
+  (`Assets/Models/Characters/*.glb`). Rig/clip integrity (joints, clip set,
+  materials) verified with gltf-transform before processing.
+- **Modifications** (ours — `game/assets-pipeline/process-character.mjs` +
+  cast table in `build-cast.mjs`, gltf-transform v4): same treatment as
+  adventurer.glb below (clip prune — ambient bodies keep only locomotion
+  clips — vertex-color bake, single-primitive merge, baked inverted-hull ink
+  outline), plus **outfit recolors** baked into the vertex colors for
+  `eli`/`casual`/`skater`/`vest`/`jogger` (exact palettes in the cast table).
+- **Runtime treatment:** rim/ramp `GraphicNovelPlugin` StandardMaterial + flat
+  ink hull, shared scene-wide (`src/engine/characterRig.ts`).
+
 ## characters/adventurer.glb
 
 - **Asset:** "Adventurer" rigged + animated character (base body for the shared

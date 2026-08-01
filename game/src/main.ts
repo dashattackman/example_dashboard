@@ -6,12 +6,27 @@ import { createLightingRig } from './engine/lighting';
 import { CameraRig } from './engine/cameraRig';
 import { attachDebug } from './engine/debug';
 import { createKit } from './engine/kit';
-import { buildEli } from './engine/character';
+import { createRigAnchor, loadCharacterRig } from './engine/characterRig';
 import { buildBeautyCorner } from './world/beautyCorner';
+import { createAmbientCast } from './world/ambient';
 import { createTouchControls } from './ui/joystick';
 import type { Phase } from './sim/clock';
 
-const MOVE_SPEED = 6; // m/s — placeholder walk tuning until 02's table lands in tuning.json
+const MOVE_SPEED = 6; // m/s — placeholder run tuning until 02's table lands in tuning.json
+const RUN_INPUT = 0.6; // joystick magnitude where the gait breaks into a run
+
+// Playwright hook for the ambient-cast spec (test/e2e/ambient.spec.ts).
+declare global {
+  interface Window {
+    __ambientTest?: {
+      ready: boolean;
+      count: number;
+      roles: string[];
+      positions(): Array<[number, number, number]>;
+      skeletons(): number;
+    };
+  }
+}
 
 /** M1: phase is picked via `?phase=` for art review and the Playwright beauty spec.
  *  The sim clock drives `rig.update(minute)` from M4's frozen clock API onward. */
@@ -28,13 +43,36 @@ async function boot(): Promise<void> {
   const lighting = createLightingRig(scene);
   const kit = createKit(scene);
   const corner = buildBeautyCorner(kit);
-  const look = lighting.applyPhase(phaseFromUrl());
+  const phase = phaseFromUrl();
+  const look = lighting.applyPhase(phase);
   corner.applyNeon(look.neon);
 
-  const eli = buildEli(scene);
-  eli.root.position.set(...corner.playerSpawn);
+  // Camera target BEFORE any await: the render loop is already running, and a
+  // camera-less scene.render() throws and kills it for good (rigHarness.ts has
+  // the war story). Eli's rig mounts onto this anchor once downloaded.
+  const player = createRigAnchor(scene, 'playerAnchor');
+  player.position.set(...corner.playerSpawn);
+  const rig = new CameraRig(scene, player);
 
-  const rig = new CameraRig(scene, eli.root);
+  // The Anchor, rigged: Eli's identity body (slate jacket / amber accent —
+  // assets-pipeline/build-cast.mjs) through the shared character pipeline.
+  const eli = await loadCharacterRig(scene, {
+    url: 'assets/characters/eli.glb',
+    targetHeight: 1.92,
+  });
+  eli.root.parent = player;
+  eli.play('Idle');
+
+  // Ambient cast — the corner is a place people live, not a diorama.
+  const ambient = await createAmbientCast(scene, corner, phase);
+  window.__ambientTest = {
+    ready: true,
+    count: ambient.people.length,
+    roles: ambient.people.map((p) => p.role),
+    positions: () => ambient.people.map((p) => p.position()),
+    skeletons: () => scene.skeletons.length,
+  };
+
   const cam = new URLSearchParams(location.search).get('cam');
   if (cam) {
     const v = cam.split(',').map(Number);
@@ -54,16 +92,24 @@ async function boot(): Promise<void> {
     const dt = Math.min(engine.getDeltaTime() / 1000, 0.1);
     const mag = Math.hypot(input.x, input.y);
     if (mag > 0.12) {
-      const step = (MOVE_SPEED * Math.min(mag, 1) * dt) / (mag || 1);
-      eli.root.position.x = Math.min(Math.max(eli.root.position.x + input.x * step, minX), maxX);
-      eli.root.position.z = Math.min(Math.max(eli.root.position.z + input.y * step, minZ), maxZ);
+      const speed = MOVE_SPEED * Math.min(mag, 1);
+      const step = (speed * dt) / (mag || 1);
+      player.position.x = Math.min(Math.max(player.position.x + input.x * step, minX), maxX);
+      player.position.z = Math.min(Math.max(player.position.z + input.y * step, minZ), maxZ);
       const targetHeading = Math.atan2(input.x, input.y);
       let d = targetHeading - heading;
       while (d > Math.PI) d -= 2 * Math.PI;
       while (d < -Math.PI) d += 2 * Math.PI;
       heading += d * Math.min(12 * dt, 1);
-      eli.root.rotation.y = heading;
+      player.rotation.y = heading;
+      // Gait: joystick magnitude picks the clip, ground speed tunes its rate
+      // (cross-fades handled by the rig; same-clip calls just retune speed).
+      if (mag < RUN_INPUT) eli.play('Walk', { speed: Math.min(Math.max(speed / 1.45, 0.7), 1.6) });
+      else eli.play('Run', { speed: Math.min(Math.max(speed / 3.8, 0.8), 1.35) });
+    } else {
+      eli.play('Idle');
     }
+    ambient.update(dt, player.position.x, player.position.z);
     rig.update(dt);
   });
 }
