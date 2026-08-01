@@ -11,6 +11,7 @@ import type { CharacterRigHandle } from './engine/characterRig';
 import { buildBeautyCorner } from './world/beautyCorner';
 import { createAmbientCast } from './world/ambient';
 import type { AmbientCast } from './world/ambient';
+import { initSoundscape } from './world/soundscape';
 import { createTouchControls } from './ui/joystick';
 import type { Phase } from './sim/clock';
 
@@ -72,6 +73,16 @@ async function boot(): Promise<void> {
   // from frame one; Eli's body and the ambient cast pop in as they arrive.
   let eli: CharacterRigHandle | null = null;
   let ambient: AmbientCast | null = null;
+
+  // Soundscape (src/world/soundscape.ts): inert until the first pointer gesture,
+  // self-ticking after that (no per-frame work in this loop). setPhase is the
+  // hook the M4 sim clock will drive; today phase is fixed per load.
+  const soundscape = initSoundscape({
+    phase,
+    player: () => [player.position.x, player.position.z],
+    gait: () => eli?.current() ?? null,
+  });
+  void soundscape; // handle stays for the M4 clock: soundscape.setPhase(newPhase)
 
   const { minX, maxX, minZ, maxZ } = corner.bounds;
   let heading = 0;

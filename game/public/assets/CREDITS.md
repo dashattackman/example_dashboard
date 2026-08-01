@@ -61,3 +61,10 @@ is not legally required, but we keep provenance honest per CLAUDE.md.
 - **Runtime treatment:** body renders through our rim/ramp `GraphicNovelPlugin`
   StandardMaterial, hull in flat ink (`src/engine/characterRig.ts`); the glb's
   own PBR materials are discarded on load.
+
+## audio/ — footsteps, UI ticks, record-store music
+
+See `audio/CREDITS.md`: Kenney RPG Audio + UI Audio (CC0, via the
+`ETdoFresh/kenney.nl` GitHub mirror) and one OpenLo-Fi track (CC0,
+`btahir/open-lofi` release zip via ranged extraction). Ambient beds are
+runtime-synthesized (no assets).
