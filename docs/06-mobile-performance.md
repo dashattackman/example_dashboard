@@ -13,6 +13,7 @@ Target: **30 fps sustained on a mid-range Android (e.g. Pixel 6a / Galaxy A54 cl
 | Materials (unique shaders) | ≤ **12** live |
 | JS sim tick | ≤ **4 ms** at 10 Hz |
 | Initial download (precache) | ≤ **25 MB**; playable first load ≤ 8 MB, rest lazy |
+| Audio (within the 25 MB) | ≤ **7 MB**: short looping music stems + 4-bar faction motifs, compressed SFX. VO is text barks in the slice — no voice acting. |
 
 Exceeding a budget is a build failure conversation, not a shrug.
 
@@ -53,6 +54,7 @@ Exceeding a budget is a build failure conversation, not a shrug.
 ## Load strategy (PWA)
 
 - First load: engine + Uptown core cells + player heroes + UI (≤ 8 MB) → playable; remaining interiors/audio lazy-load on approach and precache in the background via the service worker.
+- "Offline" promise, precisely: the core loop is offline-capable immediately after first load; the game is **fully** offline once the background precache completes (a settings-screen indicator shows precache progress).
 - All content JSON is tiny; it ships eagerly. Assets are the lazy part.
 
 ## Verification loop

@@ -55,7 +55,7 @@ Every pack asset must pass through our material pipeline (rim/ramp/palette) so n
 
 ## Consistency desk (cross-doc/cross-content referee)
 
-One recurring red-team agent audits **coherence**, not quality: names, numbers, and facts must match across docs and content JSON (e.g. faction count/names between `03` and `04`, currency names, venue hours vs NPC schedules, move names between hero JSON and dialogue references). Runs at every milestone close. Known open item at handoff: **doc 03 defines 3 factions; doc 04 was briefed for 4 — reconcile before M5** (recommendation: adopt doc 04's cast, map onto 03's three territories, or give the 4th faction a non-territorial niche, e.g. the syndicate operates everywhere).
+One recurring red-team agent audits **coherence**, not quality: names, numbers, and facts must match across docs and content JSON (e.g. faction names between `03` and `04`, currency names, venue hours vs NPC schedules, move names between hero JSON and dialogue references). Runs at every milestone close. Worked example from the design phase: docs 03 and 04 shipped with incompatible faction systems (3 territorial vs 4 different ones); the desk's resolution — 3 territorial + the Isles Trust as a non-territorial "bank" faction — is now canon in `CLAUDE.md` §Settled decisions. That's the job: catch it, propose ONE mapping, get it ruled on, sweep every doc.
 
 ## Orchestration mechanics (local session)
 

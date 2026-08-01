@@ -31,6 +31,9 @@ Superpowered open-world life-sim/brawler set in a stylized Minneapolis. Mobile-f
 - Milestone gates are **played** (Playwright player-zero + Paul on phone), not just reviewed. Feel before content.
 - Commit per surviving package, push daily. Branch: whatever Paul's current feature branch is.
 
-## Known open items
+## Settled cross-doc decisions (do not relitigate)
 
-- Faction reconciliation: `docs/03` defines 3 territorial factions, `docs/04` was briefed for 4 — resolve before M5 (see consistency-desk note in `08`).
+- **Factions:** 3 territorial (The Commons — Bee Toliver, lakefront; Iron Range Crew — Cass Delane, Greenway/28th; The Aldermen — Odegaard, Hennepin spine) + the non-territorial **Isles Trust** (Adelaide Wray — holds paper, not corners; no banners/flips). Final before M2.
+- **Player identity:** at new game you choose your hero from the roster — that hero IS you (romance/reputation/dialogue); you recruit 2 squadmates. Slice ships 6 of the 10 heroes.
+- **Time bases:** in-game clock (sleep-driven) for crops/businesses/buffs; real-world timestamps only for follower missions. Phases enum: MORN/DAY/EVE/LATE; LATE ends 3a (forced sleep); clock runs 4× slower in social/romance venues during LATE.
+- **Scope:** 18 full interiors in-slice (rest are shells); one finisher anim per hero with pair-flavor VO garnish; venue toys are animation+buff (only the 2 date minigames are real); STEAL's "heat" is pure social fallout, no police system; businesses are the designated first cut if M7 runs long.

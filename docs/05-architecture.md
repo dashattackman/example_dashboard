@@ -51,7 +51,7 @@ game/
       templater.ts          # {name}, {memory.lastFight}, opinion-conditional fragments
       scenes.ts             # milestone scenes/dates: choice beats, fade-to-black director
     ui/
-      hud.tsx?  (or lit/vanilla) # see note below — vanilla TS + DOM, no framework
+      hud.ts                # vanilla TS + DOM, no framework (see UI note below)
       joystick.ts           # virtual stick (left) + 4 context buttons (right)
       menus.ts              # squad, upgrades, base, relationships, map
       dialogueBox.ts        # portrait, line, choices; tap-through
@@ -117,5 +117,5 @@ HUD/menus are plain TS + DOM/CSS (fast, tiny, thumb-friendly), not React and not
 
 ## Testing strategy
 - **vitest** on the pure-TS sim: gossip propagation, memory decay, opinion math, economy balance invariants ("day-1 income can't buy tier-3 upgrade"), schedule resolution, save round-trip.
-- **Playwright** (preinstalled Chromium) e2e: boot to gameplay, screenshot at set times-of-day (visual reference), assert `?debug` overlay reports ≥ target fps in software WebGL baseline and draw calls under budget (see 06).
+- **Playwright** (preinstalled Chromium) e2e: boot to gameplay, screenshot at set times-of-day (visual reference), assert the `?debug` overlay's **geometry budgets** (draw calls, tris, materials — see 06). FPS is asserted on real devices only; software-WebGL framerate is noise and is never a CI gate.
 - Every milestone in `07-build-milestones.md` ends with a runnable check.
