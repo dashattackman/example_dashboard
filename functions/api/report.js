@@ -8,6 +8,15 @@
 //                     permission: Issues (read/write). Nothing else.
 // Until the token is set, reports are accepted and dropped (202).
 
+// GET /api/report — deployment diagnostic (no secrets exposed): confirms the
+// Function is deployed and whether the GitHub token is configured.
+export async function onRequestGet({ env }) {
+  return new Response(
+    JSON.stringify({ functionDeployed: true, tokenConfigured: Boolean(env.GH_REPORT_TOKEN) }),
+    { headers: { 'content-type': 'application/json' } },
+  );
+}
+
 export async function onRequestPost({ request, env }) {
   let report;
   try {

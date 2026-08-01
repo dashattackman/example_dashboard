@@ -16,15 +16,15 @@ export interface RendererHandle {
   transport: 'webgpu' | 'webgl2';
 }
 
-/** WebGL2 default. WebGPU is opt-in via `?webgpu` until the WGSL path is
- *  validated on real devices (a blank-blue-screen on phones traced here:
- *  CI's software WebGL never exercises the WebGPU shader path). */
+/** WebGPU auto where available (docs/06 flip-back criterion met: clean pass on
+ *  Paul's device 2026-08-01, plus a real WebGPU transport pass in CI). WebGL2 is
+ *  the universal fallback and can be forced via `?webgl2`. */
 export async function createRenderer(canvas: HTMLCanvasElement): Promise<RendererHandle> {
   let engine: AbstractEngine | null = null;
   let transport: 'webgpu' | 'webgl2' = 'webgl2';
 
-  const wantWebGpu = new URLSearchParams(location.search).has('webgpu');
-  if (wantWebGpu && navigator.gpu) {
+  const forceWebGl2 = new URLSearchParams(location.search).has('webgl2');
+  if (!forceWebGl2 && navigator.gpu) {
     try {
       const gpu = new WebGPUEngine(canvas, { antialias: true });
       await gpu.initAsync();
