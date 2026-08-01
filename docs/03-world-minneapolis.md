@@ -101,6 +101,10 @@ All names are lightly fictionalized — evocative of real Uptown institutions, l
 | 26 | **Cedar Bend Yoga (Petra's studio)** | Storefront yoga studio | SOCIAL · ROMANCE | MORN–EVE | **W 31st between James & Irving**; its front glass faces the Ice Barn's doors across Irving — load-bearing sightline for the Ingrid–Petra story. |
 | 27 | **The Uptown Ice Barn** | Neighborhood ice arena ("the barn," as hockey people say) | **SHELL (post-slice)** — SOCIAL | MORN–LATE (sign) | **W 31st between Irving & Humboldt**, doors facing the yoga studio; rink hum, skate-bag kids, Zamboni visible through the glass. |
 | 28 | **Farhia's Halal Market** | Small halal grocery | SHOP | MORN–EVE | **Lagoon between Irving & Humboldt, two doors from Ope's (#17)** — its own storefront, its own owner; her version of any story and Ope's owner's version never match, and both are canon. |
+| 29 | **Mercado Estrella del Norte** | Midtown-Global-Market-style mercado hall (the corridor's anchor) | SHOP · SOCIAL · JOB (stall shifts) · **arc-critical** | MORN–EVE, curfew-truncated under zone control; recovers LATE hours as the zone recedes | One big hall, many stalls — tamales and sambusas, a remittance window, a two-chair barber, a botánica; twenty flags on the rafters and zero intention of leaving. Inside the wire. FULL. |
+| 30 | **La Golondrina Panadería** | Corridor family bakery — **the kid's maternal family's store** (family names owned by `04-characters.md`) | SHOP · SOCIAL · **arc-critical** | MORN–DAY under occupation; MORN–EVE when freed | Conchas at dawn, a wall of family photos the camera lingers on, the good radio station; the back kitchen hosts more than baking. Inside the wire. FULL. |
+| 31 | **Taquería El Relámpago** | Corridor taquería | **SHELL (post-slice)** — SHOP | shuttered at ship; exterior **re-opens** (shutters up, lightning bolt repainted, music on) as the zone recedes | Steel shutters and a hand-painted lightning bolt; the first light to come back on when you push the wire — the world thanking you, in storefront form. |
+| 32 | **The Quiet Door** | Safe-house network node | unmarked · story-revealed — no sign, no hours, no shop economy | story-gated | An unlisted door between corridor storefronts; one room — cots, coffee, a laminated map of routes nobody photographs. Micro-cell; never appears on the in-game map or minimap. |
 
 ### Alias & mapping table (binding — resolves venue names used in `04-characters.md`)
 
@@ -116,7 +120,7 @@ All names are lightly fictionalized — evocative of real Uptown institutions, l
 
 Farhia's Halal Market (#28) is **not** an alias of Ope's Corner Store (#17) — distinct stores, distinct owners; never merge them.
 
-**Build notes for venue generators:** #05 and #24 gate on story progress. #13–16 are the **housing template set** — one interior template built once, re-skinned into 4 cells; they are the housing set in the ship arithmetic, not part of the 18. #22 and #24 are the two designated "truce interiors" (combat disabled). Shells: **#03, #10, #11, #19, #20, #27**. Full-interior roster (the 18): **#01, 02, 04, 05, 06, 07, 08, 09, 12, 17, 18, 21, 22, 23, 24, 25, 26, 28**. Base (★) and the garden tool shed are the two non-venue interiors.
+**Build notes for venue generators:** #05, #24, and #32 gate on story progress. #13–16 are the **housing template set** — one interior template built once, re-skinned into 4 cells; they are the housing set in the ship arithmetic, not part of the 20. #22 and #24 are the two designated "truce interiors" (combat disabled); combat is also disabled inside #30 and #32 (family and sanctuary cells — the fight happens at the wire, never in them). Shells: **#03, #10, #11, #19, #20, #27, #31**. Full-interior roster (the 20): **#01, 02, 04, 05, 06, 07, 08, 09, 12, 17, 18, 21, 22, 23, 24, 25, 26, 28, 29, 30**. Non-venue interiors: base (★), the garden tool shed, and the unmarked micro-cell #32. Corridor venues #29–31 carry a **zone-state hours modifier** (see §5) — author their hours as (occupied → freed) pairs, not constants.
 
 ---
 
@@ -180,7 +184,15 @@ Three **territorial** factions contest the slice, plus one **non-territorial** p
 
 Flips are driven by faction-rep thresholds + completed turf jobs, not real-time war sim — deterministic, save-friendly, mobile-cheap.
 
----
+### The Rogue Zone overlay (NOT a fourth flip faction — implementers, read this twice)
+
+The CIVIS Rogue Zone is **its own overlay layer with its own state model** (defined in `02-gameplay.md`'s zone-system section). Zone cells carry zone-state (pressure / perimeter / patrol values) layered **on top of** whatever faction turf they sit on or border. **Do not wedge the zone into the banner/graffiti/flip pipeline** — separate data, separate renderer, separate progression. Territory-flip tech still ships for exactly 3 factions, unchanged. Truce rules unaffected: Spin Cycle (#22) and The Understory (#24) stay neutral; the Understory's 31st St cellar door sits half a block off the wire, on purpose.
+
+**What each faction does at the border:**
+- **The Aldermen** signed the CIVIS procurement (Civic Shield co-signed; Odegaard's name is on Contract Amendment 14-C). They want it **quiet**: a PR easel at GATE-A, "pilot program" language on every flyer, and money spent keeping news vans on the far side of Hennepin. Their patrols do not approach the wire; their fixers do.
+- **The Isles Trust** holds the paper — the contractor's municipal lease and liens on corridor property. Adelaide Wray profits whether the zone stands or falls; estate-security walkers appear at the perimeter's edge exactly twice a week to "inspect the collateral," and never once look at the people in the queue.
+- **The Commons** run the **warning tree** — Bee Toliver's phone chain propagates patrol and convoy movements ahead of the bots (ambient barks reference it; see §7) — plus sanctuary logistics: the garden tool shed doubles as a supply depot, and the Shorehouse quietly hosts displaced families after close.
+- **The Iron Range Crew** smuggles people and goods through — Greenway trench to the 31st St alleys, past GATE-B's blind corner. The garage's (#23) chop-shop questline grows a strand: a delivery van the Scanners reliably misclassify. For a fee. Usually.
 
 ## 5. Ambient life
 
@@ -202,6 +214,23 @@ Flips are driven by faction-rep thresholds + completed turf jobs, not real-time 
 
 **Traffic abstraction (no traffic sim):** parked cars line every street (6–10 per block face, 4 model variants + palette swaps, several with faction bumper stickers). **Passing cars** are spline ghosts: 1 car per 45–90s per street, spawns at map edge, despawns at the other, never stops, never collides (players get a soft push + honk + one salty-but-Minnesota-polite driver bark). Bikes on the Greenway use the same spline system at higher frequency. One RT-bus-inspired "**Route 6**" bus ghost crawls Hennepin twice per phase — pure set dressing, boardable never.
 
+### The Rogue Zone in the world sim
+
+State model owned by `02-gameplay.md`'s zone system; this is the street-level rendering contract.
+
+**CIVIS patrols by phase:**
+
+| Phase | Inside the wire | At the gates / visible from our streets |
+|-------|-----------------|------------------------------------------|
+| MORN | Scanner pairs walk the stall rows; pad rotations begin | Queue forms at GATE-A ~7a — flagged NPCs on **contracted schedules** line up for work passes, visible from the Hotdish House windows |
+| DAY | Densest Scanner coverage; units dock ~20 min per pad cycle (stealth windows) | Checkpoint throughput theater; the PR easel gets refreshed; kids chalk the sidewalk just outside the wire |
+| EVE | Perimeter floodlights ramp — beige wash hardens against our sodium-orange; patrols contract inward | Corridor shutters come down early; curfew klaxon on high-pressure days |
+| LATE | **Detainer convoys move** — Ramp ↔ GATE-C, wrong-beige running lights, loudspeaker courtesy lines (§7). Deliberately routed where nightlife players on Hennepin will see them | Greenway smuggle runs; BLIND-mission windows on masts M1–M4 |
+
+**Zone-state rendering (the world visibly thanks you):** as zone pressure drops — GATE-A queues shorten, then vanish; shuttered corridor storefronts **re-open one by one** (#31 first: shutters up, lightning bolt repainted, music on); the mercado's hours extend into EVE, then LATE; string lights cross Lake St; flagged NPCs' contracted schedules relax back into free schedules — the corridor's regulars start turning up at OUR venues again (a mercado barber arguing lagers at Falls City is the reward made flesh). As pressure rises: the inverse, plus the curfew klaxon and a second Detainer on every convoy.
+
+**Firmware-mutation days:** on mutation ticks (02 owns the cadence), patrol logic changes **visibly** for that day — new routes, new glitch tics (units ticketing parked cars in triplicate, saluting fire hydrants, reclassifying pigeons as unlicensed drones). Always readable from the street so players can plan around it. Destroying a mast (BLIND missions) blacks out its radius: the beige floodlights die block by block — the game's most legible progress bar.
+
 ---
 
 ## 6. Expansion plan (post-slice district roadmap)
@@ -215,7 +244,7 @@ Flips are driven by faction-rep thresholds + completed turf jobs, not real-time 
 | 3 | **Dinkytown / U of M** | Campus chaos: young NPCs, house shows, cheap eats, exam-season rhythms — recruitment ground for every faction. |
 | 4 | **St. Paul (eventually)** | The other twin: slower, older money, capitol intrigue — a full second city with its own faction ecology and a bridge-crossing that *means something*. |
 
-Connective tissue ships with each district: the Greenway extends east (Uptown→Downtown link, past Sideshow North), the river + Stone Arch silhouette upgrade from backdrop to walkable when Downtown lands.
+Connective tissue ships with each district: the Greenway extends east (Uptown→Downtown link, past Sideshow North), the river + Stone Arch silhouette upgrade from backdrop to walkable when Downtown lands, and **the Lake Street corridor continues east past GATE-C toward the full Midtown market district** — the zone arc's second act ships as its own corridor chunk alongside district 1.
 
 ---
 
@@ -249,6 +278,33 @@ Tone: R-rated-adjacent, affectionate, never a tourism ad. Deploy via ambient VO 
 24. Lakefront argument, evergreen: "It's the best lake." / "It's the fourth-best lake and you're only saying that because you can walk to it." (never resolved; both NPCs faction-agnostic.)
 25. Laundromat corkboard flyer: *"LOST: one (1) mitten. Sentimental. The left. You know what you did."*
 26. First-snow event, one-time bark from a porch elder as the flakes start: "Welp. Here we go again, then." (delivered like a blessing, because it is one.)
+27. Warning-tree call, overheard on a porch: "It's Bee's tree — convoy's rolling early tonight. Move bingo to the church basement, tell Amal, and bring the good cooler."
+28. Mercado rafter banner, hand-painted: *"OPEN. ABIERTO. FURAN. — 20 years on this corner. Beige rusts. We don't."*
+29. Overheard at the CC Tap: "They commandeered the RAMP. Where the winter farmers market goes. And the people, obviously — the people are the main thing. But also, Gary: the market."
+30. Chalk on the sidewalk just outside the wire: a hopscotch grid drawn as a checkpoint queue, final square labeled "4.7 STARS." The kids play it loudly, on purpose, in front of the units.
+31. One (1) parked pickup, one (1) bumper sticker: *"AM 1440 THE LOON — 'FINALLY SOMEBODY'S ENFORCING SOMETHING.'"* It receives one new passive-aggressive Post-it per in-game week. It has never once been keyed. That would be rude.
+32. Overheard at the panadería counter: "You need eggs, knock twice. You need the *other* thing, knock once and wait for the porch light. Don't write this down, sweetheart."
+33. Overheard on the wire's north side, two neighbors: "You don't gotta be a hero about it. You gotta drive a van on Thursday. Different thing. Mostly."
+
+### CIVIS signage & announcements (glitched bureaucratese — canonical strings)
+
+Comedy per the controversy contract: the joke is the machine and the contractor — never anyone's fear. Deploy on gates, barrier segments, the Ramp facade, and convoy loudspeakers.
+
+- Z1 (GATE-A arch): "THIS CHECKPOINT IS RATED 4.7 STARS BY COMPLIANT PEDESTRIANS."
+- Z2 (perimeter): "WELCOME TO THE ENHANCED SERVICE AREA. YOUR PRESENCE HAS BEEN LOGGED AS FEEDBACK."
+- Z3 (queue lane): "PLEASE HAVE DOCUMENTATION READY. ACCEPTABLE DOCUMENTATION: [LIST NOT FOUND]. THANK YOU FOR YOUR PREPAREDNESS."
+- Z4 (barrier boilerplate): "LOITERING IS PROHIBITED. STANDING IS LOITERING AT REST. WALKING IS LOITERING IN MOTION. THANK YOU FOR YOUR COMPLIANCE."
+- Z5 (curfew board): "CURFEW BEGINS AT SUNDOWN OR 8:41 PM, WHICHEVER ACHIEVES COMPLIANCE FIRST."
+- Z6 (queue display): "YOUR ESTIMATED WAIT TIME IS: YES."
+- Z7 (unit chassis stencil): "THIS UNIT IS UNARMED. THIS UNIT'S ARMS ARE ATTACHMENTS."
+- Z8 (Ramp facade): "PROCESSING IS A SERVICE. ALL SERVICES MAY EXPERIENCE ELEVATED WAIT TIMES."
+- Z9 (perimeter): "REPORT SUSPICIOUS ACTIVITY. SUSPICION CRITERIA AVAILABLE UPON REQUEST. REQUESTS MEET THE CRITERIA."
+- Z10 (PR easel): "PARADIGM CIVIC SYSTEMS: BUILDING TOMORROW'S COMPLIANCE TODAY.™ FOR PERIMETER FEEDBACK, PRESS 4. [PRESSING 4 IS NOT SUPPORTED]"
+- Z11 (maintenance placard): "SCHEDULED FIRMWARE MAINTENANCE COMPLETED 4,112 DAYS AGO. NO ISSUES FOUND. NO ISSUES WILL BE FOUND."
+- Z12 (zoning notice): "SANCTUARY IS NOT A RECOGNIZED ZONING CATEGORY. PLEASE RESUBMIT YOUR COMMUNITY AS A PARKING STRUCTURE."
+- Z13 (perimeter): "THIS PERIMETER PROTECTS YOU. SPECIFICS AVAILABLE IN THE FULL CONTRACT (SEALED)."
+- Z14 (convoy loudspeaker, LATE): "THANK YOU FOR YIELDING. YOUR COOPERATION HAS BEEN RATED: ADEQUATE."
+- Z15 (mutation-day ticker): "TODAY'S DIRECTIVE: [PIGEON]. ALL UNITS: [PIGEON]."
 
 ---
 *End of doc. Coordinate all named humans (faction leaders, venue owners, romanceables referenced above as roles — "the bartender," "the doorwoman," "the mechanic") through `04-characters.md`.*

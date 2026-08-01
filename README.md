@@ -16,7 +16,7 @@ You're **the Anchor** — a single dad raising a bi-racial kid, and the only sup
 |---|---|
 | [`docs/01-vision.md`](docs/01-vision.md) | Pitch, five pillars, tone bible, art direction (graphic-novel 3D) |
 | [`docs/02-game-design.md`](docs/02-game-design.md) | Combat, progression, base/resources, farming, relationships, economy |
-| [`docs/03-world-minneapolis.md`](docs/03-world-minneapolis.md) | The Uptown slice map, venues (18 full interiors in-slice + shells), factions' turf, ambient life, expansion |
+| [`docs/03-world-minneapolis.md`](docs/03-world-minneapolis.md) | The Uptown slice map, venues (20 full interiors in-slice + shells), factions' turf, ambient life, expansion |
 | [`docs/04-characters.md`](docs/04-characters.md) | 10-hero roster, faction leaders, named NPCs, NPC-mind & gossip writing rules |
 | [`docs/05-architecture.md`](docs/05-architecture.md) | Codebase layout, module rules, scene/streaming strategy, content schemas |
 | [`docs/06-mobile-performance.md`](docs/06-mobile-performance.md) | Hard budgets, instancing/LOD strategy, cheap comic-look techniques |
