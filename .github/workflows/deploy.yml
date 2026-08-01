@@ -1,4 +1,7 @@
-name: Deploy to GitHub Pages
+name: CI
+
+# Deploys are handled by Cloudflare Pages (connected to this repo).
+# This workflow is the merge gate: unit tests + production build must pass.
 
 on:
   push:
@@ -6,14 +9,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  build-deploy:
+  test-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,11 +29,4 @@ jobs:
         run: npm test
       - name: Build
         working-directory: game
-        env:
-          BASE_PATH: /example_dashboard/
         run: npm run build
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: game/dist
