@@ -57,6 +57,20 @@ export default defineConfig({
         // keep it and the lazy-loaded character glb out of the precache budget.
         globIgnores: ['rig.html', '**/rig-*.js', '**/assets/characters/**'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+        // Character glbs stay OUT of install-time precache (8MB first-playable
+        // rule) but cache on first use, so offline covers the cast after one
+        // normal session (docs/06 "fully offline once background precache
+        // completes" — this is the character half of that promise).
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/characters\/.*\.glb$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'characters',
+              expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 90 },
+            },
+          },
+        ],
       },
     }),
   ],
