@@ -605,7 +605,17 @@ export const SaveGameSchema = z.object({
     rep: NonNeg,
     repTier: z.number().int().min(1).max(5), // docs/02 §2.3: 1-indexed, tier 1 = 0 rep
     needs: z.object({ energy: Pct0to100, social: Pct0to100, hunger: Pct0to100 }),
+    /** ADDITIVE (save-system round, still v1 — optional, old saves parse unchanged):
+     *  world transform for resume-in-place. Phase is NOT stored — it derives from
+     *  clock.minuteOfDay via sim/clock.phaseOf (single source of truth). */
+    position: z
+      .object({ x: z.number(), y: z.number(), z: z.number(), headingRad: z.number() })
+      .optional(),
   }),
+  /** ADDITIVE (save-system round, still v1 — optional): device-local player settings. */
+  settings: z
+    .object({ muted: z.boolean(), volume: z.number().min(0).max(1) })
+    .optional(),
   anchor: z.object({
     level: HeroLevel,
     xp: NonNeg,
