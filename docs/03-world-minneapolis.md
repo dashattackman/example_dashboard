@@ -8,51 +8,66 @@
 
 The slice is a **5×4-block street core plus the lakefront band (west) and the Greenway strip (north)** — a **9×7 streaming-cell footprint (~900×700 m)** anchored on the real **Hennepin Ave / Lagoon Ave** crossing, extending **west to the Lake Bde Maka Ska shoreline** (beach, parkway, jogging path, pier). The **downtown skyline** sits to the **northeast as a non-enterable backdrop silhouette** — blue-violet, lit windows at night, framed at the end of Hennepin looking north. It is the signature postcard shot; never let a building block that sightline from the Hennepin/Lagoon corner.
 
+New with the main arc (binding per `01-vision.md` "Premise" + "Controversy contract"): the **CIVIS Rogue Zone** occupies the slice's **south-southeast edge** — the Lake Street corridor east of Hennepin — inside the same 9×7 footprint. Its perimeter is **visible from our streets**: procurement-beige floodlight wash against our warm sodium-orange, and signage in glitched bureaucratese (see §7). The bots are fictional-contractor hardware (Paradigm Civic Systems "CIVIS" units) — no real organization's name or insignia, ever.
+
 ### Street grid (real names)
 
 - **North–south avenues, west to east (the real west-of-Hennepin sequence):** East Bde Maka Ska Pkwy (hugging the lake) → James Ave → Irving Ave → Humboldt Ave → Holmes Ave → Hennepin Ave. (Girard/Fremont/Emerson/Dupont run EAST of Hennepin in the real Wedge — off-slice; never use them west of Hennepin.)
 - **East–west streets, north to south:** W 28th St → Lagoon Ave → Lake St W → W 31st St.
+- **The Lake Street corridor** east of Hennepin is our fictionalized stretch of the real corridor — the immigrant business artery: mercado, panadería, taquería, remittance windows, twenty languages of signage. In the slice's present it sits inside the **CIVIS Rogue Zone** perimeter and reaches east toward the Midtown-Market-inspired anchor (#29). Freeing it is the main arc.
 - **The Midtown Greenway** runs in its real below-grade trench just north of 28th — a sunken bike corridor with graffiti walls and underpass encounters. It is the slice's "back alley highway": fast traversal, low visibility, fight spawns at night.
 - **The lake edge:** beach (north end), Thomas Beach-inspired sand crescent, a wooden **pier**, the paved **jogging/bike loop**, and grass parkway with benches and firepit rings.
 
 ### Slice figure — blocks + streaming cells (one figure, authoritative)
 
-Legend: `[##]` venue (numbered, see §2 — shells marked there) · `★` base · `♣` community garden · `≈` water · `..` greenway trench · `%%` beach/sand · `##` non-enterable filler facade (window-lit shells)
+Legend: `[##]` venue (numbered, see §2 — shells marked there) · `★` base · `♣` community garden · `≈` water · `..` greenway trench · `%%` beach/sand · `##` non-enterable filler facade (window-lit shells) · `═ ║ ╔ ╝` CIVIS perimeter (beige floodlight wash) · `GATE-A/B/C` checkpoints · `RAMP` holding/processing site · `M1–M4` rooftop Scanner relay masts (destroyable) · `⊙` induction charging pads · `·` unmarked safe-house node (dev-only marker — never rendered on the in-game map)
 
-Streaming-cell ruler: columns **A–I** west→east (A = water/swim band, B = beach + parkway band, C–G = the five street-block columns, H = Hennepin east frontage filler shells, I = east buffer). Rows **1–7** north→south (1 = Greenway strip, 7 = W 31st edge). Each cell ≈ 100m.
+Streaming-cell ruler: columns **A–I** west→east (A = water/swim band, B = beach + parkway band, C–G = the five street-block columns, **H–I = the Lake Street corridor east of Hennepin** — filler frontage north of Lake St, **CIVIS Rogue Zone in rows 5–7**). Rows **1–7** north→south (1 = Greenway strip, 7 = W 31st edge). Each cell ≈ 100m.
 
 ```
-   cells:  A    B       C          D          E          F          G       H..I →
+   cells:  A    B       C          D          E          F          G          H          I    →
             NE → downtown skyline silhouette (backdrop only, unreachable)  ▲
-          James      Irving    Humboldt    Holmes     Hennepin
- 1 ≈≈≈ %%|.........|..........|..........|..........|..........|   MIDTOWN
-   ≈≈≈ %%|... GREENWAY TRENCH (sunken, graffiti, underpasses) .|   GREENWAY
- 2 ≈≈≈ %%+---------+----------+----------+----------+----------+
-   ≈≈≈ %%| [18]    |  ★ BASE  | [15][16] | [13][14] | [01][02] |  W 28TH ST
- 3 ≈≈≈ %%| pavilion| warehouse| fourplex |  duplex  | [03]  ## |
-   ≈≈≈PIER+--------+----------+----------+----------+----------+
- 4 ≈≈≈ %%| parkway | [17][28] | [11][12] | [09][10] | [04][05] |  LAGOON AVE
-   ≈≈≈ %%| benches |  houses  |  ##  ##  |  ##  ##  | [06]  ## |
- 5 ≈≈≈ %%+---------+----------+----------+----------+----------+
-   ≈≈≈ %%| jogging | ♣ GARDEN | [19][20] | [21][22] | [07][08] |  LAKE ST W
-   ≈≈≈ %%| loop    | (plots)  | [25]  ## | [23] ##  |  ##  ##  |
- 6 ≈≈≈ %%+---------+----------+----------+----------+----------+
-   ≈≈≈ %%| firepits| [26] ##  | [27]  ## |  [24] ## |  ##  ##  |  W 31ST ST
- 7 ≈≈≈ %%| dog park|  houses  |  (rink)  |  ##  ##  |  ##  ##  |  LAKE BDE MAKA SKA ↓
+          James      Irving    Humboldt    Holmes     Hennepin     (corridor east of Hennepin)
+ 1 ≈≈≈ %%|.........|..........|..........|..........|..........|..........|..........|   MIDTOWN
+   ≈≈≈ %%|... GREENWAY TRENCH (sunken, graffiti, underpasses) ..(trench continues east →)  GREENWAY
+ 2 ≈≈≈ %%+---------+----------+----------+----------+----------+----------+----------+
+   ≈≈≈ %%| [18]    |  ★ BASE  | [15][16] | [13][14] | [01][02] |  ##  ##  |  ##  ##  |  W 28TH ST
+ 3 ≈≈≈ %%| pavilion| warehouse| fourplex |  duplex  | [03]  ## |  ##  ##  |  ##  ##  |
+   ≈≈≈PIER+--------+----------+----------+----------+----------+----------+----------+
+ 4 ≈≈≈ %%| parkway | [17][28] | [11][12] | [09][10] | [04][05] |  ##  ##  |  ##  ##  |  LAGOON AVE
+   ≈≈≈ %%| benches |  houses  |  ##  ##  |  ##  ##  | [06]  ## |  ##  ##  |  ##  ##  |
+ 5 ≈≈≈ %%+---------+----------+----------+----------+----------+═M2═══════════════M4══╗
+   ≈≈≈ %%| jogging | ♣ GARDEN | [19][20] | [21][22] | [07][08] GATE-A [30][31] M3 [29] GATE-C ═►  LAKE ST W
+   ≈≈≈ %%| loop    | (plots)  | [25]  ## | [23] ##  |  ##  ##  ║  CIVIS ROGUE ZONE   ⊙ ║  (corridor
+ 6 ≈≈≈ %%+---------+----------+----------+----------+----------║  RAMP ⊙⊙  [32]· shut- ║   continues
+   ≈≈≈ %%| firepits| [26] ##  | [27]  ## |  [24] ## |  ##  ##  ║  M1(roof)  tered ##   ║   east —
+ 7 ≈≈≈ %%| dog park|  houses  |  (rink)  |  ##  ##  |  ##  ##  ╚═GATE-B═══════════════╝   post-slice)
+  LAKE BDE MAKA SKA (swimmable shallow band, no boats in slice)
 ```
 
-This figure is authoritative: **5×4 street blocks** (columns C–G between the named avenues × the four block rows between the Greenway and W 31st) inside a **9×7 cell footprint**. All prose in this doc and §6 uses these numbers. The lake (swimmable shallow band, no boats in slice) bounds the footprint west and south-west.
+This figure is authoritative: **5×4 street blocks** (columns C–G between the named avenues × the four block rows between the Greenway and W 31st) inside a **9×7 cell footprint** — unchanged by the zone, which occupies **cells H5–I7** and continues east off-slice. All prose in this doc and §6 uses these numbers. The lake (swimmable shallow band, no boats in slice) bounds the footprint west and south-west.
 
 **Anchors:**
 - **★ Base — "The Fulton Works"**: converted brick warehouse on **Irving between W 28th & Lagoon**, half a block from the Greenway trench (private ramp down = your secret exit). Ground floor: garage/training room. Upper floor: squad loft. Roof: skyline view + future garden beds upgrade. This is the only player-owned interior at start.
 - **♣ Community garden — "Irving Commons Plots"**: fenced plots at **Irving & Lake St**. The Stardew layer: **2 free starter beds + additional rentable beds**, compost bin, tool shed (enterable, tiny), an NPC plot-neighbor rivalry over zucchini. Crop income feeds base upgrades per pillar 3.
 - **Density rule:** every block face has at minimum door-decals and lit windows; ~2-4 facades per block are true enterable venues or shells (below). Filler shells still get stoops, AC units, and porch furniture — nothing reads as flat.
 
+### The Rogue Zone — perimeter & furniture (geography layer)
+
+The zone's state model lives in `02-gameplay.md`; this is its physical anatomy. All of it sits in **cells H5–I7** and reads from our streets.
+
+- **Perimeter:** modular CIVIS barrier segments (procurement-beige, retroreflective chevrons, one per ~10m — instanced mesh). It crosses Lake St just east of Hennepin, runs east along the corridor's north curb, wraps the east map edge, and returns along W 31st. **Border light rule (binding):** inside/behind the wire the light wash is flat procurement-beige floodlight; our side keeps warm sodium-orange. The seam between the two is the arc's signature image — frame it from the Hotdish House windows.
+- **Checkpoint gates (3):** **GATE-A** — Lake St at Hennepin, the west gate; pedestrian queue lanes, a Scanner arch, a PR easel. This is the gate Uptown sees daily. **GATE-B** — W 31st at the zone's southwest corner (half a block from The Understory's cellar door — deliberately). **GATE-C** — Lake St at the east map edge; vehicle-scaled, where Detainer convoys exit toward the off-slice corridor.
+- **Holding/processing site — "the Ramp":** a commandeered municipal parking structure mid-zone (cell H6–H7). Ground level: induction pads + processing kiosks. Upper decks: holding pens behind privacy scrim (we stage dread by implication, never spectacle — controversy contract rule 4). Roof: mast M1.
+- **Scanner relay masts (4, rooftop, destroyable):** M1 on the Ramp roof, M2 above GATE-A, M3 mid-corridor above [30], M4 on the mercado block roof. Each mast projects a visible scan-sweep cone at night; destroying one (per 02's BLIND missions) kills the beige floodlights block by block in its radius — the world's most legible progress bar.
+- **Induction charging pads:** two-bay pad cluster inside the Ramp (units dock ~20 min, eyes-down — stealth windows) and one street pad by GATE-C.
+- **Zone signage:** every gate, barrier segment, and the Ramp facade carries glitched-bureaucratese boilerplate (canonical strings in §7). Fictional contractor branding only: **Paradigm Civic Systems** wordmark, "CIVIS" unit stencils. No real org's name or insignia, ever.
+
 ---
 
-## 2. Enterable venues & shells (18 full interiors ship in the slice)
+## 2. Enterable venues & shells (20 full interiors ship in the slice)
 
-**Ship arithmetic (one line): 18 full interiors + 6 shells + base + garden shed.** (The four HOUSING rows #13–16 are instances of one re-skinned template and are counted separately as the housing set — see build notes.) A **SHELL (post-slice)** ships exterior + door decal + hours sign only; its interior lands after the slice.
+**Ship arithmetic, as amended for the Rogue Zone arc (one line): 20 full interiors + 7 shells + base + garden shed + 1 unmarked micro-cell (#32).** That is round 1's 18 fulls **+ #29 (mercado) + #30 (panadería)** — both arc-critical; round 1's 6 shells **+ #31 (corridor taquería, the first storefront to visibly re-open as the zone recedes)**; #32 (safe-house node) is a single unmarked story room budgeted with the non-venue interiors, not the 20. The four HOUSING rows #13–16 remain one re-skinned template counted separately as the housing set — see build notes. A **SHELL (post-slice)** ships exterior + door decal + hours sign only; its interior lands after the slice.
 
 All names are lightly fictionalized — evocative of real Uptown institutions, legally safe, no verbatim trademarks. **Hours phases (canon enum across all docs):** MORN (6a–11a) / DAY (11a–5p) / EVE (5p–10p) / LATE (10p–3a; **hard sleep at 3a — the day always ends**). Function tags: SHOP / JOB / SOCIAL / ROMANCE / FACTION-HQ / HOUSING.
 
