@@ -426,9 +426,10 @@ Gossip math for all of the above is owned by **§5.5** — including this arc's 
 
 ### 9.3 Two paths, both with teeth, neither a game-over
 
-- **Redemption:** visible works (zone wins, EXTRACT streaks), **testimony beats** (public scenes at reveal stages), and protecting flagged NPCs convert Fear→Respect/Trust at authored milestones. Unlocks: community endorsements (corridor price floor of −10% for you — worst-wins rule still applies), volunteer ESCORT helpers, alibi/character-witness support in Testimony scenes.
+- **Both paths run through all five stages — they diverge in ledger pattern (§8.5), not in access** (09 §5). Neither is a menu toggle.
+- **Redemption:** visible works (zone wins, EXTRACT streaks), **face-it stage scenes**, and protecting flagged NPCs convert Fear→Respect/Trust at authored milestones. Unlocks: community endorsements (corridor price floor of −10% for you — worst-wins rule still applies), volunteer ESCORT helpers, character-witness support at Stage 5 (The Ledger).
 - **Monster:** embrace it — **Fear becomes a usable currency.** Fear ≥25 intimidation dialogue (§5.1) expands to fight-skips, interrogations, and shakedowns of people who have it coming (point-of-view rule: targets are grievance profiteers and contractor stooges, never the flagged community). Fear ≥50 across a district sample grants **Dread aura**: human grunt-tier enemies may rout on sight. Costs: some romance tracks lock, venues go cold, kid-related scenes get harder (hooks in 04/09 — referenced, not duplicated here). Machines are immune to Fear entirely (§1.9 quirk 4) — the zone doesn't care what they call you, which is the theme, mechanized.
-- Both paths clear the arc. Neither is free (01, Premise). No ending is a fail state.
+- Both paths clear the arc into the §8.5 endings. Neither is free (01, Premise). No ending is a fail state — even Long Winter is fail-forward.
 
 ---
 
@@ -440,7 +441,7 @@ Orchestrator-final scope calls; build to these, not to the full design surface:
 - **Businesses (§3.3) are the designated first cut** if the base milestone runs long. Cutting them removes only a redundant passive-cash edge — the §6.1 audit rule (≥2 outbound edges per system) still holds for every remaining node without BIZ.
 - **Date minigames:** only the two designed ones ship — Club Night rhythm-tap and Restaurant order-reading. The Lake Walk's stone-skipping and all other venue toys are **animation + buff interactions** in the slice (tap, watch, get the buff/bond beat), not minigames.
 - **STEAL exists in-slice.** "Heat" is defined as **pure social fallout**: witness trust loss, gossip-graph spread, faction price bumps (worst-applicable-wins rule, §6.2). There is **no police/wanted system** — do not build one.
-- **The Rogue Zone arc IS in-slice** — all of §8 ships: 6 corridor segments, all six mission verbs, the 12-entry mutation deck, and reveal stages Rumor/Evidence/Testimony (§9.2).
+- **The Rogue Zone arc IS in-slice** — all of §8 ships: 6 corridor segments, all six mission verbs, the mutation system (M1–M6 scheduled + 12-entry comedic deck), all **five** reveal stages (§9.2, canon 09 §5), and the §8.5 endings.
 - **SIEGE set-pieces are capped at 2 in the slice.** The other five verbs are repeatable systems; SIEGE is authored spectacle and budgeted like it.
 
 ---
@@ -456,8 +457,10 @@ Orchestrator-final scope calls; build to these, not to the full design surface:
 | Per-tier enemy scaling cap | +15% HP / +20% dmg | 1.6 |
 | Tier-1 grunt hit | 12% of player max HP | 1.6 |
 | Splash Rating loot multiplier | ×1.0–×1.5 (D→S) | 1.6 |
-| Anchor thread slots | 2 base → 4 via tree | 1.8 |
-| Thread regen reservation | 25%/thread (→20% via tree) | 1.8 |
+| Anchor thread slots | Slot Zero + 1 free → Slot Zero + 3 free (displays 2→4) | 1.8 |
+| Thread regen reservation | 25%/free thread (→20% via tree); Slot Zero reserves none | 1.8 |
+| Echo fidelity curve | 60/80/100% at bond 2 / 3–4 / 5; cap 120% via tree | 1.8 |
+| Full Hands duration | 5s, all echoes at full fidelity, then free threads drop | 1.8 |
 | Thread ignition cost | 20 power; drop free | 1.8 |
 | Thread palette | hold ≥300ms; 0.3× time, max 4s | 1.8 |
 | Scrap per machine unit | 2–5 (Warden-hand 12–20 + 5 flux) | 1.9 |
@@ -476,7 +479,9 @@ Orchestrator-final scope calls; build to these, not to the full design surface:
 | Corridor segments | 6 | 8.1 |
 | BLIND safe window | −50% coverage, 1 in-game day; relays rebuild in 2 | 8.1 |
 | Firmware mutation cadence | every 3 in-game days; deck of 12 | 8.3 |
-| Reveal stages | 3 (Rumor/Evidence/Testimony); gossip 2 hops/sleep, half decay | 9.2 |
+| Reveal stages | 5 (canon 09 §5); injected items (1/3/5): fidelity 1.0, 2 hops/sleep, half decay | 9.2 |
+| Stage-2 leak fidelity | 0.7, betrayal-class (bury-it gone bad only) | 9.2 |
+| Mutation cadence + story pulls | clock starts Patch Night; M1–M6 scheduled, consume their cycle's pull | 8.3 |
 | Fear currency gates | intimidation ≥25; Dread aura ≥50 (district sample) | 9.3 |
 | SIEGE set-pieces in slice | 2 (3 min hard cap each) | 8.2, 10 |
 | Daily farm upkeep budget | ≤60s | 4.2 |
