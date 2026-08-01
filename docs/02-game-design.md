@@ -274,7 +274,7 @@ Must be fully satisfying: open at base → water/harvest (≤60s) → collect bu
 
 ### 7.2 The 30-minute couch session
 
-Story beat → 2–3 brawls → a date or milestone scene → base build decision → next-day plan. The day clock (20 min) means a couch session spans ~1.5 in-game days — one full "wake to club" loop from `01-vision.md` §"15 minutes", plus change. Evening/night content (clubs, dates) is deliberately the *deep* content: long sessions naturally drift into the social game.
+Story beat → 2–3 brawls → a date or milestone scene → base build decision → next-day plan. The day clock (20 min) means a couch session spans ~1.5 in-game days — one full "wake to club" loop from `01-vision.md` §"15 minutes", plus change. EVE/LATE content (clubs, dates — with LATE's 4× venue dilation, §4.1) is deliberately the *deep* content: long sessions naturally drift into the social game.
 
 ### 7.3 Autosave rules
 
