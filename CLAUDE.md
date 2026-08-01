@@ -29,6 +29,7 @@ Superpowered open-world life-sim/brawler set in a stylized Minneapolis. Mobile-f
 - Follow the author→red-team→revise loop in `08-agent-playbook.md` for every substantive package. Max 3 rounds, then escalate to Paul with a short decision memo.
 - Asset routing: procedural by default; CC0 packs (Quaternius/Kenney/PolyHaven) on 2 consecutive ART failures or when a pack asset is an obvious win. All pack assets go through our shader pipeline + `public/assets/CREDITS.md`.
 - **Characters are the art priority (Paul's standing ruling):** people must look great, move great, and be attachment-worthy. Rigged+animated CC0 base bodies through the rim/ramp/outline pipeline; procedural primitive humans are placeholders only, never shippable. Character ART reviews judge animation screenshots against "would you get attached?", not just budgets.
+- **Environments must read rich and real (Paul's standing ruling)** — believability over polycount: real scanned CC0 surfaces (PolyHaven/ambientCG → KTX2) graded through our pipeline, trim sheets, grime/wear decals, dense street dressing, light spill and atmosphere, Minneapolis-specific texture. Flat-colored boxes are placeholder-only. The 75MB cache ruling funds this; tri/draw budgets still govern.
 - Milestone gates are **played** (Playwright player-zero + Paul on phone), not just reviewed. Feel before content.
 - Commit per surviving package, push daily. Branch: whatever Paul's current feature branch is.
 
