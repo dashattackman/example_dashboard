@@ -71,7 +71,13 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const woodStore = kit.envMat('woodStore', '#5c4736', { texture: { url: `${TEX}wood.jpg` } });
   const trim = kit.envMat('trim', U.trim);
   const inkMat = kit.envMat('inkMat', '#1f2126');
-  const whitePaint = kit.envMat('whitePaint', '#b9b9b2');
+  // Road paint is WORN paint, not primer: value pulled down (#b9→#9e) and the
+  // asphalt grain runs through it so DAY sun can't blow the crosswalks into
+  // blinding white slabs (the DAY-grade fix's material half; lighting.ts DAY
+  // holds the other half).
+  const whitePaint = kit.envMat('whitePaint', '#9e9a90', {
+    texture: { url: `${TEX}asphalt.jpg` },
+  });
   const yellowPaint = kit.envMat('yellowPaint', '#d8c060');
   const awningMat = kit.envMat('awningMat', U.teal);
   const darkGlass = kit.envMat('darkGlass', '#182030');
@@ -140,11 +146,26 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   for (let i = 0; i < 6; i++)
     barXf.push({ pos: [-10.3 + i * 1.7, 0.05, 16], scale: [0.7, 1, 3.0] }); // across avenue
   for (let i = 0; i < 3; i++)
-    barXf.push({ pos: [2, 0.05, 11.6 + i * 1.7], scale: [3.0, 1, 0.7] }); // across cross street
+    barXf.push({ pos: [2, 0.05, 12.1 + i * 1.7], scale: [3.0, 1, 0.7] }); // across cross street
   // Parking-lane ticks along the west curb where the cars sit.
   for (const z of [-24, -16.5, -9, 25.5, 32.5, 40, 47.5])
     barXf.push({ pos: [-9.35, 0.05, z], scale: [0.12, 1, 1.4] });
   kit.thin(bar, barXf);
+
+  // Macro value structure for the avenue at DISTANCE: the 4m asphalt tile's
+  // detail averages out past ~40m and the roadway collapsed into a dark
+  // featureless void in the EVE wide (corner-polish r1). One face-up decal the
+  // length of the vista adds distance-scale variation — wheel-track wear
+  // bands, cold-patch fields, faded seam lines — so the far roadway reads as
+  // SURFACE. Scene-lit + fogged, whisper-alpha up close.
+  const macro = kit.canvasPlane('asphaltMacro', 10, 220, 96, 1024, drawAsphaltMacro, {
+    lit: true,
+    alpha: true,
+  }, {
+    pos: [-6, 0.044, 92], // above the roadway top (0.04), under the lane paint (0.05)
+    rotX: HALF_PI,
+  });
+  kit.freeze(macro);
 
   // --- buildings (kit-of-parts: massing + plinth + trim + instanced windows) ---
   // Brick tiles ≈ 2.5m; uv factors picked for the dominant street-facing face.
@@ -420,9 +441,18 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   kit.thin(wire, wireXf, ['#14161a']);
 
   // Window AC units, dripping off a few upper windows (module protrudes ~0.35m).
+  // Corner-polish r1: at LATE/grazing they read as floating pale slabs — value
+  // brought down toward weathered metal, a shadow line tucked under the body
+  // (the "it hangs, it blocks light" read) and two angled mount brackets
+  // grounding the box against the wall. -Z is the street-facing face.
   const acParts = [
-    kit.tint(kit.box('acBody', 0.72, 0.52, 0.55, moduleWhite, { pos: [0, 0, 0] }), '#9aa0a0'),
-    kit.tint(kit.box('acFace', 0.6, 0.4, 0.06, moduleWhite, { pos: [0, 0, -0.28] }), '#6e7676'),
+    kit.tint(kit.box('acBody', 0.72, 0.52, 0.55, moduleWhite, { pos: [0, 0, 0] }), '#767c7c'),
+    kit.tint(kit.box('acFace', 0.6, 0.4, 0.06, moduleWhite, { pos: [0, 0, -0.28] }), '#565e5e'),
+    // shadow line: dark underside lip just below the body, wall side
+    kit.tint(kit.box('acShade', 0.78, 0.05, 0.5, moduleWhite, { pos: [0, -0.29, 0.04] }), '#22262a'),
+    // mount brackets: two diagonal struts from the sill down to the wall
+    kit.tint(kit.box('acBrkL', 0.05, 0.05, 0.5, moduleWhite, { pos: [-0.26, -0.38, 0.06], rotX: 0.65 }), '#2e3236'),
+    kit.tint(kit.box('acBrkR', 0.05, 0.05, 0.5, moduleWhite, { pos: [0.26, -0.38, 0.06], rotX: 0.65 }), '#2e3236'),
   ];
   const ac = kit.merge('acMod', acParts);
   ac.material = moduleWhite;
@@ -437,7 +467,8 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
       { pos: [-12.82, 7.7, 3.7], rotY: -HALF_PI },
       { pos: [-12.82, 4.4, 51.8], rotY: -HALF_PI },
     ],
-    ['#ffffff', '#e8e0d0', '#d8dce0'],
+    // Weathered-metal variants only — no near-white (the floating-slab tell).
+    ['#e2ded2', '#cdd2d4', '#d8d2c4'],
   );
 
   // Trash cans (wall/curb side, clear of NPC lanes).
@@ -518,10 +549,13 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   );
 
   // Storm drains at the gutters (flat lit decals) + painted no-parking curb.
+  // Drain 2 pulled tight to the curb line and the cross-street zebra shifted
+  // north 0.5m — the dark grate butted the lead bar's edge and the pair read
+  // as a hole punched in the paint at phone scale (corner-polish r1).
   const drain = kit.canvasPlane('drain', 0.95, 0.5, 96, 48, drawDrain, { lit: true });
   kit.thin(drain, [
     { pos: [-1.55, 0.045, 6.4], rotX: HALF_PI },
-    { pos: [1.2, 0.045, 10.65], rotX: HALF_PI, rotY: HALF_PI },
+    { pos: [1.2, 0.045, 10.45], rotX: HALF_PI, rotY: HALF_PI },
   ]);
 
   // Alley hint south of building A: dumpster, leaning pallet, boxes.
@@ -601,27 +635,43 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
     ['#7c8894', '#8a5344', '#42596b', '#54524a', '#96938a', '#5c3a44'],
   );
 
-  // --- boulevard trees (late summer) -----------------------------------------
-  const treeParts = [
-    kit.tint(kit.cyl('trunk', { h: 2.8, d: 0.24, tess: 8 }, moduleWhite, { pos: [0, 1.4, 0] }), '#3a2d22'),
-    kit.tint(kit.sphere('can1', 2.7, moduleWhite, { pos: [0, 3.5, 0] }, 8), '#2f4a38'),
-    kit.tint(kit.sphere('can2', 2.0, moduleWhite, { pos: [0.35, 4.4, 0.2] }, 8), '#39543c'),
-  ];
-  const tree = kit.merge('tree', treeParts);
-  tree.material = moduleWhite;
-  kit.thin(
-    tree,
-    [
+  // --- boulevard + garden trees (late summer) ---------------------------------
+  // Real low-poly trees — Quaternius Lowpoly Nature "CommonTree" through the
+  // prop pipeline (assets-pipeline/process-trees.mjs: palette-baked vertex
+  // colors, one merged primitive, LH world scale). The sphere-stack stand-ins
+  // died in ART arbitration (2x failures against real brick — CLAUDE.md asset
+  // routing). Three silhouette variants, thin-instanced; near-white green-lean
+  // instance tints only (the planter straw lesson, r2 p1). Fire-and-forget
+  // like the character glbs — trees pop in as the payloads land.
+  const TREE_TINTS = ['#ffffff', '#eef4e4', '#dfeacf', '#f2eedd'];
+  const treeSets: Array<[string, string, Xform[]]> = [
+    // tree_a: fullest crown — the two garden-strip anchors by the planter
+    // corner (clear of the east-walk NPC lanes x 1.3/3.2 by canopy height;
+    // trunks sit between/outside the lanes) and one hero boulevard spot.
+    ['treeA', 'assets/props/tree_a.json', [
+      { pos: [2.3, 0.1, 27.5], rotY: 0.7 },
+      { pos: [0.6, 0.1, 32.5], rotY: 3.9, scale: [0.9, 0.92, 0.9] },
+      { pos: [3.6, 0.1, -16], rotY: 2.6 },
+    ]],
+    // tree_b: mid silhouette — east boulevard rhythm.
+    ['treeB', 'assets/props/tree_b.json', [
       { pos: [3.6, 0.1, -30], rotY: 1.1 },
-      { pos: [3.6, 0.1, -16], rotY: 2.6, scale: [1.1, 1.15, 1.1] },
-      { pos: [3.6, 0.1, 34], rotY: 0.4 },
-      { pos: [3.6, 0.1, 48], rotY: 4.2, scale: [0.9, 0.95, 0.9] },
+      { pos: [3.6, 0.1, 34], rotY: 0.4, scale: [1.05, 1.1, 1.05] },
+      { pos: [-13.6, 0.1, 40], rotY: 5.1, scale: [1.1, 1.15, 1.1] },
+    ]],
+    // tree_c: lightest — west row + far north (reads as variety, not copies).
+    ['treeC', 'assets/props/tree_c.json', [
+      { pos: [3.6, 0.1, 48], rotY: 4.2, scale: [0.95, 1, 0.95] },
       { pos: [-13.6, 0.1, -24], rotY: 3.3 },
-      { pos: [-13.6, 0.1, 40], rotY: 5.1, scale: [1.05, 1.2, 1.05] },
-      { pos: [-13.6, 0.1, 62], rotY: 0.9 },
-    ],
-    ['#ffffff', '#e8f0dd', '#d8e4c8', '#f0e6d0'],
-  );
+      { pos: [-13.6, 0.1, 62], rotY: 0.9, scale: [1.05, 1.1, 1.05] },
+    ]],
+  ];
+  for (const [name, url, xfs] of treeSets) {
+    kit
+      .prop(name, url)
+      .then((m) => kit.thin(m, xfs, TREE_TINTS))
+      .catch((err: unknown) => console.error(`tree prop ${name} failed:`, err));
+  }
 
   // --- street furniture --------------------------------------------------------
   // Hydrant: body + bonnet cap + side nozzles so it doesn't read as a traffic cone.
@@ -653,17 +703,21 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   // The tower layout is deterministic (seeded) so the lit/unlit repaint in
   // applyNeon changes ONLY the windows — playtest p2's baked-night-skyline-at-MORN
   // bug dies here.
+  // litWindows=false is the DAYTIME skyline (MORN/DAY): the night silhouette
+  // hexes read as flat purple slabs against a bright sky (corner-polish r1),
+  // so day towers get an atmospheric daylight tint + subtle glass variation —
+  // sky-reflecting window columns, a few dark panes — instead of lit dots.
   const drawSkyline = (ctx: Canvas2D, w: number, h: number, litWindows: boolean): void => {
     ctx.clearRect(0, 0, w, h);
     const r = makeRand(0xa11ce);
-    // Far layer.
-    ctx.fillStyle = PALETTE.skyline.silhouetteFar;
+    // Far layer — day towers dissolve toward the sky (aerial perspective).
+    ctx.fillStyle = litWindows ? PALETTE.skyline.silhouetteFar : '#8195b2';
     for (let x = 0; x < w; x += 30 + r() * 40) {
       const bh = h * (0.25 + r() * 0.35);
       ctx.fillRect(x, h - bh, 24 + r() * 36, bh);
     }
-    // Near layer with lit windows.
-    ctx.fillStyle = PALETTE.skyline.silhouette;
+    // Near layer.
+    ctx.fillStyle = litWindows ? PALETTE.skyline.silhouette : '#5b6a92';
     const towers: Array<[number, number, number]> = [];
     for (let x = 6; x < w - 40; x += 44 + r() * 52) {
       const bw = 26 + r() * 42;
@@ -680,8 +734,8 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
     ctx.lineTo(w * 0.4 + 8, h * 0.18);
     ctx.lineTo(w * 0.4 + 16, h * 0.3);
     ctx.fill();
-    // Lit windows (skipped in day phases — the towers hold the silhouette alone).
     if (litWindows) {
+      // Night: lit windows.
       ctx.fillStyle = PALETTE.skyline.window;
       for (const [tx, tw, th] of towers) {
         for (let wy = h - th + 6; wy < h - 8; wy += 9) {
@@ -689,6 +743,24 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
             if (r() < 0.24) ctx.fillRect(wx, wy, 3, 4);
           }
         }
+      }
+    } else {
+      // Day: glass curtain-wall columns catching the sky, occasional dark pane
+      // — value variation, not light sources (phase-honest, playtest p2).
+      for (const [tx, tw, th] of towers) {
+        for (let wx = tx + 3; wx < tx + tw - 3; wx += 7) {
+          ctx.fillStyle = `rgba(174,198,224,${0.2 + r() * 0.3})`;
+          ctx.fillRect(wx, h - th + 4, 3, th - 8);
+        }
+        for (let wy = h - th + 6; wy < h - 8; wy += 11) {
+          if (r() < 0.18) {
+            ctx.fillStyle = 'rgba(40,48,72,0.4)'; // a few dark panes break the grid
+            ctx.fillRect(tx + 3 + ((r() * (tw - 9)) | 0), wy, 3, 4);
+          }
+        }
+        // sun-side edge lift on the west face of each slab (sun rides east→south).
+        ctx.fillStyle = 'rgba(214,228,240,0.35)';
+        ctx.fillRect(tx, h - th, 2, th);
       }
     }
   };
@@ -1184,6 +1256,62 @@ function drawFoam(ctx: Canvas2D, w: number, h: number): void {
       ctx.fillRect(x0 - 4 - r() * 7, y, 3 + r() * 3, 2);
     }
   }
+}
+
+/** Avenue macro-wear decal (distance value structure). Canvas x spans the
+ *  roadway west→east; canvas TOP maps to +Z (the far north end of the vista).
+ *  Whisper alphas: this is variation for the 40m+ read, not close-up grime —
+ *  the tiling asphalt map owns near detail. Near (bottom) end is faded out so
+ *  the two scales cross over instead of doubling up. */
+function drawAsphaltMacro(ctx: Canvas2D, w: number, h: number): void {
+  ctx.clearRect(0, 0, w, h);
+  const r = makeRandLocal(0xa5fa17);
+  // Wheel-track wear: lighter polished bands where tires run, one pair per
+  // lane (lane centers sit at x fractions 0.25 / 0.75 of the roadway).
+  for (const lane of [0.25, 0.75]) {
+    for (const off of [-0.09, 0.09]) {
+      const x = w * (lane + off);
+      const g = ctx.createLinearGradient(x - w * 0.035, 0, x + w * 0.035, 0);
+      g.addColorStop(0, 'rgba(128,132,140,0)');
+      g.addColorStop(0.5, 'rgba(128,132,140,0.17)');
+      g.addColorStop(1, 'rgba(128,132,140,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x - w * 0.035, 0, w * 0.07, h);
+    }
+    // oily lane-center band between the tracks
+    const cx = w * lane;
+    const og = ctx.createLinearGradient(cx - w * 0.03, 0, cx + w * 0.03, 0);
+    og.addColorStop(0, 'rgba(10,11,14,0)');
+    og.addColorStop(0.5, 'rgba(10,11,14,0.16)');
+    og.addColorStop(1, 'rgba(10,11,14,0)');
+    ctx.fillStyle = og;
+    ctx.fillRect(cx - w * 0.03, 0, w * 0.06, h);
+  }
+  // Cold-patch fields and repaved slabs — elongated along the roadway.
+  for (let i = 0; i < 16; i++) {
+    const px = w * (0.06 + r() * 0.82);
+    const py = h * r();
+    const pw = w * (0.1 + r() * 0.24);
+    const ph = h * (0.015 + r() * 0.045);
+    const dark = r() < 0.6;
+    ctx.fillStyle = dark
+      ? `rgba(11,12,15,${0.12 + r() * 0.14})`
+      : `rgba(112,118,126,${0.08 + r() * 0.1})`;
+    ctx.fillRect(px, py, pw, ph);
+  }
+  // Faded tar seams across the roadway.
+  ctx.fillStyle = 'rgba(9,10,13,0.22)';
+  for (let y = 30; y < h; y += 60 + r() * 90) ctx.fillRect(w * (r() * 0.1), y, w, 2);
+  // Fade the NEAR end (canvas bottom) — the tiling map owns the close read.
+  // Short ramp only (bottom ~15% ≈ z 18-45): the EVE wide's "dark field"
+  // begins barely 25m out, so the macro must carry from there, not from 90m.
+  const fade = ctx.createLinearGradient(0, h * 0.85, 0, h);
+  fade.addColorStop(0, 'rgba(0,0,0,0)');
+  fade.addColorStop(1, 'rgba(0,0,0,1)');
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = fade;
+  ctx.fillRect(0, h * 0.85, w, h * 0.15);
+  ctx.globalCompositeOperation = 'source-over';
 }
 
 /** Storm drain grate decal. */

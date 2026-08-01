@@ -30,6 +30,10 @@ export interface PhaseLook {
   skyStops: Array<[number, string]>;
   clear: string;
   rim: { color: string; intensity: number };
+  /** Tiny view-aligned character fill (materials.ts): lifts camera-facing
+   *  faces so Eli reads at phone scale when the key is behind him (the EVE
+   *  black-smudge-face fix). Kept subtle — it's a catchlight, not a keylight. */
+  fill: { color: string; intensity: number };
   /** 0..1 — how hard signs / lit windows / lamps glow in this phase. */
   neon: number;
   /** Procedural cloud layer painted into the skydome (docs/01: "gradient +
@@ -42,6 +46,15 @@ export interface PhaseLook {
     opacity: number;
     drift: number;
     stars?: boolean;
+    /** Vertical texel band the cloud mass occupies (horizon ≈ 128). Default
+     *  is the classic 80..120; DAY drops its cumulus lower so the street
+     *  framings — which only see v≈0.40+ (y ≥ ~102) — actually catch them. */
+    band?: [number, number];
+    /** Puff radius multiplier (default 1). One dome texel ≈ 0.7° of azimuth,
+     *  so default puffs span 10-25° — dusk violet carries that as mood, but
+     *  DAY's white cumulus needs smaller, denser masses or it reads as one
+     *  giant glow smeared on the horizon (corner-polish DAY round 2). */
+    scale?: number;
   };
 }
 
@@ -64,28 +77,50 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     ],
     clear: '#4a72ae',
     rim: { color: '#ffe7c2', intensity: 0.5 },
+    fill: { color: '#cdd8e8', intensity: 0.05 },
     neon: 0,
     // High thin morning wisps, barely-pink off the low sun.
     clouds: { style: 'wisps', body: '#f6e4cc', accent: '#ffd2a8', opacity: 0.4, drift: 0.0022 },
   },
   DAY: {
-    sunDir: [-0.3, -0.88, 0.28], // high summer sun
-    sunColor: '#fff2dd',
-    sunIntensity: 1.25,
-    hemiSky: '#9fb8d8',
-    hemiGround: '#5a5148',
-    hemiIntensity: 0.6,
-    fog: { color: '#bccfe2', start: 150, end: 520 },
+    // High summer noon — the corner-polish pass killed the flat-cyan orphan:
+    // deeper zenith blue (clouds get contrast to live against), sun warmed a
+    // touch and pulled off full blast, hemisphere down so painted whites
+    // (crosswalks) stop blowing out (the whitePaint value drop is the other
+    // half of that fix — beautyCorner.ts).
+    sunDir: [-0.3, -0.88, 0.28],
+    sunColor: '#ffedcc',
+    sunIntensity: 1.12,
+    hemiSky: '#a4c0dd',
+    hemiGround: '#6b6052', // warm pavement bounce, not grey mud
+    hemiIntensity: 0.52,
+    fog: { color: '#b6cbde', start: 150, end: 520 },
     skyStops: [
-      [0, '#2e6cb8'],
-      [0.6, '#7fb0dd'],
-      [0.86, '#c8dff0'],
-      [1, '#9fb4c4'],
+      // Real summer gradient: deep zenith → mid blue → pale warmed horizon.
+      // The framed band (v≈0.40-0.55) must stay MID-blue — round 1 ran pale
+      // there and the white cumulus vanished into it at phone scale.
+      [0, '#1c56a4'],
+      [0.3, '#2f6fbc'],
+      [0.5, '#5e97d2'],
+      [0.72, '#a5cce8'],
+      [0.9, '#dcebf2'],
+      [1, '#b0bfc8'],
     ],
-    clear: '#2e6cb8',
+    clear: '#1c56a4',
     rim: { color: '#eef4ff', intensity: 0.32 },
+    fill: { color: '#d8e2ec', intensity: 0.05 },
     neon: 0,
-    clouds: { style: 'cumulus', body: '#f4f8fc', accent: '#9fb0c0', opacity: 0.85, drift: 0.0025 },
+    // Fat fair-weather cumulus: bright white bodies, blue-grey shaded
+    // undersides — opacity up so they hold against the deeper sky.
+    clouds: {
+      style: 'cumulus',
+      body: '#ffffff',
+      accent: '#8ba2b8',
+      opacity: 1.0,
+      drift: 0.0025,
+      band: [94, 122], // low summer cumulus over the rooflines — in-frame at street level
+      scale: 0.6, // smaller defined masses, not a horizon-wide white smear
+    },
   },
   EVE: {
     // Golden hour — sun low in the west, ahead-left of the default camera so
@@ -113,6 +148,10 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     ],
     clear: '#16233f',
     rim: { color: '#ffcf8a', intensity: 1.0 },
+    // EVE is the phase that NEEDED the fill: sun sits behind characters on the
+    // money framing, and dark faces + ink outline collapsed to a smudge.
+    // Cool dusk-sky bounce, just enough to read features at phone scale.
+    fill: { color: '#8fa3c8', intensity: 0.14 },
     neon: 0.55,
     // The money-shot clouds: violet-grey cumulus catching sodium on the belly.
     clouds: { style: 'cumulus', body: '#6e5a80', accent: '#f2b06b', opacity: 0.7, drift: 0.0018 },
@@ -136,6 +175,7 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     ],
     clear: '#05070f',
     rim: { color: '#8fb4ff', intensity: 0.85 },
+    fill: { color: '#5a6a9c', intensity: 0.1 }, // streetlight-era ambient catch
     neon: 1,
     // Thin high cirrus over stars — motion keeps LATE alive without light.
     clouds: { style: 'streaks', body: '#3a426e', accent: '#232a55', opacity: 0.5, drift: 0.0008, stars: true },
@@ -197,10 +237,14 @@ export function createLightingRig(scene: Scene): LightingRig {
   const paintClouds = (ctx: ReturnType<DynamicTexture['getContext']>, look: PhaseLook): void => {
     const { style, body, accent, opacity, stars } = look.clouds;
     const r = makeRand(0xc10d5);
-    const blob = (x: number, y: number, rad: number, color: string, squash: number): void => {
+    // `edge` (0..1) holds the blob solid to that fraction of the radius before
+    // the alpha falloff — cumulus bodies need DEFINED edges (a pure 0→1 fade
+    // reads as glow, not cloud, once the body color is white).
+    const blob = (x: number, y: number, rad: number, color: string, squash: number, edge = 0): void => {
       for (const dx of [0, -SKY_W, SKY_W]) {
         const g = ctx.createRadialGradient(x + dx, y / squash, 0, x + dx, y / squash, rad);
         g.addColorStop(0, color);
+        if (edge > 0) g.addColorStop(edge, color);
         g.addColorStop(1, rgba(body, 0));
         ctx.save();
         ctx.scale(1, squash);
@@ -222,23 +266,27 @@ export function createLightingRig(scene: Scene): LightingRig {
     if (style === 'cumulus') {
       // Soft stacked puffs with a lit accent along the belly. The band hugs the
       // 70..118 range — low enough that the street framings actually SEE them
-      // over the rooflines (horizon = 128; verified via gate/lake shots).
+      // over the rooflines (horizon = 128; verified via gate/lake shots) —
+      // unless the look pins its own band (DAY rides lower still).
+      const [b0, b1] = look.clouds.band ?? [80, 120];
+      const cs = look.clouds.scale ?? 1;
+      const edge = cs < 1 ? 0.55 : 0.2; // smaller puffs = crisper cumulus edges
       for (let i = 0; i < 8; i++) {
         const cx = r() * SKY_W;
-        const cy = 80 + r() * 40;
+        const cy = b0 + r() * (b1 - b0);
         const puffs = 5 + Math.floor(r() * 3);
         for (let p = 0; p < puffs; p++) {
-          const px = cx + (r() - 0.5) * 74;
-          const py = cy + (r() - 0.5) * 14;
-          blob(px, py, 16 + r() * 20, rgba(body, opacity * (0.55 + r() * 0.35)), 0.55);
+          const px = cx + (r() - 0.5) * 74 * cs;
+          const py = cy + (r() - 0.5) * 14 * cs;
+          blob(px, py, (16 + r() * 20) * cs, rgba(body, opacity * (0.55 + r() * 0.35)), 0.55, edge);
         }
         for (let p = 0; p < 3; p++) {
-          blob(cx + (r() - 0.5) * 56, cy + 12, 10 + r() * 9, rgba(accent, opacity * 0.55), 0.4);
+          blob(cx + (r() - 0.5) * 56 * cs, cy + 12 * cs, (10 + r() * 9) * cs, rgba(accent, opacity * 0.55), 0.4, edge * 0.7);
         }
       }
       // A couple of small far puffs right on the horizon band for depth.
       for (let i = 0; i < 4; i++) {
-        blob(r() * SKY_W, 116 + r() * 6, 8 + r() * 6, rgba(body, opacity * 0.4), 0.4);
+        blob(r() * SKY_W, 116 + r() * 6, (8 + r() * 6) * cs, rgba(body, opacity * 0.4), 0.4, edge * 0.7);
       }
     } else if (style === 'wisps') {
       for (let i = 0; i < 10; i++) {
@@ -289,7 +337,7 @@ export function createLightingRig(scene: Scene): LightingRig {
     scene.clearColor = Color4.FromHexString(`${look.clear}ff`);
     paintSky(look);
     cloudDrift = look.clouds.drift;
-    setRimLook(look.rim.color, look.rim.intensity);
+    setRimLook(look.rim.color, look.rim.intensity, look.fill.color, look.fill.intensity);
     return look;
   };
 

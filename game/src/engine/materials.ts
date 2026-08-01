@@ -78,11 +78,25 @@ export function hexToColor3(hex: string): Color3 {
 // ---------------------------------------------------------------------------
 
 const globalRim = { color: new Color3(1.0, 0.81, 0.54), intensity: 1.0 };
+// View-aligned character fill (the "photographer's bounce card"): lifts
+// camera-facing surfaces so faces read when the phase key is behind the
+// character (EVE backlight turned Eli's face into a black smudge at phone
+// scale). Characters only — environment materials keep fillStrength 0 so the
+// value structure that IS the environment's ink stays untouched.
+const globalFill = { color: new Color3(0.56, 0.64, 0.78), intensity: 0.0 };
 
-/** Tint every graphic-novel material's rim light — called by lighting.ts per phase. */
-export function setRimLook(hex: string, intensity: number): void {
+/** Tint every graphic-novel material's rim light — and the view-aligned
+ *  character fill — called by lighting.ts per phase. */
+export function setRimLook(
+  hex: string,
+  intensity: number,
+  fillHex?: string,
+  fillIntensity?: number,
+): void {
   globalRim.color.copyFrom(Color3.FromHexString(hex));
   globalRim.intensity = intensity;
+  if (fillHex !== undefined) globalFill.color.copyFrom(Color3.FromHexString(fillHex));
+  if (fillIntensity !== undefined) globalFill.intensity = fillIntensity;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,6 +116,9 @@ export interface GraphicNovelOptions {
   rampSteps: number;
   /** Lift for the shadow band so ramped shadows never crush to black. */
   shadowFloor: number;
+  /** Per-material multiplier on the global view-aligned fill (characters 1,
+   *  environment 0 — see globalFill above). Default 0. */
+  fillStrength?: number;
 }
 
 export class GraphicNovelPlugin extends MaterialPluginBase {
@@ -134,11 +151,14 @@ export class GraphicNovelPlugin extends MaterialPluginBase {
         // x: rim intensity, y: rim power, z: ramp steps, w: shadow floor
         { name: 'tcParams', size: 4, type: 'vec4' },
         { name: 'tcRimColor', size: 3, type: 'vec3' },
+        // rgb: fill color, w: fill intensity (global × per-material strength)
+        { name: 'tcFill', size: 4, type: 'vec4' },
       ],
       // Declaration used only on the non-UBO (WebGL1-style) fallback path.
       fragment: `#ifdef GRAPHICNOVEL
         uniform vec4 tcParams;
         uniform vec3 tcRimColor;
+        uniform vec4 tcFill;
       #endif`,
     };
   }
@@ -153,6 +173,13 @@ export class GraphicNovelPlugin extends MaterialPluginBase {
       o.shadowFloor,
     );
     uniformBuffer.updateColor3('tcRimColor', globalRim.color);
+    uniformBuffer.updateFloat4(
+      'tcFill',
+      globalFill.color.r,
+      globalFill.color.g,
+      globalFill.color.b,
+      globalFill.intensity * (o.fillStrength ?? 0),
+    );
   }
 
   override getCustomCode(
@@ -180,8 +207,19 @@ export class GraphicNovelPlugin extends MaterialPluginBase {
         * baseColor.rgb * baseAmbientColor + finalSpecular,
       color.a);
   }
-  let tcFr = pow(1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0), uniforms.tcParams.y);
+  let tcFacing = clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
+  let tcFr = pow(1.0 - tcFacing, uniforms.tcParams.y);
   color = vec4f(color.rgb + uniforms.tcRimColor.rgb * (uniforms.tcParams.x * tcFr), color.a);
+  // View-aligned fill: shadow-only catchlight on camera-facing surfaces
+  // (faces stay readable under backlight; highlights are protected).
+  if (uniforms.tcFill.w > 0.0) {
+    let tcLc = dot(color.rgb, vec3f(0.299, 0.587, 0.114));
+    color = vec4f(
+      color.rgb
+        + uniforms.tcFill.rgb
+          * (uniforms.tcFill.w * tcFacing * tcFacing * clamp(1.0 - tcLc * 1.4, 0.0, 1.0)),
+      color.a);
+  }
 }
 #endif`,
       };
@@ -199,8 +237,15 @@ export class GraphicNovelPlugin extends MaterialPluginBase {
     color.rgb = clamp(tcBase * diffuseColor + emissiveColor + vAmbientColor, 0.0, 1.0)
       * baseColor.rgb * baseAmbientColor + finalSpecular;
   }
-  float tcFr = pow(1.0 - clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0), tcParams.y);
+  float tcFacing = clamp(dot(normalize(viewDirectionW), normalW), 0.0, 1.0);
+  float tcFr = pow(1.0 - tcFacing, tcParams.y);
   color.rgb += tcRimColor * (tcParams.x * tcFr);
+  // View-aligned fill: shadow-only catchlight on camera-facing surfaces
+  // (faces stay readable under backlight; highlights are protected).
+  if (tcFill.w > 0.0) {
+    float tcLc = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+    color.rgb += tcFill.rgb * (tcFill.w * tcFacing * tcFacing * clamp(1.0 - tcLc * 1.4, 0.0, 1.0));
+  }
 }
 #endif`,
     };
@@ -224,6 +269,7 @@ export function createCharacterMaterial(scene: Scene, name: string): StandardMat
     rimPower: 2.4,
     rampSteps: 3,
     shadowFloor: 0.3, // shadow band stays readable — ink lives in the outline, not black fill
+    fillStrength: 1.0, // characters take the per-phase view-aligned catchlight
   });
   return mat;
 }

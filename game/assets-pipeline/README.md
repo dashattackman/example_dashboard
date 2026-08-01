@@ -4,6 +4,12 @@ Reproducible processing for every rigged CC0 body shipped in
 `public/assets/characters/` (license + provenance in
 `public/assets/CREDITS.md`).
 
+Sibling pipelines in this directory follow the same shape (CC0 source over
+the GitHub-raw asset channel → palette bake → one merged primitive →
+CREDITS.md): `process-street-textures.mjs` (surface maps) and
+`process-trees.mjs` (street-tree props for `kit.prop()`, run
+`node assets-pipeline/process-trees.mjs`).
+
 ## Re-running
 
 ```bash

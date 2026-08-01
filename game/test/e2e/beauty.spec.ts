@@ -1,6 +1,8 @@
 // M1 beauty-corner reference shots (docs/07 M1 check): EVE is the golden-hour money
 // shot; LATE proves the deep-blue + neon night look; MORN guards the phase-honest
-// dressing (skyline windows/signs must NOT glow at breakfast — playtest p2).
+// dressing (skyline windows/signs must NOT glow at breakfast — playtest p2); DAY
+// guards the high-summer grade (readable clouds, daytime skyline facades — the
+// corner-polish round killed the flat-cyan orphan look).
 // Geometry budgets are asserted on every shot — beauty never gets to breach docs/06.
 
 import { expect, test } from '@playwright/test';
@@ -23,7 +25,7 @@ async function settleAndAssert(page: import('@playwright/test').Page): Promise<v
   expect(stats.tris).toBeLessThanOrEqual(300_000);
 }
 
-for (const phase of ['MORN', 'EVE', 'LATE'] as const) {
+for (const phase of ['MORN', 'DAY', 'EVE', 'LATE'] as const) {
   test(`beauty corner at ${phase}: budgets green, screenshot captured`, async ({ page }) => {
     await page.goto(`/?debug&phase=${phase}`);
     await settleAndAssert(page);

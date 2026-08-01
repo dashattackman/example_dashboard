@@ -29,6 +29,31 @@ is not legally required, but we keep provenance honest per CLAUDE.md.
 - **Runtime treatment:** rim/ramp `GraphicNovelPlugin` StandardMaterial + flat
   ink hull, shared scene-wide (`src/engine/characterRig.ts`).
 
+## props/ — street trees (tree_a, tree_b, tree_c)
+
+- **Assets:** low-poly stylized trees "CommonTree_1 / _3 / _4" from Quaternius'
+  **Lowpoly Nature / Ultimate Nature** pack family (CC0 1.0 —
+  https://creativecommons.org/publicdomain/zero/1.0/), the pack's standard
+  flat-color FBX2glTF exports (Brown/Green/DarkGreen material set).
+- **Author:** Quaternius — https://quaternius.com
+- **Obtained via:** the cloud asset channel (GitHub raw; quaternius.com and
+  asset CDNs are unreachable from the build container). Mirror pinned in
+  `game/assets-pipeline/process-trees.mjs`: `flo-bit/tiny-planets`
+  (`public/lowpoly_nature/*.gltf`, self-contained data-URI buffers). The same
+  pack files also mirror under `castle-engine/castle-engine` at
+  `…/data/quaternius/nature/glTF/`, which triangulates provenance. Each file
+  is verified on fetch (FBX2glTF generator tag + embedded buffers + the pack's
+  exact material set) before processing.
+- **Modifications** (ours — `game/assets-pipeline/process-trees.mjs`,
+  gltf-transform v4): node transforms baked, all primitives merged to ONE,
+  flat material colors REPLACED with our late-summer Uptown palette baked as
+  sRGB vertex colors (bark `#3f2e1f`, canopy `#324a2a`/`#223618`), height
+  normalized (7.4/6.6/6.2 m), converted right→left-handed, and re-emitted as
+  compact JSON vertex payloads (`props/*.json`) for `kit.prop()`.
+- **Runtime treatment:** white-diffuse graphic-novel env material (rim nearly
+  off — fresnel washes bushy silhouettes), thin-instanced with near-white
+  green-leaning per-instance tints (`src/world/beautyCorner.ts`).
+
 ## characters/adventurer.glb
 
 - **Asset:** "Adventurer" rigged + animated character (base body for the shared

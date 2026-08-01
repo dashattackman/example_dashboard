@@ -12,6 +12,7 @@ import { Color3, Color4 } from '@babylonjs/core/Maths/math.color';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import { DynamicTexture } from '@babylonjs/core/Materials/Textures/dynamicTexture';
 import { VertexBuffer } from '@babylonjs/core/Buffers/buffer';
+import { VertexData } from '@babylonjs/core/Meshes/mesh.vertexData';
 import type { Material } from '@babylonjs/core/Materials/material';
 import type { ICanvasRenderingContext } from '@babylonjs/core/Engines/ICanvas';
 import '@babylonjs/core/Meshes/thinInstanceMesh'; // side-effect: thinInstance* on Mesh
@@ -119,6 +120,28 @@ export interface Kit {
    *  BEFORE merge/thin. One factor per mesh: pick the dominant visible face. */
   uv(mesh: Mesh, u: number, v: number): Mesh;
   freeze(...meshes: Mesh[]): void;
+  /** Load a processed prop payload (assets-pipeline/process-trees.mjs emits
+   *  them: pre-merged, LEFT-HANDED, palette-baked vertex colors) into a single
+   *  Mesh wearing the white-diffuse graphic-novel env material — thin-instance
+   *  it like any tinted module. Resolves when the geometry is live; props are
+   *  world dressing, so callers may fire-and-forget like character loads. */
+  prop(name: string, url: string): Promise<Mesh>;
+}
+
+/** Shape of the JSON vertex payloads emitted by assets-pipeline/process-trees.mjs. */
+interface PropPayload {
+  index16: boolean;
+  positions: string;
+  normals: string;
+  colors: string;
+  indices: string;
+}
+
+function b64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
 }
 
 export function createKit(scene: Scene): Kit {
@@ -294,6 +317,38 @@ export function createKit(scene: Scene): Kit {
 
     freeze: (...meshes) => {
       for (const m of meshes) m.freezeWorldMatrix();
+    },
+
+    prop: async (name, url) => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`prop ${name}: ${url} HTTP ${res.status}`);
+      const payload = (await res.json()) as PropPayload;
+      const pos = b64ToBytes(payload.positions);
+      const nrm = b64ToBytes(payload.normals);
+      const col = b64ToBytes(payload.colors);
+      const idx = b64ToBytes(payload.indices);
+      const colors8 = col; // RGBA bytes → float color kind
+      const colors = new Float32Array(colors8.length);
+      for (let i = 0; i < colors8.length; i++) colors[i] = colors8[i]! / 255;
+      const data = new VertexData();
+      data.positions = new Float32Array(pos.buffer, pos.byteOffset, pos.byteLength / 4);
+      data.normals = new Float32Array(nrm.buffer, nrm.byteOffset, nrm.byteLength / 4);
+      data.colors = colors;
+      data.indices = payload.index16
+        ? new Uint16Array(idx.buffer, idx.byteOffset, idx.byteLength / 2)
+        : new Uint32Array(idx.buffer, idx.byteOffset, idx.byteLength / 4);
+      const mesh = new Mesh(name, scene);
+      data.applyToMesh(mesh);
+      mesh.isPickable = false;
+      // One white-diffuse env material shared by every prop in the scene —
+      // color rides in the baked vertex colors (the tinted-module contract).
+      // rimStrength near zero: organic props are ALL silhouette microfacets
+      // (leaf blobs), so the standard 0.22 env fresnel accumulates into a pale
+      // wash over the whole crown (corner-polish tree round 1).
+      let mat = scene.getMaterialByName('propWhite') as StandardMaterial | null;
+      if (!mat) mat = createEnvironmentMaterial(scene, 'propWhite', '#ffffff', { rimStrength: 0.05 });
+      mesh.material = mat;
+      return mesh;
     },
   };
   return kit;
