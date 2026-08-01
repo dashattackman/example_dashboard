@@ -1,0 +1,176 @@
+{
+  "_comments": {
+    "_source": "Every content-shaped number from docs/02-game-design.md's 'Appendix: tuning defaults index', plus the section tables it points at. All numbers are tunable defaults (docs/02 preamble); the table wins over prose.",
+    "clock": "docs/02 §4.1 — in-game day 20 real min (1 hr = 50s); phases MORN/DAY/EVE/LATE with hour bounds verbatim from docs/03's enum; MUST mirror sim/clock.ts PHASE_BOUNDS (unit-tested); forced sleep 3a (hardSleepMin 180), wake 6a; LATE runs 4x slower inside SOCIAL/ROMANCE venues => lateVenueTimeScale 0.25.",
+    "combat": "docs/02 §1.1 (fight length), §1.2 (buffer/dead zone/hold/auto-facing), §1.3 (chain, launcher, juggle, throw, environmental, signature frame), §1.4 (stamina/power economies, second wind), §1.5 (enemy archetypes, tokens, crowd budget), §1.6 (ramp caps, grunt hit 12%, Splash Rating, rubber-band). Damage unit anchor: one light hit = 100.",
+    "machines": "docs/02 §1.9 — CIVIS family HP mults, flagged +20%, Detainer 20s rescue / 30% carry slow, swarm groups 5-8, scrap 2-5/unit, Warden-hand drops (5 flux cells + 12-20 scrap, cap 1/mission), Demolition Rating x1.0-1.5, machines immune to Fear (quirk 4).",
+    "anchor": "docs/02 §1.8 + appendix — Slot Zero + 1 free slot at start -> 3 free late (displays 2 -> 4); reservation 25%/free thread -> 20% via tree (Slot Zero reserves NONE); ignite 20 power, drop free; palette hold >=300ms at 0.3x time max 4s; fidelity 60/80/100% at bond 2 / 3-4 / 5, cap 120%; Full Hands 5s at 100 power. MUST equal heroes/anchor.json kit — unit test enforces no drift.",
+    "progression": "docs/02 §2.1 (3 branches x 7 nodes; cost(n) = base x 1.5^n, cash base 100 / flux base 7, n = 0..6, rounded to nearest int; respec: Utility free, Power/Signature refund 25% of spent flux), §2.2 (levels 1-30, node tier gates at Lv1/10/20; combat XP 100/70/20), §2.3 (rep tiers 0/500/1500/3500/7000, 1-indexed).",
+    "relationships": "docs/02 §5.1 (axes -100..100, confession/intimidation gates), §5.2 (tracks 0-5, gift soft cap 2/NPC/day), §5.4 (needs buff-only at >=60), §5.5 + docs/04 §6 (gossip juice multipliers; PROTECTED: corridor fear gets NO juice multiplier — grief-class handling), §9.3 (Dread aura at Fear >=50 district sample).",
+    "zone": "docs/02 §8.1 (6 segments, patrol density 0-3, BLIND -50% for 1 day / relays rebuild in 2), §8.3 (mutation every 3 in-game days, 12-entry comedic deck, M1-M6 scheduled story pulls consume their cycle), §9.2 (FIVE reveal stages — canon docs/09 §5; injected items at stages 1/3/5: fidelity 1.0, 2 hops/sleep, half decay; Stage-2 leak fidelity 0.7), §8.2/§10 (2 SIEGEs, 3 min hard cap).",
+    "base": "docs/02 §3.1 (8 fixed slots: 4 at unlock + 2 at rep tier 2 + 1 + 1 at tiers 3-4; no duplicate room types in slice), §3.4 (8 followers max, missions 2-4 REAL hours — the only real-time system, party 1-3).",
+    "farm": "docs/02 §4.2 (daily upkeep <=60s, crops pause when unwatered — never wilt) and §3.2 (flux plot hard cap 4 at every greenhouse level — parity rule §2.4).",
+    "save": "docs/02 §7.3 — save size budget <=2MB, single slot + 3 rolling backups."
+  },
+  "clock": {
+    "dayRealMinutes": 20,
+    "hourRealSeconds": 50,
+    "phaseBounds": {
+      "MORN": { "startMin": 360, "endMin": 660 },
+      "DAY": { "startMin": 660, "endMin": 1020 },
+      "EVE": { "startMin": 1020, "endMin": 1320 },
+      "LATE": { "startMin": 1320, "endMin": 1620 }
+    },
+    "hardSleepMin": 180,
+    "wakeMin": 360,
+    "lateVenueTimeScale": 0.25,
+    "lateVenueTags": ["SOCIAL", "ROMANCE"]
+  },
+  "combat": {
+    "fightLengthTargetSec": [45, 90],
+    "bossFightHardCapSec": 180,
+    "inputBufferMs": 250,
+    "joystickDeadZonePct": 12,
+    "holdThresholdMs": 300,
+    "autoFacing": { "coneDeg": 60, "snapRangeM": 2.5 },
+    "lightHitDamage": 100,
+    "lightChainHits": 3,
+    "launcher": { "popHeightM": 3, "juggleAirtimeSec": 1.2, "bruiserLaunchersNeeded": 2, "bruiserLaunchWindowSec": 3 },
+    "juggle": { "damageBonusPct": 25, "powerMeterMult": 2 },
+    "throw": { "distanceM": 4, "impactDamageMult": 1.5, "knockdownRadiusM": 1.5, "wallSplatStunSec": 2 },
+    "environmental": { "propsPerArena": [4, 8], "materialDropBonusPct": 20 },
+    "signature": {
+      "durationSec": 2.5,
+      "damagePctOfLight": 400,
+      "radiusM": 4,
+      "timeDilation": { "scale": 0.5, "sec": 0.8 },
+      "assistRangeM": 5
+    },
+    "stamina": {
+      "regenPctPerSec": 20,
+      "regenDelaySec": 1,
+      "hitInterruptSec": 1.5,
+      "dodgeCostPct": 25,
+      "throwCostPct": 20,
+      "heavyCostPct": 15
+    },
+    "power": {
+      "perLightHit": 1,
+      "perJuggleHit": 3,
+      "perThrowImpact": 4,
+      "perHpLostPoint": 0.5,
+      "moveCost": 30,
+      "chargedCost": 60,
+      "signatureCost": 100,
+      "betweenFightDecayPct": 50,
+      "benchedGainPct": 30
+    },
+    "secondWind": { "surviveAtHp": 1, "invulnSec": 2, "perBrawl": 1, "lastStandingOnly": true },
+    "enemies": {
+      "hpMult": { "grunt": 1, "bruiser": 4, "ranged": 1.5, "leaderMin": 8, "leaderMax": 12 },
+      "meleeAttackTokens": 2,
+      "rangedKeepDistanceM": 8,
+      "rangedShotTelegraphSec": 0.8,
+      "leaderWhiffVulnPct": 50,
+      "leaderWhiffVulnSec": 3,
+      "telegraphMinSecOver10PctHp": 0.6,
+      "crowdTotal": [8, 14],
+      "onScreenCap": 6,
+      "waves": [2, 3],
+      "nextWaveAtRemaining": 2,
+      "gruntHitPctOfPlayerMaxHp": 12,
+      "perTierScalingCap": { "hpPct": 15, "damagePct": 20 }
+    },
+    "splashRating": { "multMin": 1.0, "multMax": 1.5 },
+    "rubberBand": { "wipesToTrigger": 2, "removeBruisers": 1, "dropFoodPickup": true }
+  },
+  "machines": {
+    "hpMult": { "scanner": 0.75, "detainer": 3, "bulwark": 5, "swarmDrone": 0.2, "wardenHand": 10 },
+    "flaggedTargetBonusDamagePct": 20,
+    "detainer": { "rescueTimerSec": 20, "carrySlowPct": 30 },
+    "swarmGroupSize": [5, 8],
+    "scrapPerUnit": [2, 5],
+    "wardenHandDrops": { "fluxContainmentCells": 5, "scrap": [12, 20], "capPerMission": 1 },
+    "demolitionRating": { "multMin": 1.0, "multMax": 1.5 },
+    "fearImmune": true
+  },
+  "anchor": {
+    "freeSlotsStart": 1,
+    "freeSlotsLate": 3,
+    "displaySlotsStart": 2,
+    "displaySlotsLate": 4,
+    "reservationPctBase": 25,
+    "reservationPctUpgraded": 20,
+    "slotZeroReservationPct": 0,
+    "ignitionPowerCost": 20,
+    "dropCost": 0,
+    "palette": { "holdMs": 300, "timeScale": 0.3, "maxSec": 4 },
+    "fidelityPct": { "bond2": 60, "bond3to4": 80, "bond5": 100, "cap": 120 },
+    "fullHands": { "durationSec": 5, "powerCost": 100 }
+  },
+  "progression": {
+    "tree": {
+      "branches": 3,
+      "nodesPerBranch": 7,
+      "costCurve": { "cashBase": 100, "fluxBase": 7, "growth": 1.5, "rounding": "round" }
+    },
+    "respec": { "utility": "free", "powerAndSignatureFluxRefundPct": 25 },
+    "levels": { "cap": 30, "nodeTierGates": { "nodes1to2": 1, "nodes3to4": 10, "nodes5to7": 20 } },
+    "combatXpSharePct": { "controlled": 100, "aiAllies": 70, "benched": 20 },
+    "repTierThresholds": [0, 500, 1500, 3500, 7000]
+  },
+  "relationships": {
+    "opinionAxisRange": [-100, 100],
+    "trackLevelRange": [0, 5],
+    "gates": {
+      "romanceConfession": { "attraction": 30, "trust": 10 },
+      "intimidation": { "fear": 25, "trustCostOnUse": true },
+      "dreadAura": { "fearDistrictSample": 50 }
+    },
+    "giftBondXpSoftCapPerNpcPerDay": 2,
+    "needs": {
+      "buffThreshold": 60,
+      "buffs": { "energyStaminaRegenPct": 10, "socialBondXpPct": 10, "hungerMaxHpPct": 5 }
+    },
+    "gossip": {
+      "juiceMult": {
+        "romanceBetrayal": 3,
+        "fights": 2.5,
+        "factionBetrayal": 2.5,
+        "generosity": 1.5,
+        "weirdness": 1,
+        "corridorFear": 1
+      },
+      "typicalSaturationDays": 2
+    }
+  },
+  "zone": {
+    "segments": 6,
+    "patrolDensityRange": [0, 3],
+    "blind": { "coverageReductionPct": 50, "windowDays": 1, "relayRebuildDays": 2 },
+    "mutation": { "cadenceDays": 3, "comedicDeckSize": 12, "storyMutations": 6, "storyPullConsumesCycle": true },
+    "reveal": {
+      "stages": 5,
+      "injectedItems": { "stages": [1, 3, 5], "fidelity": 1.0, "hopsPerSleep": 2, "decayMult": 0.5 },
+      "stage2LeakFidelity": 0.7
+    },
+    "siege": { "sliceCount": 2, "hardCapSec": 180 }
+  },
+  "base": {
+    "roomSlotsAtUnlock": 4,
+    "roomSlotsRepTier2": 2,
+    "roomSlotsRepTier3": 1,
+    "roomSlotsRepTier4": 1,
+    "noDuplicateRoomTypes": true,
+    "followerRosterCap": 8,
+    "followerMissionRealHours": [2, 4],
+    "followerPartySize": [1, 3]
+  },
+  "farm": {
+    "dailyUpkeepBudgetSec": 60,
+    "fluxPlotCap": 4,
+    "gardenFreeBeds": 2,
+    "cropsPauseWhenUnwatered": true
+  },
+  "save": { "sizeBudgetMB": 2, "rollingBackups": 3 }
+}

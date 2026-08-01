@@ -1,0 +1,136 @@
+{
+  "id": "camille",
+  "name": "Camille Dubois",
+  "alias": "Kiln",
+  "age": 33,
+  "slice": true,
+  "role": "zone-support",
+  "kit": {
+    "name": "Fire/heat (craft, not carnage)",
+    "description": "Camille shapes heat like glass."
+  },
+  "moves": [
+    {
+      "id": "glasswork",
+      "name": "Glasswork",
+      "class": "field",
+      "tags": ["shield", "zone", "burn"],
+      "anim": "camille_glasswork",
+      "description": "Pulls molten barriers out of the air — cover on demand that enemies burn on.",
+      "damage": 40,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.4,
+      "supportsCharge": true,
+      "effects": { "barrier": true, "enemiesBurnOnContact": true, "barrierDurationSec": 8 }
+    },
+    {
+      "id": "anneal",
+      "name": "Anneal",
+      "class": "field",
+      "tags": ["ally-target", "buff", "heal-conversion"],
+      "anim": "camille_anneal",
+      "description": "A heat-wrap on an ally that converts 50% of damage they take into a delayed heal — the game's weirdest, best support tool, and by design the ONLY heal in the game: a conversion, never a pool.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.3,
+      "supportsCharge": false,
+      "effects": { "convertDamageToDelayedHealPct": 50, "onlyHealInGame": true, "wrapDurationSec": 6 }
+    },
+    {
+      "id": "flashpoint",
+      "name": "Flashpoint",
+      "class": "strike",
+      "tags": ["aoe", "burn"],
+      "anim": "camille_flashpoint",
+      "description": "Detonates any of her cooling glass structures.",
+      "damage": 220,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.3,
+      "supportsCharge": false,
+      "effects": { "detonatesGlassStructures": true }
+    }
+  ],
+  "signature": {
+    "id": "studio_fire",
+    "name": "Studio Fire",
+    "class": "field",
+    "tags": ["aoe", "burn", "zone", "knockdown", "debuff"],
+    "anim": "camille_studio_fire",
+    "description": "An expanding ring of shimmering heat-haze; enemies inside take ramping burn and — the flourish — their weapons visibly droop and slag.",
+    "damage": 320,
+    "staminaCost": 0,
+    "powerCost": 100,
+    "telegraphSec": 0.6,
+    "supportsCharge": false,
+    "durationSec": 2.5,
+    "radiusM": 6,
+    "knockdown": true,
+    "effects": { "rampingBurn": true, "weaponsSlag": true, "expandingRing": true }
+  },
+  "equippedDefault": "glasswork",
+  "upgradeTree": {
+    "branches": [
+      {
+        "id": "camille_raw_power",
+        "name": "Raw Power",
+        "theme": "damage, HP, meter gain",
+        "nodes": [
+          { "id": "camille_power_1", "name": "Hotter Gather", "effect": "+8% damage", "costCash": 100, "costFlux": 7 },
+          { "id": "camille_power_2", "name": "Kiln-Cured", "effect": "+10% HP", "costCash": 150, "costFlux": 11 },
+          { "id": "camille_power_3", "name": "Long Blow", "effect": "+15% stamina cap", "costCash": 225, "costFlux": 16 },
+          { "id": "camille_power_4", "name": "Sharper Shards", "effect": "Flashpoint detonations +25% damage", "costCash": 338, "costFlux": 24 },
+          { "id": "camille_power_5", "name": "Contact Burn", "effect": "Glasswork contact burn ticks twice as fast", "costCash": 506, "costFlux": 35 },
+          { "id": "camille_power_6", "name": "Furnace Draft", "effect": "+8% damage; burning enemies feed +1 power meter per tick", "costCash": 759, "costFlux": 53 },
+          { "id": "camille_power_7", "name": "Piece 214", "effect": "+10% HP and +8% damage", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "camille_utility",
+        "name": "Utility",
+        "theme": "squad & world value",
+        "nodes": [
+          { "id": "camille_util_1", "name": "Warm Welcome", "effect": "Swapping in grants 1s of 20% damage buff", "costCash": 100, "costFlux": 7 },
+          { "id": "camille_util_2", "name": "Craft Fair Cut", "effect": "Haggle: -5% at studios and craft vendors", "costCash": 150, "costFlux": 11 },
+          { "id": "camille_util_3", "name": "Studio Assistant", "effect": "AI Camille wraps the lowest-HP ally with Anneal on cooldown", "costCash": 225, "costFlux": 16 },
+          { "id": "camille_util_4", "name": "Tempered", "effect": "Glasswork barriers last 4s longer", "costCash": 338, "costFlux": 24 },
+          { "id": "camille_util_5", "name": "Double Wrap", "effect": "Anneal can run on two allies at once", "costCash": 506, "costFlux": 35 },
+          { "id": "camille_util_6", "name": "Warm the Room", "effect": "Allies near a Glasswork barrier gain +10% stamina regen", "costCash": 759, "costFlux": 53 },
+          { "id": "camille_util_7", "name": "First Call", "effect": "Squad power-meter share +10% while Camille is fielded", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "camille_signature_evolution",
+        "name": "Signature Evolution",
+        "theme": "Studio Fire grows",
+        "nodes": [
+          { "id": "camille_sig_1", "name": "Quick Light", "effect": "Studio Fire ignites 10% faster", "costCash": 100, "costFlux": 7, "unlocksMoveId": "anneal" },
+          { "id": "camille_sig_2", "name": "Annealed Edge", "effect": "EVOLUTION: allies inside the ring gain Anneal's conversion at 25%", "costCash": 150, "costFlux": 11, "evolution": true },
+          { "id": "camille_sig_3", "name": "Wider Ring", "effect": "Studio Fire radius +1m", "costCash": 225, "costFlux": 16, "unlocksMoveId": "flashpoint" },
+          { "id": "camille_sig_4", "name": "Slower Cool", "effect": "Ring lingers 2s longer", "costCash": 338, "costFlux": 24 },
+          { "id": "camille_sig_5", "name": "Slagged", "effect": "EVOLUTION: weapon-slag also halves enemy damage for 5s after the ring", "costCash": 506, "costFlux": 35, "evolution": true },
+          { "id": "camille_sig_6", "name": "Heat Haze", "effect": "Enemy ranged accuracy drops inside the ring", "costCash": 759, "costFlux": 53 },
+          { "id": "camille_sig_7", "name": "Gallery Opening", "effect": "EVOLUTION (poster): the ring blooms into glass sculpture; the crowd files it under unforgettable", "costCash": 1139, "costFlux": 80, "evolution": true }
+        ]
+      }
+    ]
+  },
+  "personality": {
+    "summary": "Loud, precise, and warm, in that order; flirts as punctuation; New Orleans to the bone and openly at war with Minnesota winter (\"y'all CHOSE this?\").",
+    "traits": ["loud", "precise", "warm", "flirts-as-punctuation"]
+  },
+  "romance": {
+    "open": true,
+    "orientation": "any",
+    "exclusive": false,
+    "style": "non-exclusive-primacy",
+    "notes": "Non-exclusive with a live wire: PRIMACY. No exclusivity demand, but being demoted from \"the one she calls first\" triggers her unique consequence scene — one glass piece delivered to your base, unsigned, flawless, and cold."
+  },
+  "recruitHook": "Her studio's lease is a pawn in the Aldermen–Isles Trust land fight. Secure the building — buy it, leverage it, or burn the right document (her suggestion, delivered while making direct eye contact and a very thin wine glass).",
+  "differentiation": [
+    "BINDING (docs/04 §1.8, design note §1): Anneal is the ONLY heal in the game and it is a CONVERSION, never a pool — no healer role by design.",
+    "Glasswork is the only player-made cover in the slice."
+  ]
+}

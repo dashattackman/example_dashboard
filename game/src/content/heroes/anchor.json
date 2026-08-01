@@ -1,0 +1,103 @@
+{
+  "id": "anchor",
+  "name": "Elias Monroe",
+  "alias": "The Anchor",
+  "age": 39,
+  "slice": true,
+  "role": "multithreader (always fielded)",
+  "kit": {
+    "type": "multithread",
+    "slotZero": {
+      "locked": true,
+      "lit": true,
+      "hostsEchoes": false,
+      "reservesRegenPct": 0,
+      "uiExplains": false
+    },
+    "freeSlots": { "start": 1, "late": 3 },
+    "displaySlots": { "start": 2, "late": 4 },
+    "reservationPct": { "base": 25, "upgraded": 20 },
+    "ignitionPowerCost": 20,
+    "dropCost": 0,
+    "palette": { "holdMs": 300, "timeScale": 0.3, "maxSec": 4 },
+    "echoClassUnlockNode": { "strike": 0, "stance": 2, "field": 4 },
+    "fidelityPct": { "bond2": 60, "bond3to4": 80, "bond5": 100, "cap": 120 }
+  },
+  "signature": {
+    "id": "full_hands",
+    "name": "Full Hands",
+    "class": "strike",
+    "tags": ["buff", "aoe", "multi-hit"],
+    "anim": "anchor_full_hands",
+    "description": "For 5 seconds, every attuned echo in his loadout runs at once at full fidelity, ignoring slot count and stamina reservation — the screen fills with everyone he's let in. Then every free thread drops.",
+    "damage": 0,
+    "staminaCost": 0,
+    "powerCost": 100,
+    "telegraphSec": 0.5,
+    "supportsCharge": false,
+    "durationSec": 5,
+    "knockdown": false,
+    "effects": {
+      "allAttunedEchoesAtFullFidelity": true,
+      "ignoresSlotCount": true,
+      "ignoresStaminaReservation": true,
+      "dropsFreeThreadsAfter": true,
+      "anchorBarkPerLitEcho": true
+    }
+  },
+  "upgradeTree": {
+    "branches": [
+      {
+        "id": "capacity",
+        "name": "Capacity",
+        "theme": "free slots, class permissions, reservation, palette duration (docs/02 §1.8)",
+        "nodes": [
+          { "id": "anchor_cap_1", "name": "Steady Hands", "effect": "Thread palette max duration 4s → 5s", "costCash": 100, "costFlux": 7 },
+          { "id": "anchor_cap_2", "name": "Stance Permission", "effect": "Stance-class echoes may run on a thread", "costCash": 150, "costFlux": 11 },
+          { "id": "anchor_cap_3", "name": "Second Hand", "effect": "Free slot 2 unlocks", "costCash": 225, "costFlux": 16 },
+          { "id": "anchor_cap_4", "name": "Field Permission", "effect": "Field-class echoes may run on a thread", "costCash": 338, "costFlux": 24 },
+          { "id": "anchor_cap_5", "name": "Lighter Hold", "effect": "Per-thread stamina-regen reservation 25% → 22%", "costCash": 506, "costFlux": 35 },
+          { "id": "anchor_cap_6", "name": "Third Hand", "effect": "Free slot 3 unlocks", "costCash": 759, "costFlux": 53 },
+          { "id": "anchor_cap_7", "name": "Light Grip", "effect": "Per-thread stamina-regen reservation 22% → 20%", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "echo_fidelity",
+        "name": "Echo Fidelity",
+        "theme": "echo strength = source hero's bond level through the fidelity curve; nodes raise the floor and push the cap to 120% (docs/02 §1.8 — replaces \"Library\")",
+        "nodes": [
+          { "id": "anchor_fid_1", "name": "Listening", "effect": "Fidelity floor at bond 2: 60% → 65%", "costCash": 100, "costFlux": 7 },
+          { "id": "anchor_fid_2", "name": "Good Ear", "effect": "Fidelity at bond 3–4: 80% → 85%", "costCash": 150, "costFlux": 11 },
+          { "id": "anchor_fid_3", "name": "In Their Cadence", "effect": "Fidelity floor at bond 2: 65% → 70%", "costCash": 225, "costFlux": 16 },
+          { "id": "anchor_fid_4", "name": "Held Right", "effect": "Fidelity at bond 3–4: 85% → 90%", "costCash": 338, "costFlux": 24 },
+          { "id": "anchor_fid_5", "name": "Word for Word", "effect": "Fidelity cap 100% → 110%", "costCash": 506, "costFlux": 35 },
+          { "id": "anchor_fid_6", "name": "Second Nature", "effect": "Echo buffs/debuffs last 15% longer", "costCash": 759, "costFlux": 53 },
+          { "id": "anchor_fid_7", "name": "Truer Than the Original", "effect": "Fidelity cap → 120% — he's had time to listen", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "braids",
+        "name": "Braids",
+        "theme": "two running echoes braided into one composite effect occupying both slots; recipes are data rows keyed to source-move pairs — naming and flavor per pairing owned by docs/04 (docs/02 §1.8)",
+        "nodes": [
+          { "id": "anchor_braid_1", "name": "First Braid", "effect": "Unlock braid recipe slot 1", "costCash": 100, "costFlux": 7 },
+          { "id": "anchor_braid_2", "name": "Clean Weave", "effect": "Braided composites ignite for 30 power instead of 40", "costCash": 150, "costFlux": 11 },
+          { "id": "anchor_braid_3", "name": "Second Braid", "effect": "Unlock braid recipe slot 2", "costCash": 225, "costFlux": 16 },
+          { "id": "anchor_braid_4", "name": "Tight Wrap", "effect": "Braided composites reserve regen as 1.5 threads, not 2", "costCash": 338, "costFlux": 24 },
+          { "id": "anchor_braid_5", "name": "Third Braid", "effect": "Unlock braid recipe slot 3", "costCash": 506, "costFlux": 35 },
+          { "id": "anchor_braid_6", "name": "Living Knot", "effect": "Braids inherit the HIGHER of the two source fidelities", "costCash": 759, "costFlux": 53 },
+          { "id": "anchor_braid_7", "name": "Full Braid Is Dead, Long Live Full Hands", "effect": "During Full Hands, all valid braid composites fire too", "costCash": 1139, "costFlux": 80 }
+        ]
+      }
+    ]
+  },
+  "personality": {
+    "summary": "Steady under load — the man you want holding the door; dry Minnesota deflection as a first language; and a guilt he has built an entire functioning life around, which the game slowly makes load-bearing. He shows up, he counts exits, and he lies only by omission — the specific omission being the plot.",
+    "traits": ["steady-under-load", "dry-deflection", "shows-up", "counts-exits", "lies-only-by-omission"]
+  },
+  "aiRules": [
+    "AI Anchor keeps echoes running and never lights new ones (docs/02 §1.8).",
+    "When stamina-starved, AI Anchor drops the highest-reservation echo first (docs/02 §1.8).",
+    "Progression: combat XP and story beats only — no bond-XP spigot on yourself (docs/02 §1.8/§2.2)."
+  ]
+}

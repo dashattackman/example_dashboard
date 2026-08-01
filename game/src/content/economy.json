@@ -1,0 +1,175 @@
+{
+  "_comments": {
+    "_source": "Income/sink numbers from docs/02-game-design.md; every figure that is a doc default is cited; figures marked 'invented' are tunable placeholders consistent with the §6.2 sanity curve.",
+    "income": "docs/02 §6.2 (mid-game target 1,500 cash + 60 flux / real hour), §2.3 (rep: brawls +10-40, story +50-200, bond milestones +25), §3.3 (faction jobs 100-400 cash; businesses 150/in-game day, capped 2 days, designated first cut per §10; materials 1-3/enemy, environmental +20%; scrap sells 5 cash), §2.4 (leader kills 3-8 flux; flux parity rule).",
+    "sinks": "docs/02 §2.1 (node curve — see tuning.progression.tree.costCurve; node range 100-1,139 cash / 7-80 flux), §3.2 (room build/upgrade table; workshop Lv3 transmute 10:1 lossy; Private Quarters Lv3 is story — null), §5.3 (dates 50-200 cash, 3-5 real min), §6.2 (gear mods ~300).",
+    "rules": "docs/02 §6.2 — price modifiers do NOT stack, single worst applicable modifier wins (hard rule for this file); next meaningful purchase <=45 min away; every sink has a combat path AND a farm/social path; §2.4: no premium currency, no energy system, ever.",
+    "crops": "docs/02 §4.2 — flux crops (greenhouse only): 3 tiers, grow 2/4/7 in-game days, yield 8/20/45 flux, tier 2-3 seeds rep/story gated; produce (both sites): tomatoes/sweet corn/hot peppers/herbs, 1-3 day cycles. Seed costs and produce sell prices are invented tunables sized so one flux plot-cycle ~= one good brawl's flux take (§2.4 parity).",
+    "items": "docs/02 §4.2 (dishes: consumable combat/social buffs; home-grown hotdish worth 3x a store gift in bond XP), §3.2/§3.3 (workshop bot-tech lane: shield-piercer mods, spoof beacons — scrap-fed), §1.9 (spoof beacon walks a patrol into the lake, quirk 2). Prices invented tunables."
+  },
+  "income": {
+    "midGamePerRealHour": { "cash": 1500, "flux": 60 },
+    "rep": { "brawl": [10, 40], "storyBeat": [50, 200], "bondMilestone": 25 },
+    "factionJobCash": [100, 400],
+    "business": { "cashPerInGameDay": 150, "accrualCapDays": 2, "firstCutCandidate": true },
+    "brawlLoot": { "materialsPerEnemy": [1, 3], "environmentalKillBonusPct": 20, "leaderFluxDrop": [3, 8] },
+    "scrap": { "perMachineUnit": [2, 5], "salePriceCash": 5 },
+    "fluxParityRule": "one flux plot-cycle ~= one good brawl's flux take; with the hard 4-plot cap both lanes land on ~60 flux/real-hour mid-game (docs/02 §2.4)"
+  },
+  "sinks": {
+    "upgradeNode": {
+      "curveRef": "tuning.progression.tree.costCurve",
+      "nodeCashRange": [100, 1139],
+      "nodeFluxRange": [7, 80]
+    },
+    "rooms": {
+      "train_room": { "buildAndUpgradeCash": [800, 2000, 5000] },
+      "flux_greenhouse": { "buildAndUpgradeCash": [1000, 2500, 6000] },
+      "workshop": { "buildAndUpgradeCash": [600, 1800, 4500], "transmuteMaterialsPerFlux": 10 },
+      "lounge": { "buildAndUpgradeCash": [500, 1500, 4000] },
+      "private_quarters": { "buildAndUpgradeCash": [700, 2000, null] }
+    },
+    "dates": { "costCash": [50, 200], "lengthRealMin": [3, 5] },
+    "gearModCashApprox": 300
+  },
+  "rules": {
+    "priceModifierStacking": "worst-single-wins",
+    "nextPurchaseHorizonMin": 45,
+    "everySinkHasTwoPaths": true,
+    "premiumCurrency": false,
+    "energySystem": false
+  },
+  "crops": [
+    {
+      "id": "flux_bloom_t1",
+      "name": "Flux Bloom (Tier 1)",
+      "lane": "flux",
+      "tier": 1,
+      "site": "greenhouse",
+      "growDays": 2,
+      "yieldAmount": 8,
+      "seedCostCash": 40
+    },
+    {
+      "id": "flux_bloom_t2",
+      "name": "Flux Bloom (Tier 2)",
+      "lane": "flux",
+      "tier": 2,
+      "site": "greenhouse",
+      "growDays": 4,
+      "yieldAmount": 20,
+      "seedCostCash": 120,
+      "gate": "rep/story gated (docs/02 §4.2)"
+    },
+    {
+      "id": "flux_bloom_t3",
+      "name": "Flux Bloom (Tier 3)",
+      "lane": "flux",
+      "tier": 3,
+      "site": "greenhouse",
+      "growDays": 7,
+      "yieldAmount": 45,
+      "seedCostCash": 300,
+      "gate": "rep/story gated (docs/02 §4.2)"
+    },
+    {
+      "id": "tomatoes",
+      "name": "Tomatoes",
+      "lane": "produce",
+      "site": "both",
+      "growDays": 2,
+      "yieldAmount": 3,
+      "seedCostCash": 10,
+      "sellPriceCash": 12
+    },
+    {
+      "id": "sweet_corn",
+      "name": "Sweet Corn",
+      "lane": "produce",
+      "site": "both",
+      "growDays": 3,
+      "yieldAmount": 4,
+      "seedCostCash": 14,
+      "sellPriceCash": 18
+    },
+    {
+      "id": "hot_peppers",
+      "name": "Hot Peppers",
+      "lane": "produce",
+      "site": "both",
+      "growDays": 2,
+      "yieldAmount": 3,
+      "seedCostCash": 12,
+      "sellPriceCash": 15
+    },
+    {
+      "id": "herbs",
+      "name": "Herbs",
+      "lane": "produce",
+      "site": "both",
+      "growDays": 1,
+      "yieldAmount": 2,
+      "seedCostCash": 6,
+      "sellPriceCash": 8
+    }
+  ],
+  "items": [
+    {
+      "id": "store_gift_flowers",
+      "name": "Store-Bought Flowers",
+      "kind": "gift",
+      "priceCash": 40,
+      "description": "A fine gift. A home-cooked hotdish is worth three of these, and the NPC will say so.",
+      "effects": { "bondXpMult": 1 }
+    },
+    {
+      "id": "homegrown_hotdish",
+      "name": "Home-Grown Hotdish",
+      "kind": "dish",
+      "priceCash": 0,
+      "description": "Cooked from your own corn. Worth 3x a store gift in bond XP (docs/02 §4.2); also fills the hunger-need food slot.",
+      "effects": { "bondXpMult": 3, "wellFed": true }
+    },
+    {
+      "id": "pre_fight_pepper_plate",
+      "name": "Pepper Plate",
+      "kind": "dish",
+      "priceCash": 0,
+      "description": "Consumable combat buff: +10% damage for one fight (docs/02 §4.2).",
+      "effects": { "damageBuffPct": 10, "durationFights": 1, "wellFed": true }
+    },
+    {
+      "id": "date_night_charm_plate",
+      "name": "Charm Plate",
+      "kind": "dish",
+      "priceCash": 0,
+      "description": "Consumable social buff: +charm on a date (docs/02 §4.2).",
+      "effects": { "charmBuff": true, "durationDates": 1, "wellFed": true }
+    },
+    {
+      "id": "shield_piercer_mod",
+      "name": "Shield-Piercer Mod",
+      "kind": "gear_mod",
+      "priceCash": 300,
+      "craftedWithScrap": 12,
+      "description": "Workshop bot-tech lane (docs/02 §3.2): attacks pierce Bulwark frontal shields.",
+      "effects": { "bypassesBulwarkShield": true }
+    },
+    {
+      "id": "spoof_beacon",
+      "name": "Spoof Beacon",
+      "kind": "gear_mod",
+      "priceCash": 250,
+      "craftedWithScrap": 8,
+      "description": "Workshop craft (docs/02 §1.9 quirk 2 / §3.3): feeds CIVIS a false directive target — a crafted spoof beacon can walk an entire patrol into the lake.",
+      "effects": { "redirectsPatrolDirective": true, "singleUse": true }
+    },
+    {
+      "id": "scavenged_materials",
+      "name": "Scavenged Materials",
+      "kind": "material",
+      "priceCash": 4,
+      "description": "Brawl drops and daily scavenging nodes (docs/02 §3.3). Spent on rooms and workshop crafts."
+    }
+  ]
+}

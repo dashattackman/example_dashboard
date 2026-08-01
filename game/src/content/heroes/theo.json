@@ -1,0 +1,136 @@
+{
+  "id": "theo",
+  "name": "Theo Park",
+  "alias": "Stitch",
+  "age": 24,
+  "slice": true,
+  "role": "mobility",
+  "kit": {
+    "name": "Speedster (short-burst blinkwork)",
+    "description": "Not a marathon runner — a sewing machine."
+  },
+  "moves": [
+    {
+      "id": "needle",
+      "name": "Needle",
+      "class": "strike",
+      "tags": ["dash", "single-target"],
+      "anim": "theo_needle",
+      "description": "A straight-line dash-through with a slash on exit.",
+      "damage": 140,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.15,
+      "supportsCharge": false,
+      "effects": { "dashThrough": true }
+    },
+    {
+      "id": "basting",
+      "name": "Basting",
+      "class": "strike",
+      "tags": ["multi-hit", "control"],
+      "anim": "theo_basting",
+      "description": "Tags up to four enemies at walking pace, then hits all tags at once.",
+      "damage": 80,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.3,
+      "supportsCharge": true,
+      "effects": { "maxTags": 4, "damagePerTag": 80 }
+    },
+    {
+      "id": "errand",
+      "name": "Errand",
+      "class": "field",
+      "tags": ["ally-target", "dash"],
+      "anim": "theo_errand",
+      "description": "Instantly repositions one ALLY instead of himself — the only speedster whose speed is a gift.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.2,
+      "supportsCharge": false,
+      "effects": { "repositionsAlly": true }
+    }
+  ],
+  "signature": {
+    "id": "seam_ripper",
+    "name": "Seam Ripper",
+    "class": "strike",
+    "tags": ["multi-hit", "aoe", "dash", "knockdown"],
+    "anim": "theo_seam_ripper",
+    "description": "Ten dashes stitched through the whole enemy formation in one second; the screen holds a comic-panel freeze of every pass before the damage lands.",
+    "damage": 350,
+    "staminaCost": 0,
+    "powerCost": 100,
+    "telegraphSec": 0.4,
+    "supportsCharge": false,
+    "durationSec": 2.5,
+    "radiusM": 6,
+    "knockdown": true,
+    "effects": { "dashes": 10, "comicPanelFreeze": true }
+  },
+  "equippedDefault": "needle",
+  "upgradeTree": {
+    "branches": [
+      {
+        "id": "theo_raw_power",
+        "name": "Raw Power",
+        "theme": "damage, HP, meter gain",
+        "nodes": [
+          { "id": "theo_power_1", "name": "Sharper Exit", "effect": "+8% damage", "costCash": 100, "costFlux": 7 },
+          { "id": "theo_power_2", "name": "Carb Load", "effect": "+10% HP", "costCash": 150, "costFlux": 11 },
+          { "id": "theo_power_3", "name": "Second Wind Sprints", "effect": "+15% stamina cap", "costCash": 225, "costFlux": 16 },
+          { "id": "theo_power_4", "name": "Double Stitch", "effect": "Needle's exit slash hits twice", "costCash": 338, "costFlux": 24 },
+          { "id": "theo_power_5", "name": "Fifth Tag", "effect": "Basting tags up to five enemies", "costCash": 506, "costFlux": 35 },
+          { "id": "theo_power_6", "name": "Momentum Debt", "effect": "+8% damage; dash hits build +1 power meter", "costCash": 759, "costFlux": 53 },
+          { "id": "theo_power_7", "name": "Overlock", "effect": "+10% HP and +8% damage", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "theo_utility",
+        "name": "Utility",
+        "theme": "squad & world value",
+        "nodes": [
+          { "id": "theo_util_1", "name": "Hot Handoff", "effect": "Swapping in grants 1s of 20% damage buff", "costCash": 100, "costFlux": 7 },
+          { "id": "theo_util_2", "name": "Everyone's Order", "effect": "Delivery routes: +10% scavenge yield citywide", "costCash": 150, "costFlux": 11 },
+          { "id": "theo_util_3", "name": "Designated Runner", "effect": "AI Theo uses Errand to pull low-HP allies out of crowds", "costCash": 225, "costFlux": 16 },
+          { "id": "theo_util_4", "name": "Regular's Discount", "effect": "Haggle: -5% at restaurants and the Nite Owl", "costCash": 338, "costFlux": 24 },
+          { "id": "theo_util_5", "name": "Free Refills", "effect": "Errand also grants the moved ally 15% stamina", "costCash": 506, "costFlux": 35 },
+          { "id": "theo_util_6", "name": "Route Memory", "effect": "Basting tags persist through one enemy reposition", "costCash": 759, "costFlux": 53 },
+          { "id": "theo_util_7", "name": "Tip Jar", "effect": "Squad power-meter share +10% while Theo is fielded", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "theo_signature_evolution",
+        "name": "Signature Evolution",
+        "theme": "Seam Ripper grows",
+        "nodes": [
+          { "id": "theo_sig_1", "name": "Quick Thread", "effect": "Seam Ripper starts 10% faster", "costCash": 100, "costFlux": 7, "unlocksMoveId": "basting" },
+          { "id": "theo_sig_2", "name": "Twelve Pass", "effect": "EVOLUTION: twelve dashes instead of ten", "costCash": 150, "costFlux": 11, "evolution": true },
+          { "id": "theo_sig_3", "name": "Wider Weave", "effect": "Seam Ripper formation radius +1m", "costCash": 225, "costFlux": 16, "unlocksMoveId": "errand" },
+          { "id": "theo_sig_4", "name": "Pinking Shears", "effect": "Each pass applies a 1s slow", "costCash": 338, "costFlux": 24 },
+          { "id": "theo_sig_5", "name": "Cross-Stitch", "effect": "EVOLUTION: final pass converges on the biggest enemy for double damage", "costCash": 506, "costFlux": 35, "evolution": true },
+          { "id": "theo_sig_6", "name": "Bar Tack", "effect": "Basting-tagged enemies take +20% from Seam Ripper", "costCash": 759, "costFlux": 53 },
+          { "id": "theo_sig_7", "name": "The Splash Page", "effect": "EVOLUTION (poster): the comic-panel freeze holds a full beat; every pass gets its own panel", "costCash": 1139, "costFlux": 80, "evolution": true }
+        ]
+      }
+    ]
+  },
+  "personality": {
+    "summary": "Chronically early and emotionally late; funny as a defense mechanism, then accidentally sincere; treats every kindness like a debt he has to repay at 200%.",
+    "traits": ["chronically-early", "deflects-with-jokes", "accidentally-sincere", "over-repays"]
+  },
+  "romance": {
+    "open": true,
+    "orientation": "any",
+    "exclusive": false,
+    "style": "skittish-open",
+    "notes": "Flirts at full speed and retreats faster. BINDING (docs/04 §1.5): his Romance-3 almost-moment plays at 0.1x time — the game's only non-combat slow-motion scene."
+  },
+  "recruitHook": "Cheap to recruit, hard to keep: he says yes immediately — too immediately — and the real recruitment is the follow-up mission where you learn he's quadruple-booked out of pure inability to disappoint anyone. Make him quit something. That's the price.",
+  "differentiation": [
+    "Errand is the only ally-repositioning move in the game — his speed is a gift.",
+    "BINDING (docs/04 §1.5): Romance-3 scene at 0.1x time, the only non-combat slow-mo."
+  ]
+}

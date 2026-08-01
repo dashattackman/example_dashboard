@@ -1,0 +1,136 @@
+{
+  "id": "maggie",
+  "name": "Maggie St. Pierre",
+  "alias": "Ballast",
+  "age": 44,
+  "slice": true,
+  "role": "tank",
+  "kit": {
+    "name": "Density tank",
+    "description": "Maggie doesn't dodge."
+  },
+  "moves": [
+    {
+      "id": "set",
+      "name": "Set",
+      "class": "stance",
+      "tags": ["buff", "counter", "stagger"],
+      "anim": "maggie_set",
+      "description": "Roots in place, density up: damage taken drops 80%, enemies who melee her stagger themselves.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.3,
+      "supportsCharge": false,
+      "effects": { "rooted": true, "damageTakenReductionPct": 80, "meleeAttackersSelfStagger": true }
+    },
+    {
+      "id": "beam_walk",
+      "name": "Beam Walk",
+      "class": "strike",
+      "tags": ["push", "control", "single-target"],
+      "anim": "maggie_beam_walk",
+      "description": "A slow unstoppable advance that shoves the whole enemy front line back — territory control as a punch.",
+      "damage": 100,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.6,
+      "supportsCharge": true,
+      "effects": { "unstoppable": true, "pushesFrontLine": true }
+    },
+    {
+      "id": "spotters_call",
+      "name": "Spotter's Call",
+      "class": "field",
+      "tags": ["taunt", "aoe", "buff"],
+      "anim": "maggie_spotters_call",
+      "description": "Taunts everything in a cone; the squad takes zero damage from taunted enemies for 4 seconds.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.4,
+      "supportsCharge": false,
+      "effects": { "tauntConeDeg": 90, "squadImmuneToTauntedSec": 4 }
+    }
+  ],
+  "signature": {
+    "id": "topping_out",
+    "name": "Topping Out",
+    "class": "strike",
+    "tags": ["aoe", "knockdown", "launcher"],
+    "anim": "maggie_topping_out",
+    "description": "Maximum density, one jump, one landing. Unconditional knockdown on everything — the longest windup in the game; the squad's job is buying her the seconds. Car alarms three blocks over, filed by the gossip system under \"Ballast again.\"",
+    "damage": 300,
+    "staminaCost": 0,
+    "powerCost": 100,
+    "telegraphSec": 2,
+    "supportsCharge": false,
+    "durationSec": 2.5,
+    "radiusM": 6,
+    "knockdown": true,
+    "effects": { "unconditionalKnockdown": true, "longestWindupInGame": true, "carAlarmsGossipItem": true }
+  },
+  "equippedDefault": "set",
+  "upgradeTree": {
+    "branches": [
+      {
+        "id": "maggie_raw_power",
+        "name": "Raw Power",
+        "theme": "damage, HP, meter gain",
+        "nodes": [
+          { "id": "maggie_power_1", "name": "Wrecking Weight", "effect": "+8% damage", "costCash": 100, "costFlux": 7 },
+          { "id": "maggie_power_2", "name": "Load-Bearing", "effect": "+10% HP", "costCash": 150, "costFlux": 11 },
+          { "id": "maggie_power_3", "name": "Long Shift", "effect": "+15% stamina cap", "costCash": 225, "costFlux": 16 },
+          { "id": "maggie_power_4", "name": "Counterweight", "effect": "Set's self-stagger also deals light-hit damage", "costCash": 338, "costFlux": 24 },
+          { "id": "maggie_power_5", "name": "Armor-Pierce Shove", "effect": "Beam Walk pierces bruiser armor", "costCash": 506, "costFlux": 35 },
+          { "id": "maggie_power_6", "name": "Iron Rule", "effect": "+8% damage; hits taken in Set build +1 power meter", "costCash": 759, "costFlux": 53 },
+          { "id": "maggie_power_7", "name": "Local 512", "effect": "+10% HP and +8% damage", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "maggie_utility",
+        "name": "Utility",
+        "theme": "squad & world value",
+        "nodes": [
+          { "id": "maggie_util_1", "name": "Shift Change", "effect": "Swapping in grants 1s of 20% damage buff", "costCash": 100, "costFlux": 7 },
+          { "id": "maggie_util_2", "name": "Union Rates", "effect": "Haggle: -5% on base room builds", "costCash": 150, "costFlux": 11 },
+          { "id": "maggie_util_3", "name": "Watch the Door", "effect": "AI Maggie taunts when any ally is grabbed or downed", "costCash": 225, "costFlux": 16 },
+          { "id": "maggie_util_4", "name": "Scrap Eye", "effect": "+10% material drops from environmental kills", "costCash": 338, "costFlux": 24 },
+          { "id": "maggie_util_5", "name": "Wider Call", "effect": "Spotter's Call cone widens to 120°", "costCash": 506, "costFlux": 35 },
+          { "id": "maggie_util_6", "name": "You'll Live", "effect": "Allies protected by Spotter's Call regen 10% stamina", "costCash": 759, "costFlux": 53 },
+          { "id": "maggie_util_7", "name": "Crew Chief", "effect": "Squad power-meter share +10% while Maggie is fielded", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "maggie_signature_evolution",
+        "name": "Signature Evolution",
+        "theme": "Topping Out grows",
+        "nodes": [
+          { "id": "maggie_sig_1", "name": "Faster Rig", "effect": "Topping Out windup -0.2s (still the longest in the game)", "costCash": 100, "costFlux": 7, "unlocksMoveId": "beam_walk" },
+          { "id": "maggie_sig_2", "name": "Deeper Crater", "effect": "EVOLUTION: landing zone +2m radius", "costCash": 150, "costFlux": 11, "evolution": true },
+          { "id": "maggie_sig_3", "name": "High Steel", "effect": "Jump height up; landing damage +10%", "costCash": 225, "costFlux": 16, "unlocksMoveId": "spotters_call" },
+          { "id": "maggie_sig_4", "name": "Aftershock", "effect": "A second, smaller knockdown pulse 1s after landing", "costCash": 338, "costFlux": 24 },
+          { "id": "maggie_sig_5", "name": "Drop Forge", "effect": "EVOLUTION: enemies knocked down by Topping Out take +25% damage while down", "costCash": 506, "costFlux": 35, "evolution": true },
+          { "id": "maggie_sig_6", "name": "Spot Me", "effect": "Squad takes zero damage during her windup if within 5m", "costCash": 759, "costFlux": 53 },
+          { "id": "maggie_sig_7", "name": "Everyone Knows the Pose", "effect": "EVOLUTION (poster): the whole arena freezes to watch; car alarms three blocks over, every time", "costCash": 1139, "costFlux": 80, "evolution": true }
+        ]
+      }
+    ]
+  },
+  "personality": {
+    "summary": "Unshockable; generous with time, stingy with sympathy (\"you'll live\"); the driest one-liners in the roster, delivered at load-bearing volume.",
+    "traits": ["unshockable", "generous-with-time", "dry", "range-rules"]
+  },
+  "romance": {
+    "open": false,
+    "orientation": "none",
+    "exclusive": false,
+    "style": "friendship-only",
+    "notes": "Friendship-only, and the richest arc for it. Her wife died four winters ago; the first-snow event lands on their anniversary, and her scene that night is the reason the friendship track exists."
+  },
+  "recruitHook": "Work: she won't join a squad she hasn't stood a shift with. Take three faction jobs alongside her as a non-recruit ally first; if you cut corners on any of them, the third job never comes.",
+  "differentiation": [
+    "BINDING (docs/04 §1.6): Topping Out is an UNCONDITIONAL knockdown with the LONGEST windup in the game — the squad buys her the seconds.",
+    "PROTECTED (docs/04 §1.6): do not soften her."
+  ]
+}

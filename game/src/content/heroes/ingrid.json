@@ -1,0 +1,136 @@
+{
+  "id": "ingrid",
+  "name": "Ingrid Halvorsen",
+  "alias": "Whiteout",
+  "age": 34,
+  "slice": true,
+  "role": "control",
+  "kit": {
+    "name": "Cold (heat theft)",
+    "description": "Not ice blasts — heat theft. The most Minnesotan power in the game: the cold isn't hers, it's everyone else's, held."
+  },
+  "moves": [
+    {
+      "id": "draw",
+      "name": "Draw",
+      "class": "strike",
+      "tags": ["single-target", "debuff", "slow", "buff"],
+      "anim": "ingrid_draw",
+      "description": "Siphons heat from an enemy: they slow, she gains armor frost.",
+      "damage": 90,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.3,
+      "supportsCharge": true,
+      "effects": { "enemySlowPct": 30, "selfArmorFrostPct": 15 }
+    },
+    {
+      "id": "black_ice",
+      "name": "Black Ice",
+      "class": "field",
+      "tags": ["zone", "control", "buff"],
+      "anim": "ingrid_black_ice",
+      "description": "Paints a ground patch — enemies slide, her squad skates: allies crossing it get a free dash.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.3,
+      "supportsCharge": false,
+      "effects": { "enemiesSlide": true, "allyFreeDashOnCross": true, "patchDurationSec": 6 }
+    },
+    {
+      "id": "shelter",
+      "name": "Shelter",
+      "class": "field",
+      "tags": ["shield", "zone"],
+      "anim": "ingrid_shelter",
+      "description": "A snow-squall dome that blocks projectiles both ways — the \"okay everybody breathe\" button.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.4,
+      "supportsCharge": false,
+      "effects": { "blocksProjectilesBothWays": true, "domeDurationSec": 5 }
+    }
+  ],
+  "signature": {
+    "id": "january",
+    "name": "January",
+    "class": "field",
+    "tags": ["aoe", "freeze", "control"],
+    "anim": "ingrid_january",
+    "description": "Drops the local temperature to lethal-cold for six seconds; everything hostile freezes mid-pose like a photograph of a blizzard. Control, not clear — the squad chooses which statues matter. Conversations still end.",
+    "damage": 0,
+    "staminaCost": 0,
+    "powerCost": 100,
+    "telegraphSec": 0.6,
+    "supportsCharge": false,
+    "durationSec": 6,
+    "radiusM": 8,
+    "knockdown": false,
+    "effects": { "freeze": true, "freezeBreaksOnHit": true, "freezeDurationSec": 6 }
+  },
+  "equippedDefault": "draw",
+  "upgradeTree": {
+    "branches": [
+      {
+        "id": "ingrid_raw_power",
+        "name": "Raw Power",
+        "theme": "damage, HP, meter gain",
+        "nodes": [
+          { "id": "ingrid_power_1", "name": "Cold Snap", "effect": "+8% damage", "costCash": 100, "costFlux": 7 },
+          { "id": "ingrid_power_2", "name": "Defense First", "effect": "+10% HP", "costCash": 150, "costFlux": 11 },
+          { "id": "ingrid_power_3", "name": "Third Period Legs", "effect": "+15% stamina cap", "costCash": 225, "costFlux": 16 },
+          { "id": "ingrid_power_4", "name": "Deep Freeze", "effect": "Draw's slow deepens to 45%", "costCash": 338, "costFlux": 24 },
+          { "id": "ingrid_power_5", "name": "Frost Armor", "effect": "Armor frost from Draw stacks twice", "costCash": 506, "costFlux": 35 },
+          { "id": "ingrid_power_6", "name": "Wind Chill", "effect": "+8% damage; slowed enemies feed +1 power meter per hit", "costCash": 759, "costFlux": 53 },
+          { "id": "ingrid_power_7", "name": "Boards Up", "effect": "+10% HP and +8% damage", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "ingrid_utility",
+        "name": "Utility",
+        "theme": "squad & world value",
+        "nodes": [
+          { "id": "ingrid_util_1", "name": "Line Change", "effect": "Swapping in grants 1s of 20% damage buff", "costCash": 100, "costFlux": 7 },
+          { "id": "ingrid_util_2", "name": "Rink Rat", "effect": "+10% scavenge yield near the lakefront", "costCash": 150, "costFlux": 11 },
+          { "id": "ingrid_util_3", "name": "Stay-Home Defender", "effect": "AI Ingrid drops Shelter when two allies fall below 30% HP", "costCash": 225, "costFlux": 16 },
+          { "id": "ingrid_util_4", "name": "Season Pass", "effect": "Haggle: -5% at arena and lakefront vendors", "costCash": 338, "costFlux": 24 },
+          { "id": "ingrid_util_5", "name": "Longer Sheet", "effect": "Black Ice patch lasts 3s longer", "costCash": 506, "costFlux": 35 },
+          { "id": "ingrid_util_6", "name": "Power Play", "effect": "Allies dashing off Black Ice gain +10% damage for 2s", "costCash": 759, "costFlux": 53 },
+          { "id": "ingrid_util_7", "name": "Captain's Quiet", "effect": "Squad power-meter share +10% while Ingrid is fielded", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "ingrid_signature_evolution",
+        "name": "Signature Evolution",
+        "theme": "January grows",
+        "nodes": [
+          { "id": "ingrid_sig_1", "name": "Early Frost", "effect": "January windup 10% faster", "costCash": 100, "costFlux": 7, "unlocksMoveId": "black_ice" },
+          { "id": "ingrid_sig_2", "name": "Hard Water", "effect": "EVOLUTION: frozen enemies take +25% damage from the breaking hit", "costCash": 150, "costFlux": 11, "evolution": true },
+          { "id": "ingrid_sig_3", "name": "Wider Front", "effect": "January radius +2m", "costCash": 225, "costFlux": 16, "unlocksMoveId": "shelter" },
+          { "id": "ingrid_sig_4", "name": "Long Winter", "effect": "Freeze lasts 7s (still breaks on hit)", "costCash": 338, "costFlux": 24 },
+          { "id": "ingrid_sig_5", "name": "Black February", "effect": "EVOLUTION: January leaves Black Ice across its whole radius", "costCash": 506, "costFlux": 35, "evolution": true },
+          { "id": "ingrid_sig_6", "name": "Still Air", "effect": "Squad gains 2s of stamina-free dodges after January", "costCash": 759, "costFlux": 53 },
+          { "id": "ingrid_sig_7", "name": "The Photograph", "effect": "EVOLUTION (poster): the blizzard freeze-frame holds; camera orbits the statues", "costCash": 1139, "costFlux": 80, "evolution": true }
+        ]
+      }
+    ]
+  },
+  "personality": {
+    "summary": "Economical with words, extravagant with actions; competitive only where nobody can see; the person everyone assumes is fine, and never is.",
+    "traits": ["reserved", "total-commitment", "privately-competitive", "unspoken"]
+  },
+  "romance": {
+    "open": false,
+    "orientation": "women",
+    "exclusive": true,
+    "style": "oriented-exclusive",
+    "notes": "Oriented (women) — not into you, and that's content: her arc, including the protected Ingrid–Petra geometry, runs at full richness on the friendship/ally track."
+  },
+  "recruitHook": "The arena's rink chiller dies mid-heatwave and she's been keeping the ice frozen herself, secretly, eighteen hours a day, and it's killing her. Notice. Fix the chiller or get the money for it. She joins because you saw her working — she'll never say that's why.",
+  "differentiation": [
+    "BINDING (docs/04 §1.4): January deals NO damage, and each freeze BREAKS ON HIT — control, not clear.",
+    "Shelter blocks projectiles BOTH ways — the squad's only breathe button."
+  ]
+}

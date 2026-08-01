@@ -1,0 +1,136 @@
+{
+  "id": "marisol",
+  "name": "Marisol Vega",
+  "alias": "Rebound",
+  "age": 31,
+  "slice": true,
+  "role": "brawler",
+  "kit": {
+    "name": "Kinetic brawler (momentum theft)",
+    "description": "She doesn't take hits, she banks them: incoming force goes into a stored-momentum meter and comes back out with interest."
+  },
+  "moves": [
+    {
+      "id": "absorb_stance",
+      "name": "Absorb Stance",
+      "class": "stance",
+      "tags": ["counter", "buff"],
+      "anim": "marisol_absorb_stance",
+      "description": "Soak an incoming hit into a stored-momentum meter instead of taking it clean.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.2,
+      "supportsCharge": false,
+      "effects": { "storesMomentum": true, "storedHitCap": 3 }
+    },
+    {
+      "id": "payback_palm",
+      "name": "Payback Palm",
+      "class": "strike",
+      "tags": ["single-target", "push"],
+      "anim": "marisol_payback_palm",
+      "description": "Dump stored force into one open-hand shot.",
+      "damage": 250,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.4,
+      "supportsCharge": true,
+      "effects": { "scalesWithStoredMomentum": true }
+    },
+    {
+      "id": "wallride",
+      "name": "Wallride",
+      "class": "strike",
+      "tags": ["dash", "single-target"],
+      "anim": "marisol_wallride",
+      "description": "Converts her own movement into a ricochet dash off any surface.",
+      "damage": 120,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.2,
+      "supportsCharge": false,
+      "effects": { "ricochet": true }
+    }
+  ],
+  "signature": {
+    "id": "interest",
+    "name": "Interest",
+    "class": "strike",
+    "tags": ["counter", "single-target", "knockdown"],
+    "anim": "marisol_interest",
+    "description": "Stores three consecutive hits without attacking, then returns all of it at 150% in a single screen-shaking counter. High risk, highest single-hit number in the game.",
+    "damage": 450,
+    "staminaCost": 0,
+    "powerCost": 100,
+    "telegraphSec": 0.5,
+    "supportsCharge": false,
+    "durationSec": 2.5,
+    "radiusM": 2,
+    "knockdown": true,
+    "effects": { "requiresStoredHits": 3, "returnPct": 150 }
+  },
+  "equippedDefault": "absorb_stance",
+  "upgradeTree": {
+    "branches": [
+      {
+        "id": "marisol_raw_power",
+        "name": "Raw Power",
+        "theme": "damage, HP, meter gain",
+        "nodes": [
+          { "id": "marisol_power_1", "name": "Heavier Hands", "effect": "+8% damage", "costCash": 100, "costFlux": 7 },
+          { "id": "marisol_power_2", "name": "Derby Legs", "effect": "+10% HP", "costCash": 150, "costFlux": 11 },
+          { "id": "marisol_power_3", "name": "Deep Tank", "effect": "+15% stamina cap", "costCash": 225, "costFlux": 16 },
+          { "id": "marisol_power_4", "name": "Compound Momentum", "effect": "Stored-momentum meter caps at 4 hits", "costCash": 338, "costFlux": 24 },
+          { "id": "marisol_power_5", "name": "Armor-Pierce Palm", "effect": "Heavies and Payback Palm pierce bruiser armor", "costCash": 506, "costFlux": 35 },
+          { "id": "marisol_power_6", "name": "Bank Run", "effect": "+8% damage; absorbing a hit grants 2 power meter", "costCash": 759, "costFlux": 53 },
+          { "id": "marisol_power_7", "name": "Principal + Interest", "effect": "+10% HP and +8% damage", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "marisol_utility",
+        "name": "Utility",
+        "theme": "squad & world value",
+        "nodes": [
+          { "id": "marisol_util_1", "name": "Tag In Hot", "effect": "Swapping in grants 1s of 20% damage buff", "costCash": 100, "costFlux": 7 },
+          { "id": "marisol_util_2", "name": "Courier Routes", "effect": "+10% scavenge yield", "costCash": 150, "costFlux": 11 },
+          { "id": "marisol_util_3", "name": "Corner Read", "effect": "AI Marisol absorbs the first ranged shot each wave", "costCash": 225, "costFlux": 16 },
+          { "id": "marisol_util_4", "name": "Shop Discount", "effect": "Haggle: -5% at Spoke & Dagger-affiliated vendors", "costCash": 338, "costFlux": 24 },
+          { "id": "marisol_util_5", "name": "Meter Share", "effect": "Squad power-meter share +10% while Marisol is benched", "costCash": 506, "costFlux": 35 },
+          { "id": "marisol_util_6", "name": "Wall Coach", "effect": "Allies crossing her Wallride path gain a short speed buff", "costCash": 759, "costFlux": 53 },
+          { "id": "marisol_util_7", "name": "Team Captain", "effect": "AI allies contribute +1 hit to player juggles", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "marisol_signature_evolution",
+        "name": "Signature Evolution",
+        "theme": "Interest grows",
+        "nodes": [
+          { "id": "marisol_sig_1", "name": "Open Account", "effect": "Interest windup 10% faster", "costCash": 100, "costFlux": 7, "unlocksMoveId": "payback_palm" },
+          { "id": "marisol_sig_2", "name": "Compound", "effect": "EVOLUTION: Interest returns 200% of stored damage", "costCash": 150, "costFlux": 11, "evolution": true },
+          { "id": "marisol_sig_3", "name": "Line of Credit", "effect": "Interest range +1m", "costCash": 225, "costFlux": 16, "unlocksMoveId": "wallride" },
+          { "id": "marisol_sig_4", "name": "Late Fee", "effect": "Interest applies a 2s stagger to nearby enemies", "costCash": 338, "costFlux": 24 },
+          { "id": "marisol_sig_5", "name": "Market Crash", "effect": "EVOLUTION: Interest shockwave knocks down in 3m", "costCash": 506, "costFlux": 35, "evolution": true },
+          { "id": "marisol_sig_6", "name": "Fast Close", "effect": "Stored hits persist 2s longer before expiring", "costCash": 759, "costFlux": 53 },
+          { "id": "marisol_sig_7", "name": "Foreclosure", "effect": "EVOLUTION (poster): storing all 3 hits triggers slow-mo and a screen-wide camera pull", "costCash": 1139, "costFlux": 80, "evolution": true }
+        ]
+      }
+    ]
+  },
+  "personality": {
+    "summary": "Competitive to the point of self-sabotage; loyal like a dog with a grudge; laughs loudest at her own worst decisions.",
+    "traits": ["competitive", "loyal", "self-sabotaging", "all-in"]
+  },
+  "romance": {
+    "open": true,
+    "orientation": "any",
+    "exclusive": true,
+    "style": "exclusive-jealous",
+    "notes": "Dates like she fights — all in, no guard. Torches relationships preemptively when she catches feelings first."
+  },
+  "recruitHook": "Beat her: she challenges the player to a 1v1 in the Spoke & Dagger alley after you break up a fight she was winning. You don't have to win, but you have to land the last hit clean.",
+  "differentiation": [
+    "BINDING (docs/04 §1.1): enemy telegraphs display 0.5s earlier for Marisol than for any other hero.",
+    "BINDING (docs/04 §1.1): unique interrupt-before-the-line dialogue options — uncanny at high bond, misfire embarrassingly at low bond."
+  ]
+}

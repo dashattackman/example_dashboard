@@ -1,0 +1,135 @@
+{
+  "id": "august",
+  "name": "August Vang",
+  "alias": "Reverb",
+  "age": 25,
+  "slice": true,
+  "role": "ranged-control",
+  "kit": {
+    "name": "Sonic (sound sculpting)",
+    "description": "August hears everything and can throw it back."
+  },
+  "moves": [
+    {
+      "id": "feedback_lash",
+      "name": "Feedback Lash",
+      "class": "strike",
+      "tags": ["projectile", "single-target"],
+      "anim": "august_feedback_lash",
+      "description": "A cutting directional shriek — the poke tool.",
+      "damage": 180,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.3,
+      "supportsCharge": true
+    },
+    {
+      "id": "dead_air",
+      "name": "Dead Air",
+      "class": "field",
+      "tags": ["aoe", "silence", "control", "zone"],
+      "anim": "august_dead_air",
+      "description": "A silence dome: enemies inside can't call reinforcements, casters can't cast, and the fight goes eerily mute — a design showpiece.",
+      "damage": 0,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.4,
+      "supportsCharge": false,
+      "effects": { "radiusM": 6, "durationSec": 4, "blocksReinforcementCalls": true, "silencesCasters": true, "mutesAudio": true }
+    },
+    {
+      "id": "bassline",
+      "name": "Bassline",
+      "class": "field",
+      "tags": ["aoe", "buff", "stagger", "zone"],
+      "anim": "august_bassline",
+      "description": "A rhythmic ground-pulse that staggers enemies on the beat and buffs squad attack speed if THEY attack on the beat.",
+      "damage": 60,
+      "staminaCost": 0,
+      "powerCost": 30,
+      "telegraphSec": 0.4,
+      "supportsCharge": false,
+      "effects": { "staggerOnBeat": true, "squadAttackSpeedBuffPct": 15, "onBeatOnly": true }
+    }
+  ],
+  "signature": {
+    "id": "encore",
+    "name": "Encore",
+    "class": "strike",
+    "tags": ["aoe", "knockdown"],
+    "anim": "august_encore",
+    "description": "Records the last 5 seconds of combat audio and replays it as concussive force — the bigger the fight was, the bigger the blast.",
+    "damage": 400,
+    "staminaCost": 0,
+    "powerCost": 100,
+    "telegraphSec": 0.6,
+    "supportsCharge": false,
+    "durationSec": 2.5,
+    "radiusM": 4,
+    "knockdown": true,
+    "effects": { "scalesWithLast5sCombatIntensity": true, "recordWindowSec": 5 }
+  },
+  "equippedDefault": "feedback_lash",
+  "upgradeTree": {
+    "branches": [
+      {
+        "id": "august_raw_power",
+        "name": "Raw Power",
+        "theme": "damage, HP, meter gain",
+        "nodes": [
+          { "id": "august_power_1", "name": "Hot Signal", "effect": "+8% damage", "costCash": 100, "costFlux": 7 },
+          { "id": "august_power_2", "name": "Road Case", "effect": "+10% HP", "costCash": 150, "costFlux": 11 },
+          { "id": "august_power_3", "name": "Headroom", "effect": "+15% stamina cap", "costCash": 225, "costFlux": 16 },
+          { "id": "august_power_4", "name": "Clipping", "effect": "Feedback Lash pierces through the first target", "costCash": 338, "costFlux": 24 },
+          { "id": "august_power_5", "name": "Sub Drop", "effect": "Bassline pulses deal +50% damage", "costCash": 506, "costFlux": 35 },
+          { "id": "august_power_6", "name": "Gain Stage", "effect": "+8% damage; on-beat squad hits build +1 power meter", "costCash": 759, "costFlux": 53 },
+          { "id": "august_power_7", "name": "Full Stack", "effect": "+10% HP and +8% damage", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "august_utility",
+        "name": "Utility",
+        "theme": "squad & world value",
+        "nodes": [
+          { "id": "august_util_1", "name": "Soundcheck", "effect": "Swapping in grants 1s of 20% damage buff", "costCash": 100, "costFlux": 7 },
+          { "id": "august_util_2", "name": "House Ears", "effect": "Gossip items heard at The Foundry arrive one sleep-tick early", "costCash": 150, "costFlux": 11 },
+          { "id": "august_util_3", "name": "Monitor Mix", "effect": "AI August prioritizes silencing ranged enemies with Dead Air", "costCash": 225, "costFlux": 16 },
+          { "id": "august_util_4", "name": "Comp Ticket", "effect": "Haggle: -5% at Hennepin-spine venues", "costCash": 338, "costFlux": 24 },
+          { "id": "august_util_5", "name": "Wider Dome", "effect": "Dead Air radius +2m", "costCash": 506, "costFlux": 35 },
+          { "id": "august_util_6", "name": "Click Track", "effect": "Bassline beat window is 25% more forgiving for the squad", "costCash": 759, "costFlux": 53 },
+          { "id": "august_util_7", "name": "Front of House", "effect": "Squad power-meter share +10% while August is fielded", "costCash": 1139, "costFlux": 80 }
+        ]
+      },
+      {
+        "id": "august_signature_evolution",
+        "name": "Signature Evolution",
+        "theme": "Encore grows",
+        "nodes": [
+          { "id": "august_sig_1", "name": "Longer Tape", "effect": "Encore record window 6s", "costCash": 100, "costFlux": 7, "unlocksMoveId": "dead_air" },
+          { "id": "august_sig_2", "name": "Remaster", "effect": "EVOLUTION: Encore replays at 125% of recorded intensity", "costCash": 150, "costFlux": 11, "evolution": true },
+          { "id": "august_sig_3", "name": "Wide Release", "effect": "Encore radius +1m", "costCash": 225, "costFlux": 16, "unlocksMoveId": "bassline" },
+          { "id": "august_sig_4", "name": "Fast Cue", "effect": "Encore charge speed +15%", "costCash": 338, "costFlux": 24 },
+          { "id": "august_sig_5", "name": "Double LP", "effect": "EVOLUTION: Encore leaves a 3s ringing stagger field", "costCash": 506, "costFlux": 35, "evolution": true },
+          { "id": "august_sig_6", "name": "Deafening Silence", "effect": "Enemies inside Dead Air when Encore fires take +25% of it", "costCash": 759, "costFlux": 53 },
+          { "id": "august_sig_7", "name": "Live Album", "effect": "EVOLUTION (poster): the city block visibly rattles; car alarms join the mix", "costCash": 1139, "costFlux": 80, "evolution": true }
+        ]
+      }
+    ]
+  },
+  "personality": {
+    "summary": "Watchful in a way people mistake for shy; devastating one-liners delivered at library volume; holds grudges in perfect fidelity because he literally cannot forget a sound.",
+    "traits": ["watchful", "dry", "grudge-perfect", "quiet"]
+  },
+  "romance": {
+    "open": true,
+    "orientation": "any",
+    "exclusive": false,
+    "style": "slow-burn",
+    "notes": "Months of dry jokes across the soundboard, then one night he plays you a track made of city sounds and it's — obviously, embarrassingly — about you."
+  },
+  "recruitHook": "Friendship, not spectacle: he joins after the player does three small things quietly — no witnesses, no rep gain — and he heard every one of them.",
+  "differentiation": [
+    "Dead Air is the anti-reinforcement / anti-caster tool — no other slice kit silences.",
+    "Bassline is the only squad-wide attack-speed buff and it demands rhythm play."
+  ]
+}
