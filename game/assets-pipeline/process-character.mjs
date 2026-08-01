@@ -13,6 +13,14 @@
 //                                linear->sRGB conversion as before).
 //     --name <BodyName>          output mesh/node base name (default from dst)
 //
+// `paint` (API-only, see build-cast.mjs): positional vertex-color bands for
+// details the pack's material regions don't carve out (e.g. Eli's amber back
+// yoke — the torso is ONE material front and back). Pack bind-space axes are
+// Z-UP: z=height, y=depth with FRONT = -y / BACK = +y, x=lateral (verified on
+// the eye/feet vertices). Bands are in fractions of total bind height, so
+// rules survive the 1/100 bind-scale weirdness untouched.
+//   { hex, materials: ['Green'], height: [0.68, 0.82], back: true, halfWidth: 0.105 }
+//
 // Or import { processCharacter } and drive it from a table (build-cast.mjs).
 import { NodeIO, Primitive, getBounds } from '@gltf-transform/core';
 import { resample, dedup, prune } from '@gltf-transform/functions';
@@ -36,6 +44,7 @@ export async function processCharacter({
   keep = DEFAULT_KEEP,
   strip,
   recolor = {},
+  paint = [],
   name,
   quiet = false,
 }) {
@@ -84,6 +93,7 @@ export async function processCharacter({
         col = [srgb(base[0]), srgb(base[1]), srgb(base[2])];
       }
       parts.push({
+        mat: matName,
         pos: prim.getAttribute('POSITION').getArray(),
         nrm: prim.getAttribute('NORMAL').getArray(),
         col: [...col, 1],
@@ -105,6 +115,16 @@ export async function processCharacter({
   const JNT = new Uint16Array(totalVerts * 4);
   const WGT = new Float32Array(totalVerts * 4);
   const IDX = new Uint32Array(totalIdx);
+  // Bind-space height bounds for positional paint bands (z is UP, see header).
+  let bindZMin = Infinity;
+  let bindZMax = -Infinity;
+  for (const p of parts)
+    for (let k = 2; k < p.pos.length; k += 3) {
+      bindZMin = Math.min(bindZMin, p.pos[k]);
+      bindZMax = Math.max(bindZMax, p.pos[k]);
+    }
+  const bindH = Math.max(bindZMax - bindZMin, 1e-9);
+
   let v = 0;
   let i = 0;
   for (const p of parts) {
@@ -113,8 +133,22 @@ export async function processCharacter({
     NRM.set(p.nrm, v * 3);
     WGT.set(p.weights, v * 4);
     JNT.set(p.joints, v * 4); // may upcast u8 -> u16
-    for (let k = 0; k < n; k++)
-      COL.set(p.col.map((c) => Math.round(c * 255)), (v + k) * 4);
+    const baseBytes = p.col.map((c) => Math.round(c * 255));
+    const rules = paint.filter((r) => r.materials.includes(p.mat));
+    for (let k = 0; k < n; k++) {
+      let bytes = baseBytes;
+      for (const r of rules) {
+        const x = p.pos[k * 3];
+        const depth = p.pos[k * 3 + 1]; // front = -y, back = +y
+        const hFrac = (p.pos[k * 3 + 2] - bindZMin) / bindH;
+        if (hFrac < r.height[0] || hFrac > r.height[1]) continue;
+        if (r.back && depth < 0.01 * bindH) continue;
+        if (r.front && depth > -0.01 * bindH) continue;
+        if (r.halfWidth !== undefined && Math.abs(x) > r.halfWidth * bindH) continue;
+        bytes = [...hexBytes(r.hex), 255];
+      }
+      COL.set(bytes, (v + k) * 4);
+    }
     for (let k = 0; k < p.idx.length; k++) IDX[i + k] = p.idx[k] + v;
     v += n;
     i += p.idx.length;

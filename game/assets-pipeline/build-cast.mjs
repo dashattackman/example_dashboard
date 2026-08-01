@@ -50,20 +50,28 @@ const CAST = [
       Black: '#191a20', Grey: '#272930', Skin: '#9d6c50', Hair: '#181920',
       Eyebrows: '#101014', Eye: '#0c0d10',
     },
+    // The chase cam lives on his BACK: paint an amber yoke panel across the
+    // upper back of the jacket (the torso is one material front+back, so this
+    // is a positional band — shoulder-blade height, torso width, back side).
+    paint: [
+      { hex: '#d98a3a', materials: ['Green'], height: [0.67, 0.8], back: true, halfWidth: 0.105 },
+    ],
   },
   // --- ambient cast ---------------------------------------------------------
   { dst: 'punk.glb', src: 'Punk', keep: AMBIENT_CLIPS, name: 'Punk' }, // pink mohawk, as shipped
   { dst: 'suit.glb', src: 'Suit', keep: AMBIENT_CLIPS, name: 'Suit' }, // black suit, as shipped
   { dst: 'worker.glb', src: 'Worker', keep: AMBIENT_CLIPS, name: 'Worker' }, // hi-vis
   {
-    // "Casual" — Suit re-dressed: tan jacket, slate shirt, dark hair+skin.
+    // "Casual" — Suit re-dressed: tan jacket, cream shirt, dark hair+skin.
+    // (ART r2: NO Eli-adjacent blues on ambient bodies — Eli owns slate-blue.)
     dst: 'casual.glb', src: 'Suit', keep: AMBIENT_CLIPS, name: 'Casual',
-    recolor: { Black: '#6b5138', White: '#8fa3b2', Hair_Blond: '#241a12', Skin: '#6e462c' },
+    recolor: { Black: '#6b5138', White: '#d3c7a4', Hair_Blond: '#241a12', Skin: '#6e462c' },
   },
   {
-    // "Skater" — Punk re-dressed: green fade hawk, slate jacket.
+    // "Skater" — Punk re-dressed: green fade hawk, plum jacket (club palette;
+    // ART r2 moved it off Eli's slate-blue).
     dst: 'skater.glb', src: 'Punk', keep: AMBIENT_CLIPS, name: 'Skater',
-    recolor: { Pink: '#3f7d4f', Black: '#333848', Skin: '#c99b72' },
+    recolor: { Pink: '#3f7d4f', Black: '#56304c', Skin: '#c99b72' },
   },
   {
     // "Vest" — Worker re-dressed: teal jacket, dark cap — the bench regular.
