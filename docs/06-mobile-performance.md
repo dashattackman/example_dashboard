@@ -50,7 +50,11 @@ Exceeding a budget is a build failure conversation, not a shrug.
 
 ## Runtime governance
 
-- `renderer.ts` **fps governor**: if fps < 28 for 3s → step down hardware scaling (1.0 → 0.85 → 0.75 DPR), then crowd density, then disable bloom. Steps back up when headroom returns. Log steps to debug overlay.
+- **Device tiers** (auto-detected at boot from GPU string + a 2s hidden benchmark; user-overridable in settings). The budget table above is the **BASE tier floor** — mid-range must always play great. Flagships step UP, not the game down:
+  - **BASE** (mid-range): the budget table as written. Blob shadows, no post, 0.85–1.0 DPR.
+  - **HIGH** (flagship, e.g. 12–16GB-class phones): native DPR, one cascaded sun shadow map, bloom always on at night, crowd density +50% (VAT only — skeleton budget unchanged), full-res texture mips (BASE loads one mip lower from the same KTX2 files — no extra download).
+  - Tiers change polish, never content or sim behavior — nobody sees a different city, and saves are identical across tiers.
+- `renderer.ts` **fps governor**: if fps < 28 for 3s → step down within the current tier (hardware scaling 1.0 → 0.85 → 0.75 DPR, then crowd density, then bloom/shadows) and step back up when headroom returns — it can also demote HIGH → BASE on sustained thermal throttle. Log steps to debug overlay.
 - Pause sim + render on `visibilitychange` (backgrounded tab) — battery respect is retention.
 - Touch input on `pointer` events with no passive-listener violations; UI in DOM so the GPU never rasterizes menus.
 
