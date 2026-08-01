@@ -65,4 +65,21 @@ async function boot(): Promise<void> {
   });
 }
 
-void boot();
+// Phone-side failures must be visible, not a silent blue screen.
+function showFatal(msg: string): void {
+  let el = document.getElementById('fatal-banner');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'fatal-banner';
+    el.style.cssText =
+      'position:fixed;top:0;left:0;right:0;z-index:999;padding:10px 14px;' +
+      'background:#7a1f1f;color:#ffe;font:12px/1.4 monospace;pointer-events:auto;' +
+      'white-space:pre-wrap;word-break:break-word';
+    document.body.appendChild(el);
+  }
+  el.textContent = `TWIN CITIES error — screenshot this:\n${msg}`;
+}
+window.addEventListener('error', (e) => showFatal(String(e.error?.stack ?? e.message)));
+window.addEventListener('unhandledrejection', (e) => showFatal(String(e.reason?.stack ?? e.reason)));
+
+boot().catch((err: unknown) => showFatal(String((err as Error)?.stack ?? err)));
