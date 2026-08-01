@@ -10,7 +10,7 @@
 
 ### 1.1 The frame
 
-You field **3 heroes** from your recruited roster. You directly control one; squad AI runs the other two; **tap a hero's portrait to swap instantly** (no cooldown on swap itself — swapping is a core move, not a panic button). Streets-of-Rage DNA: side-of-street arenas, readable crowds, launchers, juggles, throws, and furniture that hurts.
+You field a squad of 3: **the Anchor** (you — the authored player character, the 11th character sheet in `04-characters.md`, always fielded) plus **2 heroes from your recruited roster**. You directly control one; squad AI runs the other two; **tap a hero's portrait to swap instantly** (no cooldown on swap itself — swapping is a core move, not a panic button). You can hand the Anchor to AI and drive a roster hero — his threads keep running (§1.8). Streets-of-Rage DNA: side-of-street arenas, readable crowds, launchers, juggles, throws, and furniture that hurts.
 
 **Fight length target: 45–90 seconds** for a standard street brawl. If a fight regularly runs past 2 minutes at intended power level, cut enemy HP — never add player damage nag. Boss/leader fights may run to 3 minutes, hard cap.
 
@@ -52,9 +52,9 @@ Two meters, deliberately asymmetrical:
 
 Getting hit interrupts stamina regen for 1.5s. **Second wind (precise rule):** when the **last standing hero** would drop below 1 HP, they instead survive at 1 HP with **2s of invulnerability** — once per brawl. No heal, no other trigger conditions.
 
-### 1.5 Enemy archetypes
+### 1.5 Enemy archetypes (human)
 
-Readable crowds = strict archetype silhouettes and telegraphs. Every attack that deals >10% player HP has a ≥0.6s telegraph (windup pose + ink-flash outline).
+These are the **human** archetypes; the CIVIS machine family (§1.9) is a parallel enemy class with its own rules. Readable crowds = strict archetype silhouettes and telegraphs. Every attack that deals >10% player HP has a ≥0.6s telegraph (windup pose + ink-flash outline).
 
 | Archetype | Role | HP (× grunt) | Behavior | Counterplay |
 |---|---|---|---|---|
@@ -82,13 +82,71 @@ Crowd composition budget: a standard brawl is **8–14 enemies total, ≤6 on sc
 4. Every fight ends with a **loot splash** (cash + flux + materials fountain, Splash Rating stamped on it) and a squad walk-off pose. Dopamine is a deliverable.
 5. Damage numbers OFF by default; hit-stop, ink-flash, and knockback communicate impact.
 
+### 1.8 The Anchor — multithreading as a combat verb
+
+The Anchor doesn't have *a* power; he runs **THREADS** — sustained effects that keep working while he brawls. He is the only multithreader in the setting (01, Premise) and the only character whose kit works this way.
+
+**Thread slots:** starts with **2**, upgrade tree grows toward **4**. A slot hosts one running effect until dropped or the fight ends.
+
+**Controls (two thumbs, zero gestures — same POWER button as everyone else):**
+- **Tap POWER:** fires his equipped active move, exactly like any hero (moves[3] schema unchanged).
+- **Hold POWER (≥300ms):** opens the **thread palette** — a radial around the thumb; game time dilates to **0.3× for up to 4s** while it's open. Drag to a sector and release: assigns that effect to an open slot, or drops it if it's already running. Left stick keeps steering the whole time. Same interaction pattern as the SWAP radial — nothing new to learn.
+- Threads are **fire-and-forget**: no aiming, no micromanagement. Force Hand auto-targets, auras follow him, barriers plant where he's facing at cast. The only decision is *which threads* — made at 0.3× time.
+
+**Thread economics — the per-fight decision:** each running thread reserves **25% of his stamina regen** (Branch 1 improves to 20%). Two threads = half-speed dodges; four threads (late tree) = massive board control on a nearly dry stamina bar. More threads = thinner dodges, every fight, on purpose. Igniting a thread costs **20 power meter**; dropping one is free and instant — so thread uptime competes directly with his signature finisher.
+
+**Thread library (slice ships 6 effects; Branch 2 unlocks/upgrades them):**
+
+| Thread | Effect (tunable defaults) |
+|---|---|
+| **Barrier** | 3m kinetic wall segment where he faces; blocks ranged fire; durability = 150% of his max HP |
+| **Force Hand** | autonomous force-hand: stagger-jab on nearest enemy every 2s (damage = 0.8 light hit); can pin one grunt in place |
+| **Slow-Field** | 4m radius field on him: enemies inside −40% move & attack speed |
+| **Mend** | 5m aura: squad regens 2% max HP/s |
+| **Haste** *(ally buff)* | hosted ON a squadmate: +20% attack speed |
+| **Ward** *(ally buff)* | hosted ON a squadmate: −25% damage taken |
+
+Buff threads make him the squad engine: an AI ally carrying Haste while you juggle is the multithread fantasy without any extra inputs.
+
+**Branch structure — REPLACES the standard 3-branch shape (§2.1), same 21 nodes and cost curve:**
+
+| Branch | Theme |
+|---|---|
+| **Capacity** | slot 3 (node 3), slot 4 (node 6), regen reservation 25%→20%, palette dilation duration |
+| **Library** | unlock Slow-Field/Mend/Ward (Barrier, Force Hand, Haste are starters) + potency modifiers |
+| **Braids** | cross-thread combos: two running threads within 4m merge into one stronger effect occupying both slots — Barrier+Force Hand = **Golem** (walking shield that shoves), Slow+Barrier = **Stasis Cage** (3s trap), Mend+Haste = **Overclock** (+40% ally attack speed for 5s, then both threads drop). Braid recipes are data rows, not new systems. |
+
+**Signature finisher — "Full Braid":** collapses every running thread into a radial burst: 150% of a light hit per running thread, 5m radius, all threads drop. Standard 100-power cost; the assist-garnish rule (§1.3) applies.
+
+**AI rules when a roster hero is controlled:** the AI Anchor keeps threads running, never starts new ones, and drops Mend last. **Progression:** the Anchor levels on combat XP and story beats only — no bond-XP spigot on yourself (§2.2 applies to roster heroes).
+
+### 1.9 Machine enemies — the CIVIS family
+
+Parallel enemy class to §1.5, bound by the controversy contract in 01: **machines are punchable; people are people.** No injury guilt, huge destruction physics (parts fountains, panel-shear, momentum ragdolls), and the loot is **SCRAP** — a new material lane (2–5 per unit; scrap sells for cash, so machine fights pay). Machines never drop flux, with one exception below.
+
+| Unit | Role | HP (× grunt) | Behavior | Counterplay |
+|---|---|---|---|---|
+| **Scanner** | force multiplier, priority kill | 0.75× | paints/flags targets: flagged targets take +20% damage from machines and Detainers path to them; hangs back, fragile | kill first, always; throwing anything at it works |
+| **Detainer** | the scary one | 3× | grabs a flagged NPC (or downed squadmate) and **tries to LEAVE** — a rescue timer (20s), never a DPS race; carrying slows it 30% | hits to its arm assembly break the grip; Slow-Field/Stasis Cage are counters by design |
+| **Bulwark** | shield wall | 5× | frontal shield, immune from the front, anchors formations | environmental attacks and thrown bodies bypass the shield; bait the shield-raise, flank, or bowl it over |
+| **Swarm drone** | dodge practice | 0.2× | groups of 5–8, telegraphed dive attacks, one-hit satisfying pops | dodge timing; each pop feeds power meter — they're batteries |
+| **Warden-hand** | rare mini-boss | 10× | detached heavy manipulator chassis; grabs props and squadmates, uses the environment against YOU; the only machine that re-plans mid-fight | drops 5 flux containment cells + 12–20 scrap; capped 1 per mission |
+
+**Why fighting machines FEELS different (behavior quirks — decisions, not waves):**
+1. **They obey traffic law.** Patrols halt at crosswalks and signals, hold formation lanes, and yield to buses — exploitable ambush windows the neighborhood teaches you about ("they stop for the 21. Every time. Bless 'em.").
+2. **Zero self-preservation, total directive-preservation.** They never dodge, never flee, never adapt to damage — but they instantly abandon a fight if their directive target moves. A crafted spoof beacon (§3.3 workshop) can walk an entire patrol into the lake.
+3. **They announce everything, honestly.** Compliance VO telegraphs every action ("PLEASE REMAIN DETAINED. YOUR COOPERATION HAS BEEN LOGGED."). Machine fights are perfect-information sequencing puzzles — kill order and positioning — where human fights are reads and reactions.
+4. **Mass, not morale.** No flinch, no fear (your Fear axis means nothing to them — §9), but momentum is king: knockback, throws, and crush physics do bonus structural damage. Bowling a Bulwark through a Scanner is the machine-fight equivalent of a juggle.
+
+**Demolition Rating:** the machine-fight Splash Rating variant — same D→S scale, scoring chain-destruction, crush/knockback kills, Scanner-first discipline, and zero-detainments; multiplies **scrap ×1.0–×1.5**. Style still scores.
+
 ---
 
 ## 2. Progression & Upgrades
 
 ### 2.1 Per-hero upgrade trees
 
-Every hero has **3 branches × 7 nodes** (21 nodes/hero):
+Every **roster hero** has **3 branches × 7 nodes** (21 nodes/hero). The Anchor keeps the 21-node/cost-curve chassis but swaps the branch themes for Capacity/Library/Braids (§1.8):
 
 | Branch | Theme | Example node types |
 |---|---|---|
@@ -137,7 +195,7 @@ One base: a converted **Uptown warehouse**, **owned from minute one** (per docs/
 |---|---|---|---|
 | **Train Room** | passive hero XP to 2 assigned heroes: 0.5%/1%/1.5% of their level bar per in-game hour | 800 / 2,000 / 5,000 | staffed follower: +50% rate |
 | **Flux Greenhouse** | **4 flux plots at every level (hard cap — parity, §2.4)**; levels unlock flux crop *tiers* 1/2/3 and add 4/8 normal produce plots at Lv2/Lv3 | 1,000 / 2,500 / 6,000 | staffed: auto-waters (harvest stays manual & tactile) |
-| **Workshop** | crafts gear mods & environmental "care packages"; Lv3 unlocks material→flux transmute (lossy, 10:1) | 600 / 1,800 / 4,500 | staffed: crafting queue 1→3 slots |
+| **Workshop** | crafts gear mods & environmental "care packages"; **bot-tech lane (scrap-fed):** anti-bot gear (shield-piercer mods, spoof beacons — §1.9/§8), plus kid-related gadgets (see 04/09); Lv3 unlocks material→flux transmute (lossy, 10:1) | 600 / 1,800 / 4,500 | staffed: crafting queue 1→3 slots |
 | **Lounge** | squad **morale buff**: +5/8/12% combat XP **until next sleep**, refreshed by visiting; Lv3 hosts squad hangout scenes | 500 / 1,500 / 4,000 | staffed: also +5% power meter gain |
 | **Private Quarters** | the romance venue: date-night invitations, morning-after scenes (tone bible rules, §5.6); Lv2+ required to invite anyone over | 700 / 2,000 / — (Lv3 is story) | never staffed |
 
@@ -145,7 +203,8 @@ One base: a converted **Uptown warehouse**, **owned from minute one** (per docs/
 
 - **Cash:** faction jobs (repeatable, 100–400), story beats, **businesses** (rep-gated passive stakes in local venues, e.g., the co-op grocery from docs/03: 150 per in-game day, ticked on sleep, collected at base terminal, capped at 2 in-game days so it never demands login anxiety), crop & cooked-dish sales.
 - **Materials:** brawl drops (every enemy, 1–3; environmental kills +20%), scavenging nodes in the world (dumpster/alley/shoreline, respawn daily), job rewards. Spent on rooms, workshop crafts.
-- **Flux:** §2.4. Grown, looted, transmuted (badly).
+- **Scrap:** machine-only drop (§1.9, 2–5/unit, Demolition Rating multiplies). Feeds the workshop bot-tech lane (anti-bot gear, spoof beacons, kid gadgets) and sells for cash at 5 cash/scrap — zone fights pay at parity with street brawls via scrap.
+- **Flux:** §2.4. Grown, looted, transmuted (badly). Machines don't carry it (Warden-hand containment cells are the sole exception).
 
 ### 3.4 Followers (non-hero units)
 
@@ -248,6 +307,11 @@ graph LR
     BIZ[BUSINESSES] -->|passive cash| U
     BIZ -->|passive cash| B
     REP --> BIZ
+    Z[ROGUE ZONE<br/>missions] -->|scrap| B
+    Z -->|rep, city sentiment| REP
+    Z -->|freed NPCs: bond scenes,<br/>schedules re-expand| R
+    B -->|anti-bot gear, spoof beacons| Z
+    REP -->|mission tiers| Z
 ```
 
 Audit rule: **every system must have ≥2 outbound edges.** A proposed feature that only feeds itself gets cut (pillar 3).
@@ -270,7 +334,7 @@ Cash sinks in priority order of designed spend: upgrade nodes > base rooms > dat
 
 ### 7.1 The 5-minute phone session
 
-Must be fully satisfying: open at base → water/harvest (≤60s) → collect business income & finished follower missions → launch **one** job-board brawl (45–90s) → bank loot, queue a follower mission, maybe buy one node. Every step ≤3 taps from the base terminal. A 5-minute session should always advance ≥2 systems (pillar 3 self-test).
+Must be fully satisfying: open at base → water/harvest (≤60s) → collect business income & finished follower missions → launch **one** job-board brawl (45–90s) **or one short zone mission — INTERCEPT and BLIND are built to this length and are the prime 5-minute-session content (§8.2)** → bank loot, queue a follower mission, maybe buy one node. Every step ≤3 taps from the base terminal. A 5-minute session should always advance ≥2 systems (pillar 3 self-test).
 
 ### 7.2 The 30-minute couch session
 
@@ -278,14 +342,83 @@ Story beat → 2–3 brawls → a date or milestone scene → base build decisio
 
 ### 7.3 Autosave rules
 
-- Autosave triggers: sleep, fight end, scene end, room purchase, entering/leaving a building, app background/`visibilitychange` (PWA: flush to IndexedDB immediately — mobile browsers kill tabs without warning).
+- Autosave triggers: sleep, fight end, **zone mission end (success or abort — zone state writes atomically with the save)**, scene end, room purchase, entering/leaving a building, app background/`visibilitychange` (PWA: flush to IndexedDB immediately — mobile browsers kill tabs without warning).
 - **Never** save mid-fight or mid-scene; a killed tab resumes at the pre-fight/pre-scene checkpoint with resources as they were (fights are ≤90s; losing one is losing nothing).
 - Single save slot + 3 rolling backup snapshots (last 3 sleep saves) for corruption recovery. Save size budget ≤ 2MB. All local; no account server in the slice.
 - **Follower missions are the only real-timestamp system** (checked at load — closing the app never wastes a timer). Crops, businesses, and buffs advance on the in-game clock via sleep ticks (§4.1 time-base table); income caps (§3.3) mean staying away is never punished.
 
 ---
 
-## 8. Vertical-Slice Scope Notes
+## 8. The Rogue Zone — the Arc as a System
+
+The slice's main arc (01, Premise). It is a **system with state, not a quest chain** — story beats read and write the same zone state the sandbox does. Controversy-contract rules (01) bind every mission and bark in this section.
+
+### 8.1 Zone state model
+
+The Lake Street corridor is **6 map segments** in the slice. All state is **visible on the map overlay** — the zone is a dashboard you punch.
+
+| State variable | Scope | Range | Moved by |
+|---|---|---|---|
+| `patrol_density` | per segment | 0–3 | INTERCEPT wins lower it; firmware mutations & time raise it |
+| `scanner_coverage` | per segment | 0–100% | BLIND lowers it (−50% for 1 in-game day); relays rebuild over 2 days |
+| `checkpoint` | per segment | active / disabled | SIEGE disables permanently (story-gated) |
+| `perimeter_integrity` | zone-wide | 0–100% | SIEGE + story beats only |
+| `holding_occupancy` | zone-wide | count (named NPCs listed first, by name) | Detainer captures raise it; INTERCEPT prevents, EXTRACT lowers |
+
+### 8.2 Mission grammar — six verbs, zero wave-defense
+
+Hard rule: **every mission's objective is a state change** in the table above. "Survive N waves" does not ship. The verbs:
+
+| Verb | The job | Shape & length | Notes |
+|---|---|---|---|
+| **ESCORT** | move a flagged NPC through the corridor | 2–3 min; pick a route on the map; play it stealth-lite (time the patrols' traffic-law halts), disguised (workshop craft), or loud | the NPC has agency — they talk, they have opinions about your route |
+| **INTERCEPT** | stop a Detainer convoy before it reaches holding | 60–90s brawl on a moving target; convoy timer visible | prime 5-minute-session content (§7.1) |
+| **EXTRACT** | holding-site rescue | 2–3 min under timer; grip-break per detainee (§1.9 Detainer rules) | named NPCs first; rescued NPCs remember (§8.4) |
+| **BLIND** | destroy Scanner relay clusters | 60–90s demolition; opens a safe window (−50% coverage, 1 day) | pairs with ESCORT: blind a segment, then run it |
+| **SPOOF** | feed CIVIS false signatures at a terminal | 45s plant-and-defend, or talk your way in — the tech-hero lane (Priya, `04-characters.md`) | crafts the spoof beacons §1.9 quirk 2 exploits |
+| **SIEGE** | set-piece push on zone infrastructure with faction allies | 3 min hard cap; rare, loud, story-gated | **2 in the slice** (§10) |
+
+### 8.3 Firmware mutation — the anti-boredom engine
+
+Every **3 in-game days** (tunable) the fleet re-syncs and its behavior **mutates**: new unit-mix weights, new patrol logic, and occasionally a hilarious new literal-minded directive (mutation deck is **12 authored entries** in the slice — e.g., patrols begin escorting food trucks after a "protect commerce" misparse; comedy per controversy contract rule 4: the bots' literal-mindedness, never anyone's fear). A zone-wide sync klaxon telegraphs it; spoofed terminals let you read the new directive early. **This is stated as the anti-boredom engine:** the zone never presents the same tactical problem two visits running, without hand-authoring new content.
+
+### 8.4 Zone pressure ↔ the NPC sim
+
+- **Pressure on:** flagged NPCs' schedules **contract** (LATE outings stop first, then EVE — they stop going out); corridor venues cut hours and lose stock; gossip carries fear tags that dent district Social buffs and date options.
+- **Player wins visibly reverse it:** on the next sleep tick after a win, schedules **re-expand**, venues re-light, rescued NPCs and their circles fire gratitude beats (+Respect/+Trust across their gossip neighborhood, bond XP). **The world thanks you by living more** — pillar 1's payoff, and the loudest reward signal the zone gives.
+
+---
+
+## 9. Public Opinion & the Reveal
+
+### 9.1 No new meter — the gossip graph IS the sentiment system
+
+City sentiment is **an aggregate readout of the existing per-NPC opinion axes (§5.1) propagated on the existing gossip graph (§5.5)**. There is no separate global opinion variable; the "street temperature" UI is a weighted sample of nearby NPCs' axes. State this in code review terms: any PR adding a global sentiment scalar is wrong by design.
+
+### 9.2 The reveal — staged, high-salience gossip
+
+The Act (01, Premise) surfaces in **3 authored stages: Rumor → Evidence → Testimony.** Each stage injects a **high-salience gossip event**: fidelity 1.0, 2 hops per sleep (vs. normal 1), half-speed decay. NPCs react per their own dials — the same event lands differently on every character (pillar 4).
+
+**Reaction modifier table (per archetype, on reveal stages AND on bot-smashing news):**
+
+| NPC archetype / faction | Bot-smashing wins | Reveal stages |
+|---|---|---|
+| Flagged community & families | +Respect +Trust (strong) | +Trust ("he's one of ours now") unless monster path active |
+| Corridor small-biz owners | +Respect; −Trust if collateral property damage that mission | mixed; Testimony stage can win them back |
+| Grievance types (radio callers, lawn-sign guy) | **−Respect +Fear** — they dock you for bot-smashing | −Respect −Trust, loudly; written as textured characters per controversy contract rule 3 |
+| Council / establishment | −Trust (you embarrass them) | −Trust +Fear |
+| Old-guard supers | per-faction (see 04/09) | +Respect from some — they knew pieces |
+| Most of the city | **+Respect (cheers it)** | watches which path you pick |
+
+### 9.3 Two paths, both with teeth, neither a game-over
+
+- **Redemption:** visible works (zone wins, EXTRACT streaks), **testimony beats** (public scenes at reveal stages), and protecting flagged NPCs convert Fear→Respect/Trust at authored milestones. Unlocks: community endorsements (corridor price floor of −10% for you — worst-wins rule still applies), volunteer ESCORT helpers, alibi/character-witness support in Testimony scenes.
+- **Monster:** embrace it — **Fear becomes a usable currency.** Fear ≥25 intimidation dialogue (§5.1) expands to fight-skips, interrogations, and shakedowns of people who have it coming (point-of-view rule: targets are grievance profiteers and contractor stooges, never the flagged community). Fear ≥50 across a district sample grants **Dread aura**: human grunt-tier enemies may rout on sight. Costs: some romance tracks lock, venues go cold, kid-related scenes get harder (hooks in 04/09 — referenced, not duplicated here). Machines are immune to Fear entirely (§1.9 quirk 4) — the zone doesn't care what they call you, which is the theme, mechanized.
+- Both paths clear the arc. Neither is free (01, Premise). No ending is a fail state.
+
+---
+
+## 10. Vertical-Slice Scope Notes
 
 Orchestrator-final scope calls; build to these, not to the full design surface:
 
@@ -293,6 +426,8 @@ Orchestrator-final scope calls; build to these, not to the full design surface:
 - **Businesses (§3.3) are the designated first cut** if the base milestone runs long. Cutting them removes only a redundant passive-cash edge — the §6.1 audit rule (≥2 outbound edges per system) still holds for every remaining node without BIZ.
 - **Date minigames:** only the two designed ones ship — Club Night rhythm-tap and Restaurant order-reading. The Lake Walk's stone-skipping and all other venue toys are **animation + buff interactions** in the slice (tap, watch, get the buff/bond beat), not minigames.
 - **STEAL exists in-slice.** "Heat" is defined as **pure social fallout**: witness trust loss, gossip-graph spread, faction price bumps (worst-applicable-wins rule, §6.2). There is **no police/wanted system** — do not build one.
+- **The Rogue Zone arc IS in-slice** — all of §8 ships: 6 corridor segments, all six mission verbs, the 12-entry mutation deck, and reveal stages Rumor/Evidence/Testimony (§9.2).
+- **SIEGE set-pieces are capped at 2 in the slice.** The other five verbs are repeatable systems; SIEGE is authored spectacle and budgeted like it.
 
 ---
 
@@ -307,6 +442,14 @@ Orchestrator-final scope calls; build to these, not to the full design surface:
 | Per-tier enemy scaling cap | +15% HP / +20% dmg | 1.6 |
 | Tier-1 grunt hit | 12% of player max HP | 1.6 |
 | Splash Rating loot multiplier | ×1.0–×1.5 (D→S) | 1.6 |
+| Anchor thread slots | 2 base → 4 via tree | 1.8 |
+| Thread regen reservation | 25%/thread (→20% via tree) | 1.8 |
+| Thread ignition cost | 20 power; drop free | 1.8 |
+| Thread palette | hold ≥300ms; 0.3× time, max 4s | 1.8 |
+| Scrap per machine unit | 2–5 (Warden-hand 12–20 + 5 flux) | 1.9 |
+| Scrap sale price | 5 cash/scrap | 3.3 |
+| Detainer rescue timer | 20s grip-break | 1.9 |
+| Demolition Rating multiplier | ×1.0–×1.5 scrap (D→S) | 1.9 |
 | Tree size | 3 branches × 7 nodes | 2.1 |
 | Node cost curve | 100 cash / 7 flux × 1.5^n, n = 0–6 per branch | 2.1 |
 | Rep tier thresholds | 0/500/1500/3500/7000 (tier 1 = 0) | 2.3 |
@@ -316,6 +459,12 @@ Orchestrator-final scope calls; build to these, not to the full design surface:
 | In-game day | 20 real minutes | 4.1 |
 | Day phases | MORN/DAY/EVE/LATE; forced sleep 3a | 4.1 |
 | LATE venue time dilation | 4× slower in SOCIAL/ROMANCE venues | 4.1 |
+| Corridor segments | 6 | 8.1 |
+| BLIND safe window | −50% coverage, 1 in-game day; relays rebuild in 2 | 8.1 |
+| Firmware mutation cadence | every 3 in-game days; deck of 12 | 8.3 |
+| Reveal stages | 3 (Rumor/Evidence/Testimony); gossip 2 hops/sleep, half decay | 9.2 |
+| Fear currency gates | intimidation ≥25; Dread aura ≥50 (district sample) | 9.3 |
+| SIEGE set-pieces in slice | 2 (3 min hard cap each) | 8.2, 10 |
 | Daily farm upkeep budget | ≤60s | 4.2 |
 | Opinion axes range | −100..+100 | 5.1 |
 | Track levels | 0–5 both tracks | 5.2 |
