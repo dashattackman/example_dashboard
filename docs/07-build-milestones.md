@@ -62,3 +62,5 @@ M0 ──► M1 ──► M2 ──┐
 ```
 
 M2∥M3 and M5∥M6 are the big fan-out opportunities (M5∥M6 is only safe because the clock/phase API freezes at M4's close — both build against it); within every milestone, content authoring (JSON/dialogue/venues) parallelizes freely once schemas exist (end of M0). Hero kits and dialogue amortize across M4–M9a rather than piling up at the end.
+
+**Standing package — character pipeline (runs with the M2∥M3 wave, priority per Paul):** rigged + animated CC0 base bodies (Quaternius-class modular characters + animation library) converted to glb/KTX2, restyled through the rim/ramp/outline pipeline, with body/outfit/palette variation for the cast. The gate is attachment: characters must look and move well enough to care about, judged from motion screenshots. Eli first, then squad/NPC variants.
