@@ -1,0 +1,23 @@
+{
+  "_comments": {
+    "_source": "Combat data rows consumed by game/src/combat (docs/02 §1.5, §1.6, §1.9). Announce lines are the CIVIS compliance VO (§1.9 quirk 3: they announce everything, honestly). Spawn weights are the §1.6 composition ramp — composition, not HP sponging, is the primary difficulty lever; tier4 mixes leaders + dual ranged.",
+    "announce": "Machine telegraph VO. Tone per 01-vision controversy contract: the comedy is the bots' literal-mindedness, never anyone's fear.",
+    "spawnWeights": "Relative weights per rep tier (human) and for the machine family. Encounter guarantees (ranged by encounter 2, bruiser by 3, leader at tier 4, >=1 scanner in machine fights) are enforced in code on top of these weights."
+  },
+  "announce": {
+    "scanner": "SUBJECT FLAGGED. THANK YOU FOR YOUR VISIBILITY.",
+    "detainer": "PLEASE REMAIN DETAINED. YOUR COOPERATION HAS BEEN LOGGED.",
+    "bulwark": "BARRIER DEPLOYED. PLEASE APPROACH FROM THE FRONT FOR PROCESSING.",
+    "swarm": "DIVE PATTERN COMMENCING. PLEASE HOLD STILL.",
+    "wardenHand": "ENVIRONMENTAL ASSETS REQUISITIONED. THIS IS FOR EVERYONE'S SAFETY."
+  },
+  "spawnWeights": {
+    "human": {
+      "tier1": { "grunt": 8, "ranged": 1 },
+      "tier2": { "grunt": 6, "ranged": 2, "bruiser": 1 },
+      "tier3": { "grunt": 5, "ranged": 2, "bruiser": 2 },
+      "tier4": { "grunt": 4, "ranged": 3, "bruiser": 2, "leader": 1 }
+    },
+    "machine": { "swarm": 4, "scanner": 2, "detainer": 2, "bulwark": 1 }
+  }
+}

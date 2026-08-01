@@ -965,6 +965,52 @@ export const EconomySchema = z.object({
 export type Economy = z.infer<typeof EconomySchema>;
 
 // ---------------------------------------------------------------------------
+// Combat content — combat.json (docs/02 §1.5/§1.6/§1.9).
+// Content-is-data rule: enemy VO lines and spawn-composition weights are data,
+// not code — game/src/combat reads them from here, never hard-codes them.
+// ---------------------------------------------------------------------------
+
+export const EnemyKindSchema = z.enum([
+  'grunt',
+  'bruiser',
+  'ranged',
+  'leader',
+  'scanner',
+  'detainer',
+  'bulwark',
+  'swarm',
+  'wardenHand',
+]);
+export type EnemyKindName = z.infer<typeof EnemyKindSchema>;
+
+/** Weighted composition row: kind -> relative spawn weight (must be > 0). */
+const SpawnWeightsSchema = z.record(EnemyKindSchema, z.number().positive());
+
+export const CombatContentSchema = z
+  .object({
+    /** §1.9 quirk 3 — compliance VO per machine unit; machines announce everything. */
+    announce: z.object({
+      scanner: z.string().min(1),
+      detainer: z.string().min(1),
+      bulwark: z.string().min(1),
+      swarm: z.string().min(1),
+      wardenHand: z.string().min(1),
+    }),
+    /** §1.6 — composition (not HP sponging) is the difficulty ramp. */
+    spawnWeights: z.object({
+      human: z.object({
+        tier1: SpawnWeightsSchema,
+        tier2: SpawnWeightsSchema,
+        tier3: SpawnWeightsSchema,
+        tier4: SpawnWeightsSchema,
+      }),
+      machine: SpawnWeightsSchema,
+    }),
+  })
+  .extend({ _comments: Comments.optional() });
+export type CombatContent = z.infer<typeof CombatContentSchema>;
+
+// ---------------------------------------------------------------------------
 // Cost-curve helper — exported so tests and tools share ONE formula (§2.1).
 // ---------------------------------------------------------------------------
 

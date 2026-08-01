@@ -172,24 +172,45 @@ describe('launcher & juggle rules (docs/02 §1.3)', () => {
     expect(e.state).toBe('down');
   });
 
-  it('juggle hits deal +25% and do NOT extend the 1.2s window', () => {
+  it('juggle hits get the juggle damage bonus and do NOT extend the 1.2s window', () => {
     const e = enemy();
     applyDamage(e, 10, { launcher: true });
     step(e, 0.2);
     const air = e.airTimer;
     const res = applyDamage(e, 10);
     expect(res.wasJuggle).toBe(true);
-    expect(res.dealt).toBeCloseTo(12.5, 5);
+    expect(res.dealt).toBeCloseTo(10 * (1 + T.juggle.damageBonus), 5);
     expect(e.airTimer).toBeCloseTo(air, 5);
   });
 
-  it('bruisers (heavy) need 2 launchers within 3s — one does nothing', () => {
+  it('bruisers (heavy) need 2 launchers within 3s — one staggers but never pops', () => {
     const e = enemy('bruiser', 'heavy', true);
-    applyDamage(e, 18, { launcher: true });
-    expect(e.state).toBe('idle'); // armored, no pop
+    const first = applyDamage(e, 18, { launcher: true });
+    expect(first.events.some((ev) => ev.type === 'launched')).toBe(false);
+    expect(first.events.some((ev) => ev.type === 'staggered')).toBe(true); // M3r2: grab window
+    expect(e.state).toBe('hit');
+    expect(e.stunTimer).toBeCloseTo(T.reactions.armoredStaggerSec, 5);
     step(e, 1.0);
     const res = applyDamage(e, 18, { launcher: true });
     expect(res.events.some((ev) => ev.type === 'launched')).toBe(true); // heavy launch
+  });
+
+  it('armored machines are staggered by deliberate verbs — and become grabbable', () => {
+    const machine = enemy('bulwark', 'heavy', true);
+    const a = hero();
+    expect(tryGrab(a, machine)).toBe(false); // no window yet
+    applyDamage(machine, 10, { power: true });
+    expect(machine.state).toBe('hit'); // staggered
+    expect(tryGrab(a, machine)).toBe(true); // §1.9: "bowl it over" is real now
+  });
+
+  it('downed targets are grabbable (§1.3 crowd tool)', () => {
+    const a = hero();
+    const e = enemy();
+    applyDamage(e, 10, { launcher: true });
+    step(e, 2.0); // launch → juggle → down
+    expect(e.state).toBe('down');
+    expect(tryGrab(a, e)).toBe(true);
   });
 
   it('two launchers spaced past the 3s window do not heavy-launch', () => {
@@ -198,6 +219,7 @@ describe('launcher & juggle rules (docs/02 §1.3)', () => {
     step(e, 3.2);
     const res = applyDamage(e, 18, { launcher: true });
     expect(res.events.some((ev) => ev.type === 'launched')).toBe(false);
+    expect(res.events.some((ev) => ev.type === 'staggered')).toBe(true);
   });
 
   it('leaders can never be launched, only staggered', () => {

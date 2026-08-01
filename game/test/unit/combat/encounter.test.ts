@@ -83,14 +83,15 @@ describe('spawn tables (docs/02 §1.5 crowd budget, §1.6 ramp)', () => {
   });
 });
 
-describe('splash rating math (docs/02 §1.6: variety/juggle/throw/environment/team)', () => {
+describe('splash rating math (docs/02 §1.6: variety/juggle/throws/team — M3r2 4-factor)', () => {
   it('mash-only lands a D at ×1.0-ish — viable, never optimal', () => {
     const stats = emptyStats();
     stats.lightHits = 30;
+    stats.assistHits = 0; // ally chip damage no longer buys the team factor
     const r = splashRating(stats, 10);
     expect(r.grade).toBe('D');
-    expect(r.score).toBeCloseTo(0.04, 5); // only variety 1/5 × weight 1/5
-    expect(r.lootMult).toBeCloseTo(1.02, 5);
+    expect(r.score).toBeCloseTo(0.05, 5); // only variety 1/5 × weight 1/4
+    expect(r.lootMult).toBeCloseTo(1.025, 5);
   });
 
   it('full-kit play scores S at ×1.5', () => {
@@ -101,12 +102,27 @@ describe('splash rating math (docs/02 §1.6: variety/juggle/throw/environment/te
     stats.throwImpacts = 5;
     stats.environmentalHits = 5;
     stats.juggleHits = 10;
-    stats.swaps = 5;
-    stats.assistHits = 5;
+    stats.swaps = 2;
+    stats.assistHits = 2; // assist JUGGLE hits (§1.3 team juggling)
     const r = splashRating(stats, 10);
     expect(r.score).toBeCloseTo(1, 5);
     expect(r.grade).toBe('S');
     expect(r.lootMult).toBeCloseTo(T.splash.lootMultMax, 5);
+  });
+
+  it('S is reachable WITHOUT environmental hits (no props in M3 core)', () => {
+    const stats = emptyStats();
+    stats.lightHits = 10;
+    stats.heavyHits = 4;
+    stats.powerMoves = 1;
+    stats.throwImpacts = 6;
+    stats.juggleHits = 12;
+    stats.swaps = 3;
+    stats.assistHits = 3;
+    const r = splashRating(stats, 10);
+    // variety 4/5, juggle 1, throws 1, team 1 → 0.95
+    expect(r.score).toBeCloseTo(0.95, 5);
+    expect(r.grade).toBe('S');
   });
 
   it('grades cut at 0.2/0.4/0.6/0.8', () => {
@@ -115,7 +131,7 @@ describe('splash rating math (docs/02 §1.6: variety/juggle/throw/environment/te
       s.juggleHits = juggles;
       return splashRating(s, 10);
     };
-    expect(mk(10).score).toBeCloseTo(0.2, 5);
+    expect(mk(10).score).toBeCloseTo(0.25, 5); // juggle factor alone / 4 factors
     expect(mk(10).grade).toBe('C');
     expect(mk(0).grade).toBe('D');
   });
@@ -243,5 +259,43 @@ describe('encounter runtime (§1.5 waves, victory/defeat)', () => {
     h.power = 80;
     carryPowerBetweenFights([h]);
     expect(h.power).toBe(40);
+  });
+
+  it('DETERMINISM: same seed twice → byte-identical event streams and positions', () => {
+    const mk = () => createEncounter(cfg({ seed: 424242, tier: 2, encounterIndex: 6 }), [hero()]);
+    const a = mk();
+    const b = mk();
+    const evA: string[] = [];
+    const evB: string[] = [];
+    for (let i = 0; i < 900; i++) {
+      evA.push(...updateEncounter(a, 1 / 30).map((e) => JSON.stringify(e)));
+      evB.push(...updateEncounter(b, 1 / 30).map((e) => JSON.stringify(e)));
+    }
+    expect(evA).toEqual(evB);
+    const snap = (enc: typeof a) =>
+      enc.enemies.map((e) => `${e.fighter.id}:${e.fighter.pos.x.toFixed(9)},${e.fighter.pos.z.toFixed(9)}:${e.mode}`);
+    expect(snap(a)).toEqual(snap(b));
+  });
+
+  it('a carrying Detainer reaches the ON-BOUNDARY exit; detainment fires exactly once, carrier goes inert', () => {
+    const civ = { id: 'civ', pos: { x: 8, z: 0 }, flagged: true, detained: false };
+    const enc = createEncounter(cfg({ seed: 4, family: 'machine', civilians: [civ] }), [hero()]);
+    const h = enc.squad[0];
+    if (h) h.pos = { x: -9, z: 0 }; // hero watches, does nothing
+    enc.pending = [{ kind: 'detainer', wave: 0 }];
+    let grabbed = 0;
+    let detained = 0;
+    for (let i = 0; i < 30 * 60 && enc.status === 'active'; i++) {
+      for (const ev of updateEncounter(enc, 1 / 30)) {
+        if (ev.type === 'grabbed-captive') grabbed += 1;
+        if (ev.type === 'detained') detained += 1;
+      }
+    }
+    expect(grabbed).toBe(1);
+    expect(detained).toBe(1); // fires once — no double-count, no wall-pinned carrier
+    expect(civ.detained).toBe(true);
+    const carrier = enc.enemies.find((e) => e.kind === 'detainer');
+    expect(carrier?.gone).toBe(true);
+    expect(enc.stats.detainments).toBe(1);
   });
 });

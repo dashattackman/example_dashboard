@@ -11,10 +11,12 @@
 import type { z } from 'zod';
 import {
   AnchorSchema,
+  CombatContentSchema,
   EconomySchema,
   HeroSchema,
   TuningSchema,
   type Anchor,
+  type CombatContent,
   type Economy,
   type Hero,
   type Tuning,
@@ -28,6 +30,8 @@ export interface ContentBundle {
   anchor: Anchor;
   tuning: Tuning;
   economy: Economy;
+  /** Enemy VO + spawn-composition weights (docs/02 §1.5/§1.6/§1.9) for game/src/combat. */
+  combat: CombatContent;
 }
 
 // Vite/vitest resolve these globs at build time; JSON default export is the
@@ -89,6 +93,7 @@ export function loadContent(): ContentBundle {
 
   const tuningRaw = rootFiles['./tuning.json'];
   const economyRaw = rootFiles['./economy.json'];
+  const combatRaw = rootFiles['./combat.json'];
   const tuning =
     tuningRaw === undefined
       ? (failures.push({ file: './tuning.json', issues: ['file missing'] }), undefined)
@@ -97,12 +102,22 @@ export function loadContent(): ContentBundle {
     economyRaw === undefined
       ? (failures.push({ file: './economy.json', issues: ['file missing'] }), undefined)
       : validateOne('./economy.json', EconomySchema, economyRaw, failures);
+  const combat =
+    combatRaw === undefined
+      ? (failures.push({ file: './combat.json', issues: ['file missing'] }), undefined)
+      : validateOne('./combat.json', CombatContentSchema, combatRaw, failures);
 
   if (anchor === undefined && !failures.some((f) => f.file.includes('anchor'))) {
     failures.push({ file: './heroes/anchor.json', issues: ['file missing'] });
   }
 
-  if (failures.length > 0 || anchor === undefined || tuning === undefined || economy === undefined) {
+  if (
+    failures.length > 0 ||
+    anchor === undefined ||
+    tuning === undefined ||
+    economy === undefined ||
+    combat === undefined
+  ) {
     const report = failures
       .map((f) => `  ${f.file}\n${f.issues.map((i) => `    - ${i}`).join('\n')}`)
       .join('\n');
@@ -111,7 +126,7 @@ export function loadContent(): ContentBundle {
     );
   }
 
-  return { heroes, anchor, tuning, economy };
+  return { heroes, anchor, tuning, economy, combat };
 }
 
 /**

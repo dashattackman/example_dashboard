@@ -2,7 +2,9 @@
 // Splash Rating, rubber-banding), §1.9 (Demolition Rating). Pure TS; the arena
 // is an abstract rect, positions are {x,z}, all randomness via injected seed.
 
+import { content } from '../content';
 import {
+  clearFlagsBy,
   createEnemy,
   damageTakenMult,
   ENEMY_CONFIGS,
@@ -18,6 +20,7 @@ import {
 } from './enemies';
 import {
   applyDamage,
+  isDeliberateVerb,
   powerGainForHit,
   updateFighter,
   wallSplat,
@@ -61,17 +64,16 @@ export interface SpawnEntry {
 // ---------------------------------------------------------------------------
 // spawn tables (§1.5 crowd budget + §1.6 composition ramp)
 
-/** Composition weights per tier — composition, not HP sponging, is the ramp (§1.6). */
+/** Composition weights per tier — composition, not HP sponging, is the ramp (§1.6).
+ *  Content-is-data: the weights live in content/combat.json, validated by zod. */
 const TIER_WEIGHTS: Record<Tier, Partial<Record<EnemyKind, number>>> = {
-  1: { grunt: 8, ranged: 1 },
-  2: { grunt: 6, ranged: 2, bruiser: 1 },
-  3: { grunt: 5, ranged: 2, bruiser: 2 },
-  4: { grunt: 4, ranged: 3, bruiser: 2, leader: 1 }, // tier 4: leaders + dual ranged (§1.6)
+  1: content.combat.spawnWeights.human.tier1,
+  2: content.combat.spawnWeights.human.tier2,
+  3: content.combat.spawnWeights.human.tier3,
+  4: content.combat.spawnWeights.human.tier4, // tier 4: leaders + dual ranged (§1.6)
 };
 
-const MACHINE_WEIGHTS: Partial<Record<EnemyKind, number>> = {
-  swarm: 4, scanner: 2, detainer: 2, bulwark: 1,
-};
+const MACHINE_WEIGHTS: Partial<Record<EnemyKind, number>> = content.combat.spawnWeights.machine;
 
 function weightedKind(weights: Partial<Record<EnemyKind, number>>, rng: Rng): EnemyKind {
   const entries = Object.entries(weights) as [EnemyKind, number][];
@@ -178,47 +180,50 @@ export interface RatingResult {
   lootMult: number;
 }
 
-/**
- * Splash Rating (§1.6): scores move VARIETY, JUGGLE hits, THROWS, ENVIRONMENTAL
- * use, and SWAP/ASSIST play — five equal-weight factors (resolved: docs/02 names
- * the factors but not the formula), each normalized against the crowd size.
- * Mash-only play lands a D at ×1.0; it stays viable, mastery pays (§1.7).
- */
-export function splashRating(stats: SplashStats, enemyCount: number): RatingResult {
-  const n = Math.max(1, enemyCount);
-  const varietyKinds =
+/** Distinct verb families used (§1.6 "move variety"). Environmental counts here —
+ *  until the M4 prop system lands it is the fifth family, not its own factor. */
+function varietyFactor(stats: SplashStats): number {
+  const kinds =
     (stats.lightHits > 0 ? 1 : 0) +
     (stats.heavyHits > 0 ? 1 : 0) +
     (stats.powerMoves > 0 ? 1 : 0) +
     (stats.throwImpacts > 0 ? 1 : 0) +
     (stats.environmentalHits > 0 ? 1 : 0);
-  const variety = varietyKinds / 5;
+  return kinds / 5;
+}
+
+/**
+ * Splash Rating (§1.6): variety / juggle / throws / team — FOUR equal-weight
+ * factors, each clamped 0..1 ([resolved M3r2]: docs/02 names the ingredients,
+ * not the formula; environmental folds into variety until M4 props exist, and
+ * team play counts swaps + ASSIST JUGGLE hits — §1.3's "team juggling" — so
+ * ally chip damage can't buy the factor for a masher).
+ * Measured anchors (pacing.test.ts): mash bot ≈0.05 → D ×1.0; skill bot ≈0.85+ → S ×1.4+.
+ */
+export function splashRating(stats: SplashStats, enemyCount: number): RatingResult {
+  const n = Math.max(1, enemyCount);
+  const variety = varietyFactor(stats);
   const juggle = clamp01(stats.juggleHits / n);
-  const throws = clamp01(stats.throwImpacts / (n * 0.5));
-  const environmental = clamp01(stats.environmentalHits / (n * 0.5));
-  const team = clamp01((stats.swaps + stats.assistHits) / n);
-  const score = (variety + juggle + throws + environmental + team) / 5;
+  const throws = clamp01(stats.throwImpacts / (n * T.splash.throwsPerEnemy));
+  const team = clamp01((stats.swaps * 2 + stats.assistHits) / T.splash.teamPlaysFull);
+  const score = (variety + juggle + throws + team) / 4;
   return { score, grade: gradeOf(score), lootMult: T.splash.lootMultMin + (T.splash.lootMultMax - T.splash.lootMultMin) * score };
 }
 
 /**
  * Demolition Rating (§1.9): the machine-fight variant — chain-destruction,
- * crush/knockback kills, Scanner-first discipline, zero detainments; multiplies
- * SCRAP ×1.0–×1.5. Style still scores.
+ * crush/knockback kills, Scanner-first discipline, zero detainments, variety;
+ * multiplies SCRAP ×1.0–×1.5. Denominators re-derived from simulated skilled
+ * play so S is reachable through what the module actually expresses (throws
+ * now resolve as real projectiles — see updateEncounter).
  */
 export function demolitionRating(stats: SplashStats, machineCount: number): RatingResult {
   const n = Math.max(1, machineCount);
-  const chain = clamp01(stats.chainDestructions / (n * 0.25));
-  const crush = clamp01(stats.crushKills / (n * 0.5));
+  const chain = clamp01(stats.chainDestructions / T.splash.demolitionChainFull);
+  const crush = clamp01(stats.crushKills / (n * T.splash.demolitionCrushPerEnemy));
   const scannerFirst = stats.scannerFirstKill ? 1 : 0;
   const zeroDetain = stats.detainments === 0 ? 1 : 0;
-  const varietyKinds =
-    (stats.lightHits > 0 ? 1 : 0) +
-    (stats.heavyHits > 0 ? 1 : 0) +
-    (stats.powerMoves > 0 ? 1 : 0) +
-    (stats.throwImpacts > 0 ? 1 : 0) +
-    (stats.environmentalHits > 0 ? 1 : 0);
-  const score = (chain + crush + scannerFirst + zeroDetain + varietyKinds / 5) / 5;
+  const score = (chain + crush + scannerFirst + zeroDetain + varietyFactor(stats)) / 5;
   return { score, grade: gradeOf(score), lootMult: T.splash.lootMultMin + (T.splash.lootMultMax - T.splash.lootMultMin) * score };
 }
 
@@ -261,6 +266,10 @@ export interface Encounter {
   fluxCells: number;
   firstMachineKill: EnemyKind | null;
   controlledId: string;
+  /** Per-encounter spawn counter — ids are seed-stable, never process-global. */
+  spawnCounter: number;
+  /** In-flight thrown bodies: victim id -> per-flight bookkeeping (§1.3 projectiles). */
+  thrownFlights: Map<string, { hitIds: Set<string>; kills: number }>;
 }
 
 function spawnPos(arena: Rect, rng: Rng): Vec2 {
@@ -284,13 +293,19 @@ export function createEncounter(cfg: EncounterConfig, squad: Fighter[]): Encount
     world: {
       time: 0, rng, tokens, squad,
       civilians: cfg.civilians ?? [],
-      flagged: new Set(cfg.civilians?.filter((c) => c.flagged).map((c) => c.id) ?? []),
+      flags: new Map(),
+      claimedCaptives: new Set(),
+      nextMeleeAt: 0,
       spoofBeaconActive: false, trafficHalt: false, leaderAlive: false,
-      exitPoint: cfg.exitPoint ?? { x: cfg.arena.maxX + 2, z: (cfg.arena.minZ + cfg.arena.maxZ) / 2 },
+      // exit sits ON the boundary — a carrier must be able to actually reach it
+      // (an off-board exit + arena clamp pinned carriers at the wall; finding #4)
+      exitPoint: cfg.exitPoint ?? { x: cfg.arena.maxX, z: (cfg.arena.minZ + cfg.arena.maxZ) / 2 },
       dreadAura: false,
     },
     scrap: 0, fluxCells: 0, firstMachineKill: null,
     controlledId: controlled ? controlled.id : '',
+    spawnCounter: 0,
+    thrownFlights: new Map(),
   };
   return enc;
 }
@@ -300,7 +315,7 @@ function standingHeroes(enc: Encounter): number {
 }
 
 function aliveEnemies(enc: Encounter): Enemy[] {
-  return enc.enemies.filter((e) => e.fighter.alive && e.mode !== 'abandoned' && !e.routed);
+  return enc.enemies.filter((e) => e.fighter.alive && e.mode !== 'abandoned' && !e.routed && !e.gone);
 }
 
 function spawnWave(enc: Encounter, wave: number, events: EncounterEvent[]): void {
@@ -318,10 +333,18 @@ function releasePendingSpawns(enc: Encounter, events: EncounterEvent[]): void {
     const spec = enc.pending[nextIdx];
     if (!spec) break;
     enc.pending.splice(nextIdx, 1);
-    const enemy = createEnemy(spec.kind, spawnPos(enc.cfg.arena, enc.rng), { tier: enc.cfg.tier });
+    const enemy = createEnemy(spec.kind, spawnPos(enc.cfg.arena, enc.rng), {
+      tier: enc.cfg.tier,
+      id: `${spec.kind}-${enc.spawnCounter++}`, // seed-stable, per-encounter
+      arcSide: enc.rng.next() < 0.5 ? 1 : -1,
+    });
     enc.enemies.push(enemy);
     events.push({ type: 'spawn', id: enemy.fighter.id, kind: spec.kind });
   }
+}
+
+function dist(a: Vec2, b: Vec2): number {
+  return Math.hypot(a.x - b.x, a.z - b.z);
 }
 
 function clampToArena(f: Fighter, arena: Rect): boolean {
@@ -351,8 +374,15 @@ export function heroHitsEnemy(
   const mult = damageTakenMult(enemy, tags, hero.pos);
   if (mult === 0) return events; // bulwark frontal block (§1.9)
 
-  // carrying detainer: hits work the arm assembly (§1.9)
-  events.push(...hitDetainerArm(enemy));
+  // carrying detainer: DELIBERATE verbs work the arm assembly (§1.9 — never a
+  // light-mash race; heavy/power/thrown/environmental only)
+  if (isDeliberateVerb(tags)) {
+    const armEvents = hitDetainerArm(enemy);
+    for (const ev of armEvents) {
+      if (ev.type === 'grip-broken') enc.world.claimedCaptives.delete(ev.captiveId); // captive is loose again
+    }
+    events.push(...armEvents);
+  }
 
   const res = applyDamage(enemy.fighter, baseDamage * mult, tags);
   events.push(...res.events);
@@ -363,7 +393,10 @@ export function heroHitsEnemy(
   else if (tags.environmental) enc.stats.environmentalHits += 1;
   else if (tags.light) enc.stats.lightHits += 1;
   else if (tags.launcher) enc.stats.heavyHits += 1;
-  if (hero.team === 'squad' && hero.id !== enc.controlledId && res.dealt > 0) enc.stats.assistHits += 1;
+  // team factor counts ASSIST JUGGLE hits only (§1.3 team juggling), not ally chip damage
+  if (hero.team === 'squad' && hero.id !== enc.controlledId && res.wasJuggle && res.dealt > 0) {
+    enc.stats.assistHits += 1;
+  }
   powerGainForHit(hero, tags, res.wasJuggle);
 
   if (!enemy.fighter.alive) {
@@ -374,6 +407,8 @@ export function heroHitsEnemy(
 
 function onEnemyKilled(enc: Encounter, enemy: Enemy, tags: DamageTags, events: EncounterEvent[]): void {
   reapTokens(enc.tokens, (id) => id !== enemy.fighter.id);
+  // a dead scanner's paint clears immediately (§1.9 counterplay, finding #7)
+  if (enemy.kind === 'scanner') clearFlagsBy(enc.world.flags, enemy.fighter.id);
   if (enemy.cfg.family === 'machine') {
     if (enc.firstMachineKill === null) {
       enc.firstMachineKill = enemy.kind;
@@ -386,6 +421,7 @@ function onEnemyKilled(enc: Encounter, enemy: Enemy, tags: DamageTags, events: E
   }
   // dropped captive if it died mid-carry
   if (enemy.carryTargetId !== null) {
+    enc.world.claimedCaptives.delete(enemy.carryTargetId);
     events.push({ type: 'grip-broken', id: enemy.fighter.id, captiveId: enemy.carryTargetId });
     enemy.carryTargetId = null;
   }
@@ -428,6 +464,8 @@ export function updateEncounter(enc: Encounter, dt: number): EncounterEvent[] {
     } else {
       clampToArena(e.fighter, enc.cfg.arena);
     }
+    // thrown enemies are PROJECTILES (§1.3): resolve body-vs-enemy collisions here
+    resolveThrownBody(enc, e, events);
     const enemyEvents = updateEnemy(e, enc.world, dt, enc.cfg.tier);
     for (const ev of enemyEvents) {
       events.push(ev);
@@ -442,7 +480,9 @@ export function updateEncounter(enc: Encounter, dt: number): EncounterEvent[] {
   // token safety: dead/gone holders never keep tokens; the cap is absolute
   reapTokens(enc.tokens, (id) => {
     const holder = enc.enemies.find((e) => e.fighter.id === id);
-    return holder !== undefined && holder.fighter.alive && !holder.routed && holder.mode !== 'abandoned';
+    return (
+      holder !== undefined && holder.fighter.alive && !holder.routed && !holder.gone && holder.mode !== 'abandoned'
+    );
   });
   if (liveTokens(enc.tokens) > T.tokens.maxSimultaneousAttackers) {
     throw new Error('token invariant violated'); // impossible by construction; tests lean on this
@@ -480,10 +520,59 @@ export function updateEncounter(enc: Encounter, dt: number): EncounterEvent[] {
   return events;
 }
 
+/**
+ * Thrown-body flight resolution (§1.3: "thrown enemies are projectiles: 1.5×
+ * impact damage to anything they hit, knockdown in a 1.5m radius"). Impact
+ * damage = impactBaseDamage × projectileImpactMult, attributed to the thrower
+ * (power meter, Splash/Demolition stats, crush kills). A flight that kills 2+
+ * counts as a chain destruction (§1.9 Demolition).
+ */
+function resolveThrownBody(enc: Encounter, e: Enemy, events: EncounterEvent[]): void {
+  const f = e.fighter;
+  const flight = enc.thrownFlights.get(f.id);
+  if (!f.thrown || !f.alive) {
+    if (flight) {
+      if (flight.kills >= 2) enc.stats.chainDestructions += 1;
+      enc.thrownFlights.delete(f.id);
+    }
+    return;
+  }
+  const fl = flight ?? { hitIds: new Set<string>(), kills: 0 };
+  if (!flight) enc.thrownFlights.set(f.id, fl);
+  const thrower = enc.squad.find((h) => h.id === f.thrownBy);
+  if (!thrower) return;
+  const impact = T.throwRules.impactBaseDamage * T.throwRules.projectileImpactMult;
+  for (const other of aliveEnemies(enc)) {
+    if (other.fighter.id === f.id || fl.hitIds.has(other.fighter.id)) continue;
+    if (dist(f.pos, other.fighter.pos) > T.throwRules.collisionRadiusM) continue;
+    fl.hitIds.add(other.fighter.id);
+    const wasAlive = other.fighter.alive;
+    events.push(...heroHitsEnemy(enc, thrower, other, impact, { thrown: true, momentum: true }));
+    if (wasAlive && !other.fighter.alive) fl.kills += 1;
+    // knockdown ring around the impact (§1.3) — mass topples, leaders/wardens don't
+    for (const near of aliveEnemies(enc)) {
+      if (near === other || near.fighter.id === f.id) continue;
+      if (near.fighter.weightClass === 'unlaunchable') continue;
+      if (dist(other.fighter.pos, near.fighter.pos) <= T.throwRules.knockdownRadiusM) {
+        near.fighter.state = 'down';
+        near.fighter.stateTime = 0;
+        near.fighter.downTimer = T.reactions.downSec;
+      }
+    }
+    // the body itself crumples on what it hits
+    const selfRes = applyDamage(f, T.throwRules.impactBaseDamage, {});
+    events.push(...selfRes.events);
+    if (!f.alive) {
+      fl.kills += 1; // the projectile dying counts toward the chain
+      break;
+    }
+  }
+}
+
 function resolveEnemyHit(enc: Encounter, attacker: Enemy, targetId: string, damage: number, events: EncounterEvent[]): void {
   const target = enc.squad.find((h) => h.id === targetId);
   if (!target || !target.alive) return;
-  const mult = machineDamageMult(attacker, targetId, enc.world.flagged);
+  const mult = machineDamageMult(attacker, targetId, enc.world);
   // grunts fight harder while their leader stands (§1.5)
   const leaderBuff = attacker.kind === 'grunt' && enc.world.leaderAlive ? T.leaderAura.gruntDamageMult : 1;
   enc.squadCtx.standingCount = standingHeroes(enc);

@@ -73,6 +73,8 @@ export interface Fighter {
   thrown: boolean;
   throwDir: Vec2;
   throwTimer: number;
+  /** Who threw this body (projectile attribution for §1.3 impact resolution). */
+  thrownBy: string | null;
   // -- reactions --
   stunTimer: number; // hit-stun / wall-splat stun; grabbable while > 0
   downTimer: number;
@@ -107,10 +109,17 @@ export interface SquadContext {
 export interface DamageTags {
   light?: boolean;
   launcher?: boolean;
+  power?: boolean;
   thrown?: boolean;
   environmental?: boolean;
   /** Machine-fight momentum bonus applies to these (§1.9 quirk 4) — set by encounter. */
   momentum?: boolean;
+}
+
+/** Deliberate (stamina/meter-priced) verbs: these stagger armored units and work
+ *  a carrying Detainer's grip (§1.9 counterplay); free lights do neither. */
+export function isDeliberateVerb(tags: DamageTags): boolean {
+  return !!(tags.launcher || tags.power || tags.thrown || tags.environmental);
 }
 
 export interface FighterInit {
@@ -154,6 +163,7 @@ export function createFighter(init: FighterInit): Fighter {
     thrown: false,
     throwDir: { x: 1, z: 0 },
     throwTimer: 0,
+    thrownBy: null,
     stunTimer: 0,
     downTimer: 0,
     iframeTimer: 0,
@@ -276,10 +286,14 @@ export function setMoveInput(f: Fighter, dir: Vec2 | null): void {
 // ---------------------------------------------------------------------------
 // grabs & throws (§1.3)
 
-/** Grab requires a stunned/grabbable target (§1.2 context override, §1.3). */
+/** Grab requires a stunned, staggered, or DOWNED target (§1.2 context override, §1.3).
+ *  Armored machines get here via the deliberate-verb stagger window (§1.9 counterplay). */
 export function tryGrab(attacker: Fighter, target: Fighter): boolean {
   if (!canAct(attacker) || !target.alive) return false;
-  const grabbable = target.stunTimer > 0 || target.state === 'hit';
+  // leaders/warden-hands can't be launched (§1.3) — and a body you can't lift,
+  // you can't throw; grabs respect the same mass rule
+  if (target.weightClass === 'unlaunchable') return false;
+  const grabbable = target.stunTimer > 0 || target.state === 'hit' || target.state === 'down';
   if (!grabbable) return false;
   attacker.state = 'grab';
   attacker.stateTime = 0;
@@ -309,6 +323,7 @@ export function throwHeld(attacker: Fighter, target: Fighter, dir: Vec2): Thrown
   attacker.stateTime = 0;
   target.heldById = null;
   target.thrown = true;
+  target.thrownBy = attacker.id;
   target.throwDir = norm(dir);
   target.throwTimer = T.throwRules.flightSec;
   target.state = 'launch';
@@ -327,6 +342,7 @@ export function throwHeld(attacker: Fighter, target: Fighter, dir: Vec2): Thrown
 export function wallSplat(target: Fighter): void {
   target.thrown = false;
   target.throwTimer = 0;
+  target.thrownBy = null;
   target.state = 'hit';
   target.stateTime = 0;
   target.stunTimer = T.throwRules.wallSplatStunSec;
@@ -401,6 +417,13 @@ export function applyDamage(target: Fighter, amount: number, tags: DamageTags = 
     applyLauncher(target, events);
   } else if (wasJuggle) {
     // stays airborne; airTimer unchanged (fixed 1.2s window — juggle hits do not extend it)
+  } else if (target.armored && isDeliberateVerb(tags)) {
+    // §1.9 counterplay window: deliberate verbs STAGGER armored units — this is
+    // what makes them grabbable/throwable ("bowl it over"). Lights never do.
+    target.state = 'hit';
+    target.stateTime = 0;
+    target.stunTimer = Math.max(target.stunTimer, T.reactions.armoredStaggerSec);
+    events.push({ type: 'staggered', id: target.id });
   } else if (tags.light && target.armored) {
     // §1.5 bruiser / §1.9 machines: no flinch on lights — damage only
   } else if (!isAirborne(target)) {
@@ -426,6 +449,13 @@ function applyLauncher(target: Fighter, events: FighterEvent[]): void {
       if (target.launcherTouches.length >= T.launcher.heavyLaunchHits) {
         target.launcherTouches = [];
         launch(target, events); // "heavy launch"
+      } else {
+        // first touch: no pop, but a deliberate verb still staggers armor —
+        // the §1.9 grab window ("bowl it over") and the §1.3 setup beat
+        target.state = 'hit';
+        target.stateTime = 0;
+        target.stunTimer = Math.max(target.stunTimer, T.reactions.armoredStaggerSec);
+        events.push({ type: 'staggered', id: target.id });
       }
       break;
     }
@@ -519,6 +549,7 @@ export function updateFighter(f: Fighter, dt: number): FighterEvent[] {
         f.throwTimer -= dt;
         if (f.throwTimer <= 0) {
           f.thrown = false;
+          f.thrownBy = null;
           f.state = 'down';
           f.stateTime = 0;
           f.downTimer = T.reactions.downSec;
@@ -569,7 +600,9 @@ function updateAttack(f: Fighter, events: FighterEvent[]): void {
   const timing =
     kind === 'light'
       ? lightTiming(f.chainIndex)
-      : { startup: T.launcher.startupSec, recovery: T.launcher.recoverySec, damage: T.launcher.damage };
+      : kind === 'power'
+        ? { startup: T.launcher.startupSec, recovery: T.launcher.recoverySec, damage: T.power.moveDamage }
+        : { startup: T.launcher.startupSec, recovery: T.launcher.recoverySec, damage: T.launcher.damage };
 
   switch (f.attackPhase) {
     case 'startup':

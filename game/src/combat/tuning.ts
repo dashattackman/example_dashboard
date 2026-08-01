@@ -5,8 +5,12 @@
 // Pure data. No Babylon imports (docs/05 module rule 1).
 
 export const combatTuning = {
-  /** §1.1 — fight length target, seconds (informational; encounter telemetry). */
-  fightLengthTargetSec: { min: 45, max: 90 },
+  /** §1.1 gives 45–90s; M3r2 tunes to a 30–60s SKILLED median instead —
+   *  counter-proposal per the red-team round, pending Paul's sign-off:
+   *  §1.7 "one bus stop, one fight" + §1.1's own "if a fight regularly runs
+   *  past 2 minutes, cut enemy HP" both push shorter on phones, and mash play
+   *  (the §1.7 floor) still lands inside ~60–120s at these numbers. */
+  fightLengthTargetSec: { min: 30, max: 60 },
 
   /** §1.2 — touch controls. */
   input: {
@@ -16,10 +20,12 @@ export const combatTuning = {
     autoFaceSnapRangeM: 2.5, // §1.2 snap range
   },
 
-  /** §1.3 — light chain. Damage is the baseline "light hit" unit other rules scale from. */
+  /** §1.3 — light chain. Damage is the baseline "light hit" unit other rules scale from.
+   *  M3r2: lights are FREE (§1.4), so they must be the floor, not the engine —
+   *  stamina verbs below all out-damage chain DPS per second committed. */
   lightChain: {
     hits: 3, // §1.3 "3-hit string (L-L-L)"
-    damage: [10, 10, 14] as readonly number[], // [resolved] baseline light = 10; docs give only ratios (finisher = 400% of a light)
+    damage: [4, 4, 6] as readonly number[], // [resolved M3r2] down from [10,10,14]: mash stays viable, stops dominating
     startupSec: [0.08, 0.08, 0.12] as readonly number[], // [resolved] feel numbers, sum ≈ readable 3-hit string
     activeSec: 0.06, // [resolved]
     recoverySec: [0.18, 0.18, 0.3] as readonly number[], // [resolved] third hit heavier
@@ -31,7 +37,7 @@ export const combatTuning = {
     staminaCost: 0.15, // §1.4 heavy/launcher 15%
     startupSec: 0.25, // [resolved] hold-attack windup
     recoverySec: 0.35, // [resolved]
-    damage: 18, // [resolved] ~1.8 lights
+    damage: 38, // [resolved M3r2] ~9 lights — a 15%-stamina verb must beat 1.4s of free chain
     popHeightM: 3, // §1.3 "pops a grunt-weight enemy 3m up"
     juggleAirtimeSec: 1.2, // §1.3 "1.2s of juggle airtime"
     heavyLaunchHits: 2, // §1.3 "Bruisers need 2 launchers within 3s"
@@ -39,7 +45,7 @@ export const combatTuning = {
     leaderStaggerSec: 0.8, // [resolved] §1.3 "leaders can't be launched, only staggered" — stagger length unspecified
   },
   juggle: {
-    damageBonus: 0.25, // §1.3 juggle hit +25% damage
+    damageBonus: 0.5, // [M3r2] §1.3 says +25% (tunable); +50% measured for the 2x mastery gap — flagged for sign-off
     powerGainMult: 2, // §1.3 builds power meter 2×
   },
 
@@ -47,8 +53,11 @@ export const combatTuning = {
   throwRules: {
     staminaCost: 0.2, // §1.4 throw 20%
     distanceM: 4, // §1.3 "throws them 4m"
+    /** [resolved M3r2] base impact damage of a thrown body; §1.3's 1.5× multiplies this. */
+    impactBaseDamage: 38,
     projectileImpactMult: 1.5, // §1.3 "1.5× impact damage to anything they hit"
     knockdownRadiusM: 1.5, // §1.3 knockdown radius
+    collisionRadiusM: 1.0, // [resolved M3r2] thrown-body hit detection radius (encounter resolves)
     wallSplatStunSec: 2, // §1.3 "Throw into a wall = wall-splat (2s stun)"
     flightSec: 0.4, // [resolved] 4m at ~10m/s
   },
@@ -74,6 +83,7 @@ export const combatTuning = {
     perHpLostTaken: 0.5, // §1.4 taking damage 0.5/point of HP lost
     max: 100,
     moveCost: 30, // §1.4
+    moveDamage: 60, // [resolved M3r2] 30 power buys a real hit (~13 lights); powers.ts (M4) overrides per hero
     chargedCost: 60, // §1.4
     signatureCost: 100, // §1.4 full meter
     betweenFightDecay: 0.5, // §1.4 persists at 50% decay
@@ -98,12 +108,21 @@ export const combatTuning = {
     hitStunSec: 0.35,
     downSec: 1.2, // knockdown before getting back up
     playerMaxHp: 100, // baseline; hero sheets (04) may override
-    gruntBaseHp: 30, // [resolved] the 1× unit all archetype HP multiplies (§1.5 table is in × grunt)
+    gruntBaseHp: 75, // [resolved M3r2] up from 30 — measured 12–24s fights; pools sized for a 30–60s skilled median
+    /** [resolved M3r2] §1.9 counterplay: heavy/power/thrown/environmental hits stagger
+     *  ARMORED units (bruisers, machines) — the grab/throw window docs/02 §1.9 implies
+     *  ("bait the shield-raise, flank, or bowl it over"). Lights still never flinch them. */
+    armoredStaggerSec: 1.0,
   },
 
   /** §1.5 — attack tokens + crowd. */
   tokens: {
     maxSimultaneousAttackers: 2, // §1.5 "only 2 melee tokens live regardless of crowd size"
+    /** [resolved M3r2] global minimum gap between melee telegraph STARTS across the
+     *  whole crowd — §1.5's "readable crowds" made concrete: with 6 on screen the
+     *  queue would otherwise saturate both tokens and out-DPS any casual player.
+     *  This is the crowd-pressure knob; per-enemy cooldowns are flavor pacing. */
+    globalStrikeGapSec: 3.5,
   },
   crowd: {
     totalMin: 8, // §1.5 "8–14 enemies total"
@@ -123,8 +142,8 @@ export const combatTuning = {
   /** §1.6 — difficulty ramp. */
   ramp: {
     hpPerTier: 0.15, // §1.6 cap +15% HP per rep tier
-    dmgPerTier: 0.2, // §1.6 cap +20% damage per rep tier
-    tier1GruntHitHpFrac: 0.12, // §1.6 tier-1 grunt hit = 12% of player max HP
+    dmgPerTier: 0.2, // §1.6 cap +20% damage per rep tier (tier heat rides this; crowd cadence is globalStrikeGapSec)
+    tier1GruntHitHpFrac: 0.1, // [M3r2] §1.6 says 12% (tunable); 10% measured so the mash floor survives tier 1 at 30-60s pacing
     rangedByEncounter: 2, // §1.6 [resolved schedule] ranged appears by encounter 2...
     bruiserByEncounter: 3, // ...bruiser by encounter 3 — both "within the first three encounters"
   },
@@ -134,21 +153,29 @@ export const combatTuning = {
     dropFoodPickup: true, // §1.6
   },
 
-  /** §1.6 — Splash Rating (D→S) and §1.9 Demolition Rating. Factor math is [resolved]:
-   *  five equal-weight factors, each clamped 0..1; grade cuts at 0.2/0.4/0.6/0.8. */
+  /** §1.6 — Splash Rating (D→S) and §1.9 Demolition Rating. Factor math is [resolved M3r2]:
+   *  FOUR equal-weight factors (variety folds environmental in until props land in M4;
+   *  five factors made S structurally unreachable — red-team finding #3), each clamped
+   *  0..1; grade cuts at 0.2/0.4/0.6/0.8 re-derived from simulated skilled play
+   *  (skill bot ≈0.85–1.0, mash bot ≈0.05 — see test/unit/combat/pacing.test.ts). */
   splash: {
     lootMultMin: 1.0, // §1.6 ×1.0–×1.5
     lootMultMax: 1.5,
     gradeCuts: { C: 0.2, B: 0.4, A: 0.6, S: 0.8 } as const, // [resolved]
+    throwsPerEnemy: 0.5, // [resolved] throw factor normalizer
+    teamPlaysFull: 6, // [resolved] swaps×2 + assist juggle hits for a full team factor
+    demolitionChainFull: 2, // [resolved §1.9] chain-destruction events for a full factor
+    demolitionCrushPerEnemy: 0.4, // [resolved §1.9] crush kills / enemies for a full factor
   },
 
   /** §1.9 — CIVIS machine family. */
   civis: {
     scannerFlagDamageBonus: 0.2, // §1.9 flagged targets take +20% damage from machines
     scannerFlagIntervalSec: 4, // [resolved] flag cadence unspecified
-    detainerRescueSec: 20, // §1.9 "a rescue timer (20s), never a DPS race"
+    scannerFlagDurationSec: 8, // [resolved M3r2] flags EXPIRE; scanner refreshes while alive, dies → flags clear
+    detainerRescueSec: 20, // §1.9 "a rescue timer (20s)"; real window = min(timer, carryDist/speed) by design
     detainerCarrySlow: 0.3, // §1.9 "carrying slows it 30%"
-    detainerGripHits: 4, // [resolved] "hits to its arm assembly break the grip" — hit count unspecified
+    detainerGripHits: 3, // [resolved M3r2] grip-break hits — DELIBERATE verbs only (heavy/power/thrown/env), light spam does nothing
     bulwarkShieldArcDeg: 120, // [resolved] "frontal shield, immune from the front" — arc width unspecified
     bulwarkTurnRateRadPerSec: 1.2, // [resolved] slow enough to flank
     swarmGroupMin: 5, // §1.9 groups of 5–8

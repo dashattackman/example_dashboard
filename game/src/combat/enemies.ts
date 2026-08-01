@@ -11,11 +11,15 @@
 //  4. Mass, not morale — no flinch (armored), immune to Fear, momentum (throw/
 //     knockback/crush) does bonus structural damage.
 
+import { content } from '../content';
 import type { Fighter, Vec2 } from './fighter';
 import { applyDamage, createFighter, type DamageTags } from './fighter';
 import type { Rng } from './rng';
 import { holdsToken, releaseToken, requestToken, type TokenPool } from './tokens';
 import { combatTuning as T } from './tuning';
+
+/** Machine compliance VO — content-is-data: lines live in content/combat.json. */
+const ANNOUNCE = content.combat.announce;
 
 export type HumanArchetype = 'grunt' | 'bruiser' | 'ranged' | 'leader';
 export type CivisUnit = 'scanner' | 'detainer' | 'bulwark' | 'swarm' | 'wardenHand';
@@ -40,8 +44,11 @@ export interface EnemyConfig {
   fearImmune: boolean; // machines (§1.9 quirk 4)
   /** Eligible for Dread-aura rout (§9.3: human grunt-tier only). */
   routsUnderDread: boolean;
+  /** Bosses don't wait in the crowd's strike queue (leader / warden-hand):
+   *  exempt from tokens.globalStrikeGapSec — tier-4 heat rides on them. */
+  ignoresStrikeGap?: boolean;
   scrapDrop?: { min: number; max: number };
-  announceLine?: string; // §1.9 quirk 3
+  announceLine?: string; // §1.9 quirk 3 — filled from content/combat.json below
 }
 
 const t1 = T.reactions.playerMaxHp;
@@ -52,28 +59,28 @@ export const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
     kind: 'grunt', family: 'human', hpMult: 1, moveSpeed: 3.5, weightClass: 'light', armored: false,
     damageFracOfPlayerHp: T.ramp.tier1GruntHitHpFrac, // 12% (§1.6)
     telegraphSec: 0.6, attackRangeM: 1.5, preferredRangeM: 1.5,
-    cooldownSec: { min: 1.2, max: 2.2 }, usesMeleeToken: true, tokenPriority: 1,
+    cooldownSec: { min: 9, max: 11 }, usesMeleeToken: true, tokenPriority: 1,
     fearImmune: false, routsUnderDread: true,
   },
   bruiser: {
     kind: 'bruiser', family: 'human', hpMult: 4, moveSpeed: 2.2, weightClass: 'heavy', armored: true,
     damageFracOfPlayerHp: 0.2, telegraphSec: 0.8, attackRangeM: 1.8, preferredRangeM: 1.8,
-    cooldownSec: { min: 2, max: 3 }, usesMeleeToken: true, tokenPriority: 3,
+    cooldownSec: { min: 7, max: 9 }, usesMeleeToken: true, tokenPriority: 3,
     fearImmune: false, routsUnderDread: false,
   },
   ranged: {
     kind: 'ranged', family: 'human', hpMult: 1.5, moveSpeed: 3, weightClass: 'light', armored: false,
-    damageFracOfPlayerHp: 0.1, telegraphSec: 0.8, // §1.5: telegraphed 0.8s shots
+    damageFracOfPlayerHp: 0.08, telegraphSec: 0.8, // §1.5: telegraphed 0.8s shots
     attackRangeM: 12, preferredRangeM: 8, // §1.5: keeps 8m
-    cooldownSec: { min: 1.8, max: 2.8 }, usesMeleeToken: false, tokenPriority: 0,
+    cooldownSec: { min: 7, max: 9 }, usesMeleeToken: false, tokenPriority: 0,
     fearImmune: false, routsUnderDread: false,
   },
   leader: {
-    kind: 'leader', family: 'human', hpMult: 10, // §1.5: 8–12×, midpoint
+    kind: 'leader', family: 'human', hpMult: 8, // §1.5: 8–12×, low end (fight-length budget §1.1)
     moveSpeed: 2.8, weightClass: 'unlaunchable', armored: true,
-    damageFracOfPlayerHp: 0.18, telegraphSec: 1, attackRangeM: 2, preferredRangeM: 2,
-    cooldownSec: { min: 2.5, max: 3.5 }, usesMeleeToken: true, tokenPriority: 4,
-    fearImmune: false, routsUnderDread: false,
+    damageFracOfPlayerHp: 0.22, telegraphSec: 1, attackRangeM: 2, preferredRangeM: 2,
+    cooldownSec: { min: 5, max: 6.5 }, usesMeleeToken: true, tokenPriority: 4,
+    fearImmune: false, routsUnderDread: false, ignoresStrikeGap: true,
   },
   // --- CIVIS (§1.9) ---
   scanner: {
@@ -81,36 +88,36 @@ export const ENEMY_CONFIGS: Record<EnemyKind, EnemyConfig> = {
     damageFracOfPlayerHp: 0, telegraphSec: 0, attackRangeM: 0, preferredRangeM: 12, // hangs back, fragile
     cooldownSec: { min: 3, max: 4 }, usesMeleeToken: false, tokenPriority: 0,
     fearImmune: true, routsUnderDread: false, scrapDrop: T.civis.scrapPerUnit,
-    announceLine: 'SUBJECT FLAGGED. THANK YOU FOR YOUR VISIBILITY.',
+    announceLine: ANNOUNCE.scanner,
   },
   detainer: {
     kind: 'detainer', family: 'machine', hpMult: 3, moveSpeed: 3.2, weightClass: 'heavy', armored: true,
     damageFracOfPlayerHp: 0.15, telegraphSec: 0.7, attackRangeM: 1.6, preferredRangeM: 1.6,
-    cooldownSec: { min: 2, max: 3 }, usesMeleeToken: true, tokenPriority: 2,
+    cooldownSec: { min: 5, max: 6.5 }, usesMeleeToken: true, tokenPriority: 2,
     fearImmune: true, routsUnderDread: false, scrapDrop: T.civis.scrapPerUnit,
-    announceLine: 'PLEASE REMAIN DETAINED. YOUR COOPERATION HAS BEEN LOGGED.',
+    announceLine: ANNOUNCE.detainer,
   },
   bulwark: {
     kind: 'bulwark', family: 'machine', hpMult: 5, moveSpeed: 1.8, weightClass: 'heavy', armored: true,
     damageFracOfPlayerHp: 0.15, telegraphSec: 0.7, attackRangeM: 2, preferredRangeM: 2,
-    cooldownSec: { min: 2.5, max: 3.5 }, usesMeleeToken: true, tokenPriority: 3,
+    cooldownSec: { min: 5.5, max: 7 }, usesMeleeToken: true, tokenPriority: 3,
     fearImmune: true, routsUnderDread: false, scrapDrop: T.civis.scrapPerUnit,
-    announceLine: 'BARRIER DEPLOYED. PLEASE APPROACH FROM THE FRONT FOR PROCESSING.',
+    announceLine: ANNOUNCE.bulwark,
   },
   swarm: {
     kind: 'swarm', family: 'machine', hpMult: 0.2, moveSpeed: 5, weightClass: 'light', armored: false,
     damageFracOfPlayerHp: 0.04, telegraphSec: 0.5, // ≤10% dmg → sub-0.6s telegraph is legal (§1.5 floor is for >10%)
     attackRangeM: 6, preferredRangeM: 5,
-    cooldownSec: { min: 1.5, max: 2.5 }, usesMeleeToken: false, tokenPriority: 0, // dive attacks, not melee-token queue
+    cooldownSec: { min: 3.5, max: 5 }, usesMeleeToken: false, tokenPriority: 0, // dive attacks, not melee-token queue
     fearImmune: true, routsUnderDread: false, scrapDrop: { min: 1, max: 1 },
-    announceLine: 'DIVE PATTERN COMMENCING. PLEASE HOLD STILL.',
+    announceLine: ANNOUNCE.swarm,
   },
   wardenHand: {
     kind: 'wardenHand', family: 'machine', hpMult: 10, moveSpeed: 2.4, weightClass: 'unlaunchable', armored: true,
     damageFracOfPlayerHp: 0.25, telegraphSec: 0.9, attackRangeM: 3, preferredRangeM: 3,
-    cooldownSec: { min: 3, max: 4 }, usesMeleeToken: true, tokenPriority: 4,
-    fearImmune: true, routsUnderDread: false, scrapDrop: T.civis.wardenScrap,
-    announceLine: 'ENVIRONMENTAL ASSETS REQUISITIONED. THIS IS FOR EVERYONE’S SAFETY.',
+    cooldownSec: { min: 4.5, max: 5.5 }, usesMeleeToken: true, tokenPriority: 4,
+    fearImmune: true, routsUnderDread: false, ignoresStrikeGap: true, scrapDrop: T.civis.wardenScrap,
+    announceLine: ANNOUNCE.wardenHand,
   },
 };
 
@@ -131,6 +138,13 @@ export interface Civilian {
   detained: boolean;
 }
 
+/** A Scanner's paint on a squad target — EXPIRES, and clears when the painter
+ *  dies (§1.9 counterplay: "kill first, always" has to actually remove the debuff). */
+export interface FlagMark {
+  expiresAt: number; // world time
+  by: string; // scanner fighter id
+}
+
 /** The slice of world state enemy behaviors read. Encounter owns and feeds it. */
 export interface EnemyWorld {
   time: number;
@@ -138,13 +152,33 @@ export interface EnemyWorld {
   tokens: TokenPool;
   squad: Fighter[];
   civilians: Civilian[];
-  flagged: Set<string>; // fighter+civilian ids painted by Scanners
+  /** Squad-target Scanner paint (combat +20% flags). Civilian registry flags live on Civilian.flagged. */
+  flags: Map<string, FlagMark>;
+  /** Captives currently held by SOME Detainer — one carrier per captive, ever.
+   *  Grab adds; grip-break/carrier-death remove (encounter wires the removals). */
+  claimedCaptives: Set<string>;
+  /** Global melee-pacing gate (readable crowds, §1.5): next world time any melee
+   *  telegraph may START. Mutated by updateMelee; init 0. */
+  nextMeleeAt: number;
   spoofBeaconActive: boolean; // §1.9 quirk 2 exploit (workshop craft)
   trafficHalt: boolean; // §1.9 quirk 1 window
   leaderAlive: boolean;
-  exitPoint: Vec2; // where Detainers try to LEAVE
+  exitPoint: Vec2; // where Detainers try to LEAVE — must sit ON the arena boundary
   /** §9.3 Dread aura: human grunt-tier may rout on sight. */
   dreadAura: boolean;
+}
+
+/** Is this target currently painted (unexpired flag)? */
+export function isFlagged(world: Pick<EnemyWorld, 'flags' | 'time'>, id: string): boolean {
+  const mark = world.flags.get(id);
+  return mark !== undefined && mark.expiresAt > world.time;
+}
+
+/** Painter died → its paint clears (encounter calls on scanner death). */
+export function clearFlagsBy(flags: Map<string, FlagMark>, scannerId: string): void {
+  for (const [id, mark] of [...flags]) {
+    if (mark.by === scannerId) flags.delete(id);
+  }
 }
 
 export interface Enemy {
@@ -156,6 +190,10 @@ export interface Enemy {
   cooldown: number;
   targetId: string | null;
   routed: boolean;
+  /** Permanently out of the fight (left with a captive / walked off to a beacon). */
+  gone: boolean;
+  /** Approach-arc curve side (±1) — seeded at spawn, never derived from id text. */
+  arcSide: 1 | -1;
   // detainer
   carryTargetId: string | null;
   rescueRemaining: number; // §1.9: 20s rescue timer
@@ -184,15 +222,22 @@ export type EnemyEvent =
   | { type: 'abandoned'; id: string }
   | { type: 'routed'; id: string };
 
-let enemySeq = 0;
-
-export function createEnemy(kind: EnemyKind, pos: Vec2, opts?: { tier?: number; id?: string }): Enemy {
+/**
+ * Determinism rule: NO module-global state. Callers (encounter) supply ids from
+ * their own seeded counters and the arc side from their seeded RNG — the same
+ * seed must replay identically regardless of process history.
+ */
+export function createEnemy(
+  kind: EnemyKind,
+  pos: Vec2,
+  opts?: { tier?: number; id?: string; arcSide?: 1 | -1 },
+): Enemy {
   const cfg = ENEMY_CONFIGS[kind];
   const tier = opts?.tier ?? 1;
   // §1.6: numeric scaling capped at +15% HP / +20% damage per rep tier past tier 1
   const hpScale = 1 + T.ramp.hpPerTier * (tier - 1);
   const fighter = createFighter({
-    id: opts?.id ?? `${kind}-${enemySeq++}`,
+    id: opts?.id ?? kind,
     team: 'enemy',
     pos,
     maxHp: Math.round(T.reactions.gruntBaseHp * cfg.hpMult * hpScale),
@@ -203,7 +248,8 @@ export function createEnemy(kind: EnemyKind, pos: Vec2, opts?: { tier?: number; 
   return {
     fighter, kind, cfg,
     mode: 'approach', modeTime: 0,
-    cooldown: 0, targetId: null, routed: false,
+    cooldown: 0, targetId: null, routed: false, gone: false,
+    arcSide: opts?.arcSide ?? 1,
     carryTargetId: null, rescueRemaining: 0, gripHits: 0,
     flagCooldown: T.civis.scannerFlagIntervalSec,
     shieldFacing: 0,
@@ -309,7 +355,7 @@ export function updateEnemy(e: Enemy, world: EnemyWorld, dt: number, tier = 1): 
   e.cooldown = Math.max(0, e.cooldown - dt);
   e.vulnerableTimer = Math.max(0, e.vulnerableTimer - dt);
 
-  if (!f.alive || e.routed) {
+  if (!f.alive || e.routed || e.gone) {
     releaseToken(world.tokens, f.id);
     return events;
   }
@@ -343,7 +389,13 @@ export function updateEnemy(e: Enemy, world: EnemyWorld, dt: number, tier = 1): 
         events.push({ type: 'abandoned', id: f.id });
       }
       moveBy(f, towards(f.pos, world.exitPoint), e.cfg.moveSpeed, dt);
+      if (dist(f.pos, world.exitPoint) < 1) e.gone = true; // walked off the board
       return events;
+    }
+    // an abandoned unit whose beacon dropped mid-walk re-acquires its directive
+    if (e.mode === 'abandoned') {
+      e.mode = 'approach';
+      e.modeTime = 0;
     }
     // --- quirk 1: traffic law — halt at signals (carrying Detainers keep leaving) ---
     if (world.trafficHalt && e.mode !== 'carry') {
@@ -420,14 +472,16 @@ function updateMelee(e: Enemy, world: EnemyWorld, dt: number, tier: number, even
   switch (e.mode) {
     case 'approach': {
       if (d > e.cfg.attackRangeM) {
-        // approach in arcs (§1.5): tangential bias so grunts curve in, not beeline
+        // approach in arcs (§1.5): tangential bias so grunts curve in, not beeline;
+        // side comes from spawn-time seeded RNG (determinism rule — never from id text)
         const dir = towards(f.pos, target.pos);
-        const side = f.id.length % 2 === 0 ? 1 : -1;
+        const side = e.arcSide;
         const arc = { x: dir.x - side * dir.z * 0.4, z: dir.z + side * dir.x * 0.4 };
         moveBy(f, towards({ x: 0, z: 0 }, arc), e.cfg.moveSpeed, dt);
         return;
       }
-      if (e.cooldown > 0) {
+      const gapGated = e.cfg.usesMeleeToken && !e.cfg.ignoresStrikeGap && world.time < world.nextMeleeAt;
+      if (e.cooldown > 0 || gapGated) {
         e.mode = 'strafe';
         e.modeTime = 0;
         return;
@@ -436,6 +490,7 @@ function updateMelee(e: Enemy, world: EnemyWorld, dt: number, tier: number, even
         ? requestToken(world.tokens, f.id, e.cfg.tokenPriority)
         : ({ granted: true, stolenFrom: null } as const);
       if (grant.granted) {
+        if (e.cfg.usesMeleeToken && !e.cfg.ignoresStrikeGap) world.nextMeleeAt = world.time + T.tokens.globalStrikeGapSec;
         e.mode = 'telegraph';
         e.modeTime = 0;
         events.push({
@@ -460,6 +515,15 @@ function updateMelee(e: Enemy, world: EnemyWorld, dt: number, tier: number, even
       return;
     }
     case 'telegraph': {
+      // a stolen token cancels the swing MID-TELEGRAPH — the cap on simultaneous
+      // strikes is absolute, not just on entry (red-team finding #5).
+      // Leader signature powers are not melee-token swings and are exempt.
+      if (e.cfg.usesMeleeToken && !e.powerInFlight && !holdsToken(world.tokens, f.id)) {
+        e.mode = 'approach';
+        e.modeTime = 0;
+        e.powerInFlight = false;
+        return;
+      }
       const isLeaderPower = e.kind === 'leader' && e.powerInFlight;
       const teleLen = isLeaderPower ? 1 : e.cfg.telegraphSec;
       if (e.modeTime < teleLen) return;
@@ -535,7 +599,10 @@ function updateRanged(e: Enemy, world: EnemyWorld, dt: number, tier: number, eve
   }
 }
 
-/** Scanner (§1.9): hangs back, paints targets — +20% damage from machines, Detainers path to them. */
+/** Scanner (§1.9): hangs back, paints targets — +20% damage from machines,
+ *  Detainers path to them. Paint EXPIRES (8s) and is refreshed while the
+ *  scanner lives; killing the scanner clears its paint (encounter wires that).
+ *  "Kill first, always" is real counterplay, not a permanent debuff. */
 function updateScanner(e: Enemy, world: EnemyWorld, dt: number, events: EnemyEvent[]): void {
   const f = e.fighter;
   const target = nearestStanding(world.squad, f.pos);
@@ -545,15 +612,14 @@ function updateScanner(e: Enemy, world: EnemyWorld, dt: number, events: EnemyEve
   }
   e.flagCooldown -= dt;
   if (e.flagCooldown <= 0) {
-    // flag nearest unflagged squad member, else a civilian
-    const squadTarget = world.squad.find((h) => h.alive && !world.flagged.has(h.id));
+    // paint (or refresh) the nearest standing squad member, else register-flag a civilian
     const civTarget = world.civilians.find((c) => !c.flagged && !c.detained);
-    if (squadTarget) {
-      world.flagged.add(squadTarget.id);
-      events.push({ type: 'flagged', id: f.id, targetId: squadTarget.id });
+    if (target) {
+      const fresh = !isFlagged(world, target.id);
+      world.flags.set(target.id, { expiresAt: world.time + T.civis.scannerFlagDurationSec, by: f.id });
+      if (fresh) events.push({ type: 'flagged', id: f.id, targetId: target.id });
     } else if (civTarget) {
       civTarget.flagged = true;
-      world.flagged.add(civTarget.id);
       events.push({ type: 'flagged', id: f.id, targetId: civTarget.id });
     }
     e.flagCooldown = T.civis.scannerFlagIntervalSec;
@@ -575,15 +641,17 @@ function updateDetainer(e: Enemy, world: EnemyWorld, dt: number, tier: number, e
       const civ = world.civilians.find((c) => c.id === captiveId);
       if (civ) civ.detained = true;
       e.carryTargetId = null;
-      e.mode = 'abandoned'; // it LEAVES with the captive; encounter despawns it
+      e.gone = true; // it LEAVES with the captive — permanently out, never re-engages
+      releaseToken(world.tokens, f.id);
       events.push({ type: 'detained', id: f.id, captiveId });
     }
     return;
   }
 
-  // pick a directive target: flagged civilian first, then a downed squadmate
-  const civ = world.civilians.find((c) => c.flagged && !c.detained);
-  const downedHero = world.squad.find((h) => h.state === 'down' || !h.alive);
+  // pick a directive target: flagged civilian first, then a downed squadmate.
+  // Skip anyone another Detainer already carries — one carrier per captive.
+  const civ = world.civilians.find((c) => c.flagged && !c.detained && !world.claimedCaptives.has(c.id));
+  const downedHero = world.squad.find((h) => (h.state === 'down' || !h.alive) && !world.claimedCaptives.has(h.id));
   const captivePos = civ ? civ.pos : downedHero ? downedHero.pos : null;
 
   if (captivePos !== null) {
@@ -595,6 +663,7 @@ function updateDetainer(e: Enemy, world: EnemyWorld, dt: number, tier: number, e
     // grab-and-carry begins; the 20s rescue window opens
     const captiveId = civ ? civ.id : (downedHero as Fighter).id;
     e.carryTargetId = captiveId;
+    world.claimedCaptives.add(captiveId);
     e.gripHits = 0;
     e.rescueRemaining = T.civis.detainerRescueSec;
     e.mode = 'carry';
@@ -655,9 +724,13 @@ export function rollScrap(kind: EnemyKind, rng: Rng): { scrap: number; fluxCells
 }
 
 /** Apply a strike/shot to a squad target, honoring Scanner flags (§1.9: flagged
- *  targets take +20% damage FROM MACHINES) and second wind via the caller's ctx. */
-export function machineDamageMult(attacker: Enemy, targetId: string, flagged: Set<string>): number {
-  if (attacker.cfg.family === 'machine' && flagged.has(targetId)) return 1 + T.civis.scannerFlagDamageBonus;
+ *  targets take +20% damage FROM MACHINES — only while the paint is live). */
+export function machineDamageMult(
+  attacker: Enemy,
+  targetId: string,
+  world: Pick<EnemyWorld, 'flags' | 'time'>,
+): number {
+  if (attacker.cfg.family === 'machine' && isFlagged(world, targetId)) return 1 + T.civis.scannerFlagDamageBonus;
   return 1;
 }
 

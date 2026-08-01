@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
   bulwarkBlocks,
+  clearFlagsBy,
   createEnemy,
   damageTakenMult,
   ENEMY_CONFIGS,
   hitDetainerArm,
+  isFlagged,
   machineDamageMult,
   rollScrap,
   updateEnemy,
@@ -14,7 +16,7 @@ import {
 } from '../../../src/combat/enemies';
 import { createFighter, updateFighter, type Fighter, type Vec2 } from '../../../src/combat/fighter';
 import { makeRng } from '../../../src/combat/rng';
-import { createTokenPool, liveTokens } from '../../../src/combat/tokens';
+import { createTokenPool, liveTokens, requestToken } from '../../../src/combat/tokens';
 import { combatTuning as T } from '../../../src/combat/tuning';
 
 function hero(pos: Vec2 = { x: 0, z: 0 }, id = 'hero'): Fighter {
@@ -28,7 +30,9 @@ function world(squad: Fighter[], overrides: Partial<EnemyWorld> = {}): EnemyWorl
     tokens: createTokenPool(),
     squad,
     civilians: [],
-    flagged: new Set<string>(),
+    flags: new Map(),
+    claimedCaptives: new Set<string>(),
+    nextMeleeAt: 0,
     spoofBeaconActive: false,
     trafficHalt: false,
     leaderAlive: false,
@@ -42,6 +46,7 @@ function run(e: Enemy, w: EnemyWorld, seconds: number, dt = 0.05): EnemyEvent[] 
   const events: EnemyEvent[] = [];
   let t = 0;
   while (t < seconds - 1e-9) {
+    w.time += dt; // scanner-flag expiry runs on world time
     updateFighter(e.fighter, dt);
     events.push(...updateEnemy(e, w, dt));
     t += dt;
@@ -84,7 +89,7 @@ describe('archetype configs match the docs/02 §1.5 / §1.9 tables', () => {
   });
 });
 
-describe('grunt — telegraph then strike at 12% player HP (§1.5, §1.6)', () => {
+describe('grunt — telegraph then strike at the §1.6 tier-1 fraction', () => {
   it('telegraphs 0.6s, then lands the tier-1 hit', () => {
     const h = hero({ x: 1, z: 0 });
     const w = world([h]);
@@ -93,7 +98,8 @@ describe('grunt — telegraph then strike at 12% player HP (§1.5, §1.6)', () =
     const tele = events.find((e) => e.type === 'telegraph');
     expect(tele && tele.type === 'telegraph' && tele.durationSec).toBe(0.6);
     const strike = events.find((e) => e.type === 'strike');
-    expect(strike && strike.type === 'strike' && strike.damage).toBeCloseTo(12, 5); // 12% of 100
+    // tier-1 grunt hit = ramp.tier1GruntHitHpFrac of player max HP (§1.6; M3r2 tuned to 10%)
+    expect(strike && strike.type === 'strike' && strike.damage).toBeCloseTo(100 * T.ramp.tier1GruntHitHpFrac, 5);
   });
 
   it('a dodging (i-framed) target is never struck', () => {
@@ -105,10 +111,31 @@ describe('grunt — telegraph then strike at 12% player HP (§1.5, §1.6)', () =
     expect(events.some((e) => e.type === 'strike')).toBe(false);
   });
 
+  it('a stolen token cancels the victim mid-telegraph — never 3 simultaneous strikes', () => {
+    const h = hero({ x: 1, z: 0 });
+    const w = world([h]);
+    const g = createEnemy('grunt', { x: 0, z: 0 }, { id: 'grunt-a' });
+    // enter telegraph (grabs a token immediately)
+    updateFighter(g.fighter, 0.05);
+    updateEnemy(g, w, 0.05);
+    expect(g.mode).toBe('telegraph');
+    // a higher-priority attacker steals the token mid-windup
+    const grant = requestToken(w.tokens, 'grunt-b', 1);
+    expect(grant.granted).toBe(true); // second slot, fine
+    const steal = requestToken(w.tokens, 'leader-x', 4);
+    const steal2 = requestToken(w.tokens, 'bruiser-x', 3);
+    expect(steal.granted && steal2.granted).toBe(true); // both grunt tokens stolen
+    const events = run(g, w, 1.5);
+    expect(events.some((e) => e.type === 'strike')).toBe(false); // swing cancelled
+    expect(g.mode).not.toBe('telegraph');
+  });
+
   it('crowd discipline: 4 adjacent grunts never exceed 2 live tokens', () => {
     const h = hero({ x: 0, z: 0 });
     const w = world([h]);
-    const grunts = [0, 1, 2, 3].map((i) => createEnemy('grunt', { x: Math.cos(i) * 1.2, z: Math.sin(i) * 1.2 }));
+    const grunts = [0, 1, 2, 3].map((i) =>
+      createEnemy('grunt', { x: Math.cos(i) * 1.2, z: Math.sin(i) * 1.2 }, { id: `grunt-${i}` }),
+    );
     for (let step = 0; step < 60; step++) {
       for (const g of grunts) {
         updateFighter(g.fighter, 0.05);
@@ -158,18 +185,47 @@ describe('leader — power whiff opens the 3s vulnerability window (§1.5)', () 
   });
 });
 
-describe('Scanner — paints targets (§1.9)', () => {
+describe('Scanner — paints targets, paint EXPIRES (§1.9)', () => {
   it('flags a squad member; machines then hit them +20% harder', () => {
     const h = hero({ x: 15, z: 0 });
     const w = world([h]);
-    const s = createEnemy('scanner', { x: 0, z: 0 });
+    const s = createEnemy('scanner', { x: 0, z: 0 }, { id: 'scanner-a' });
     const events = run(s, w, 4.5, 0.1);
     expect(events.some((e) => e.type === 'flagged' && e.targetId === 'hero')).toBe(true);
-    expect(w.flagged.has('hero')).toBe(true);
+    expect(isFlagged(w, 'hero')).toBe(true);
     const d = createEnemy('detainer', { x: 0, z: 0 });
-    expect(machineDamageMult(d, 'hero', w.flagged)).toBeCloseTo(1.2, 5);
+    expect(machineDamageMult(d, 'hero', w)).toBeCloseTo(1.2, 5);
     const g = createEnemy('grunt', { x: 0, z: 0 });
-    expect(machineDamageMult(g, 'hero', w.flagged)).toBe(1); // humans don't read the flags
+    expect(machineDamageMult(g, 'hero', w)).toBe(1); // humans don't read the flags
+  });
+
+  it('paint expires when the scanner stops refreshing it', () => {
+    const h = hero({ x: 15, z: 0 });
+    const w = world([h]);
+    const s = createEnemy('scanner', { x: 0, z: 0 }, { id: 'scanner-a' });
+    run(s, w, 4.5, 0.1); // painted
+    expect(isFlagged(w, 'hero')).toBe(true);
+    s.fighter.alive = false; // dead scanners refresh nothing
+    w.time += T.civis.scannerFlagDurationSec + 0.1;
+    expect(isFlagged(w, 'hero')).toBe(false); // no permanent +20% debuff
+  });
+
+  it('refreshes the paint while alive — flag outlasts its base duration', () => {
+    const h = hero({ x: 15, z: 0 });
+    const w = world([h]);
+    const s = createEnemy('scanner', { x: 0, z: 0 }, { id: 'scanner-a' });
+    run(s, w, T.civis.scannerFlagDurationSec + 6, 0.1); // >> one flag duration
+    expect(isFlagged(w, 'hero')).toBe(true);
+  });
+
+  it('killing the scanner clears its paint immediately (counterplay is the point)', () => {
+    const h = hero({ x: 15, z: 0 });
+    const w = world([h]);
+    const s = createEnemy('scanner', { x: 0, z: 0 }, { id: 'scanner-a' });
+    run(s, w, 4.5, 0.1);
+    expect(isFlagged(w, 'hero')).toBe(true);
+    clearFlagsBy(w.flags, 'scanner-a'); // encounter calls this on scanner death
+    expect(isFlagged(w, 'hero')).toBe(false);
   });
 });
 
@@ -177,7 +233,7 @@ describe('Detainer — grab-and-carry, the 20s rescue timer (§1.9)', () => {
   function grabScenario() {
     const h = hero({ x: 30, z: 0 });
     const civ = { id: 'civ', pos: { x: 5, z: 0 }, flagged: true, detained: false };
-    const w = world([h], { civilians: [civ], flagged: new Set(['civ']) });
+    const w = world([h], { civilians: [civ] });
     const d = createEnemy('detainer', { x: 0, z: 0 });
     return { w, d, civ };
   }
@@ -200,22 +256,29 @@ describe('Detainer — grab-and-carry, the 20s rescue timer (§1.9)', () => {
     expect(moved).toBeCloseTo(ENEMY_CONFIGS.detainer.moveSpeed * 0.7, 1);
   });
 
-  it('4 arm hits break the grip — a puzzle, never a DPS race', () => {
+  it('3 deliberate arm hits break the grip — a puzzle, never a DPS race', () => {
     const { w, d } = grabScenario();
     run(d, w, 3, 0.1);
     expect(hitDetainerArm(d)).toEqual([]);
-    hitDetainerArm(d);
     hitDetainerArm(d);
     const broken = hitDetainerArm(d);
     expect(broken.some((e) => e.type === 'grip-broken' && e.captiveId === 'civ')).toBe(true);
     expect(d.carryTargetId).toBeNull();
   });
 
-  it('timer expiry = detainment', () => {
+  it('timer expiry = detainment, and the carrier is GONE — no zombie re-grabs', () => {
     const { w, d, civ } = grabScenario();
     const events = run(d, w, 25, 0.1);
-    expect(events.some((e) => e.type === 'detained' && e.captiveId === 'civ')).toBe(true);
+    expect(events.filter((e) => e.type === 'detained').length).toBe(1);
     expect(civ.detained).toBe(true);
+    expect(d.gone).toBe(true);
+    // a downed squadmate appears — the departed carrier must NOT re-engage
+    const h2 = createFighter({ id: 'downed', team: 'squad', pos: { ...d.fighter.pos } });
+    h2.state = 'down';
+    w.squad.push(h2);
+    const after = run(d, w, 3, 0.1);
+    expect(after.some((e) => e.type === 'grabbed-captive')).toBe(false);
+    expect(d.carryTargetId).toBeNull();
   });
 
   it('also grabs a downed squadmate', () => {
@@ -267,9 +330,9 @@ describe('machine literal-mindedness quirks (§1.9)', () => {
     const g = createEnemy('grunt', { x: 0, z: 0 });
     const humanEvents = run(g, w, 1.2);
     expect(humanEvents.some((e) => e.type === 'telegraph')).toBe(true); // grunts don't care
-    // light turns: machine resumes
+    // light turns: machine resumes (run past the global crowd strike gap)
     w.trafficHalt = false;
-    const resumed = run(d, w, 1.2);
+    const resumed = run(d, w, T.tokens.globalStrikeGapSec + 2);
     expect(resumed.some((e) => e.type === 'telegraph')).toBe(true);
   });
 
