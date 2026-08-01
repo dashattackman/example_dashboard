@@ -24,6 +24,10 @@ You're **the Anchor** — a single dad raising a bi-racial kid, and the only sup
 | [`docs/08-agent-playbook.md`](docs/08-agent-playbook.md) | Author/red-team agent orchestration, rubrics, asset arbitration |
 | [`docs/09-story-lore.md`](docs/09-story-lore.md) | Flux lore (1918 Iron Range breach → today), the Anchor, the Act & its staged reveal, the Rogue Zone main arc |
 
+## ▶ Play it
+
+**https://dagame-c59.pages.dev** — open on your phone, then *Add to Home Screen* for the fullscreen app. Auto-deploys from `main` on every push (Cloudflare Pages). Append `?debug` for the live perf overlay, `?phase=MORN|DAY|EVE|LATE` to preview a time-of-day look.
+
 ## Continue the build locally (Windows)
 
 ```powershell
