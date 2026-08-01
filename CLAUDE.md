@@ -19,7 +19,7 @@ Superpowered open-world life-sim/brawler set in a stylized Minneapolis. Mobile-f
 
 - **Only `game/src/engine/` imports `@babylonjs/*`.** Sim/combat-logic/dialogue/save are pure TS — unit-testable without WebGL.
 - **Content is data.** Heroes/NPCs/venues/dialogue/tuning live in `game/src/content/*.json`, validated by zod schemas in `content/schemas.ts`. New content must require zero engine changes.
-- **Perf budgets in `docs/06-mobile-performance.md` are hard.** Draw calls ≤120 street / ≤60 interior, ≤300k tris, ≤25MB precache. Breach = fix before merge. Keep the `?debug` overlay honest.
+- **Perf budgets in `docs/06-mobile-performance.md` are hard.** Draw calls ≤120 street / ≤60 interior, ≤300k tris, ≤8MB to first playable (total precache may reach 75MB — spend it on audio/variety, never mistake disk size for runtime headroom). Breach = fix before merge. Keep the `?debug` overlay honest.
 - **Save compatibility:** any `SaveGame` schema change ships with a migration. Never brick a phone save.
 - **Tone:** R-rated fade-to-black. Lean bold and flirty (the bible calls tameness a bug) but the hard lines in `01-vision.md` are absolute: adults only, cut away, agency respected, no explicit content.
 - Event bus (`brawl.won`, `npc.witnessed`, …) is how systems talk. No cross-system direct calls.

@@ -12,10 +12,13 @@ Target: **30 fps sustained on a mid-range Android (e.g. Pixel 6a / Galaxy A54 cl
 | Texture memory | ≤ **160 MB** (KTX2/basis compressed) |
 | Materials (unique shaders) | ≤ **12** live |
 | JS sim tick | ≤ **4 ms** at 10 Hz |
-| Initial download (precache) | ≤ **25 MB**; playable first load ≤ 8 MB, rest lazy |
-| Audio (within the 25 MB) | ≤ **7 MB**: short looping music stems + 4-bar faction motifs, compressed SFX. VO is text barks in the slice — no voice acting. |
+| Time to first playable | ≤ **8 MB** — this is the sacred number (tap link → playing in seconds); everything else lazy-loads in the background |
+| Total precache | ≤ **75 MB** (Paul's ruling: bigger file is fine — spend it on richness, not on runtime load). Priority order for the extra: audio > texture/outfit/facade variety > VAT crowd-animation loops > baked lighting variation. |
+| Audio (within total) | ≤ **20 MB**: real looping music beds per district/venue + faction motifs, varied SFX. VO is text barks in the slice — no voice acting. |
 
 Exceeding a budget is a build failure conversation, not a shrug.
+
+**Download size vs runtime budgets — don't confuse them:** megabytes on disk buy content variety (music, texture sets, anim loops), never runtime headroom. Draw calls, tris, skeletons, and texture *RAM* are GPU/thermal limits that stay hard no matter how big the precache gets. The 8 MB first-playable rule also stays hard — the bigger cache fills in the background while the player is already walking around.
 
 ## City geometry: instancing is the whole game
 
