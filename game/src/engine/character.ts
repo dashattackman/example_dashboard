@@ -90,9 +90,11 @@ export function buildEli(scene: Scene): CharacterHandle {
   // Torso tapers up: narrow waist, wide chest (diameterTop > bottom).
   cyl('torso', 0.6, 0.37, 0.56, COLORS.jacket).position.set(0, 1.46, 0);
   // Open jacket over a warm henley — chest accent panel.
-  box('chest', 0.22, 0.34, 0.05, COLORS.accent).position.set(0, 1.47, 0.15);
+  // Accents sit PROUD of the torso surface (r≈0.245-0.25 at these heights) —
+  // buried faces never rasterize, and the warm accent is the whole point.
+  box('chest', 0.24, 0.34, 0.09, COLORS.accent).position.set(0, 1.47, 0.21);
   // Warm accent reads from BEHIND too (default camera rides his back): yoke band.
-  box('yoke', 0.4, 0.16, 0.05, COLORS.accent).position.set(0, 1.57, -0.165);
+  box('yoke', 0.4, 0.16, 0.09, COLORS.accent).position.set(0, 1.57, -0.225);
   box('collar', 0.3, 0.09, 0.1, COLORS.jacketDark).position.set(0, 1.78, -0.07);
 
   cyl('neck', 0.1, 0.12, 0.12, COLORS.skin).position.set(0, 1.8, 0);

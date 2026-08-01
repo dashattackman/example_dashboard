@@ -52,7 +52,6 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const yellowPaint = kit.envMat('yellowPaint', '#d8c060');
   const doorMat = kit.envMat('doorMat', '#24303a');
   const awningMat = kit.envMat('awningMat', U.teal);
-  const hydrantMat = kit.envMat('hydrantMat', '#a33b2e');
   const darkGlass = kit.envMat('darkGlass', '#182030');
   const moduleWhite = kit.envMat('moduleWhite', '#ffffff'); // vertex/instance-colored modules
   const waterMat = kit.envMat('waterMat', PALETTE.lake.deepWater, {
@@ -63,6 +62,7 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const litGlass = kit.glowMat('litGlass', U.warmWindow, 0.7);
   const shopGlass = kit.glowMat('shopGlass', '#ffd9a0', 0.8);
   const lampHalo = kit.glowMat('lampHalo', U.sodiumGlow, 0.8, 0.5);
+  const lampBulb = kit.glowMat('lampBulb', U.sodium, 0.6);
   const spill = kit.glowMat('spill', U.warmWindow, 0.5, 0.35);
   const sunPath = kit.glowMat('sunPath', PALETTE.lake.paleGold, 0.5, 0.55);
 
@@ -71,7 +71,8 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
     pos: [0, -0.01, 100],
   });
   const avenue = kit.box('avenue', 10, 0.04, 240, asphalt, { pos: [-6, 0.02, 80] });
-  const crossSt = kit.box('crossSt', 180, 0.04, 10, asphalt, { pos: [-10, 0.02, 15] });
+  // Cross street runs west to the lake shore (water edge x≈-75).
+  const crossSt = kit.box('crossSt', 150, 0.04, 10, asphalt, { pos: [5, 0.02, 15] });
   kit.freeze(base, avenue, crossSt);
 
   // Sidewalks (0.1m curb) — non-overlapping slabs merged into one static.
@@ -91,7 +92,7 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const dashXf: Xform[] = [];
   for (let z = -36; z <= 8; z += 6) dashXf.push({ pos: [-6, 0.05, z], scale: [0.14, 1, 1.9] });
   for (let z = 24; z <= 190; z += 6) dashXf.push({ pos: [-6, 0.05, z], scale: [0.14, 1, 1.9] });
-  for (let x = -94; x <= -18; x += 6) dashXf.push({ pos: [x, 0.05, 15], scale: [1.9, 1, 0.14] });
+  for (let x = -66; x <= -18; x += 6) dashXf.push({ pos: [x, 0.05, 15], scale: [1.9, 1, 0.14] });
   for (let x = 32; x <= 76; x += 6) dashXf.push({ pos: [x, 0.05, 15], scale: [1.9, 1, 0.14] });
   kit.thin(dash, dashXf);
 
@@ -101,20 +102,28 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
     barXf.push({ pos: [-10.3 + i * 1.7, 0.05, 16], scale: [0.7, 1, 3.0] }); // across avenue
   for (let i = 0; i < 3; i++)
     barXf.push({ pos: [2, 0.05, 11.6 + i * 1.7], scale: [3.0, 1, 0.7] }); // across cross street
+  // Parking-lane ticks along the west curb where the cars sit.
+  for (const z of [-24, -16.5, -9, 25.5, 32.5, 40, 47.5])
+    barXf.push({ pos: [-9.35, 0.05, z], scale: [0.12, 1, 1.4] });
   kit.thin(bar, barXf);
 
   // --- buildings (kit-of-parts: massing + plinth + trim + instanced windows) ---
   const bldgA = kit.box('bldgA', 22, 11, 30, brickA, { pos: [16, 5.5, -5] }); // corner store
   const bldgB = kit.box('bldgB', 20, 14.5, 38, brickB, { pos: [15, 7.25, 39] });
   const c1 = kit.box('c1', 13, 8, 26, tealGrey, { pos: [-19.5, 4, -13] });
-  const c2 = kit.box('c2', 13, 12.5, 28, brickWest, { pos: [-19.5, 6.25, 16] });
+  // c2 splits around the cross street (gap z 10..20) so the roadway — and the lake
+  // glimpse behind it — stays open instead of dead-ending into a wall.
+  const c2s = kit.box('c2s', 13, 12.5, 9, brickWest, { pos: [-19.5, 6.25, 4.5] });
+  const c2n = kit.box('c2n', 13, 12.5, 9, brickWest, { pos: [-19.5, 6.25, 25.5] });
   const c3 = kit.box('c3', 13, 9, 30, warmGrey, { pos: [-19.5, 4.5, 47] });
-  kit.freeze(bldgA, bldgB, c1, c2, c3);
+  kit.freeze(bldgA, bldgB, c1, c2s, c2n, c3);
 
   kit.merge('plinths', [
     kit.box('pA', 22.4, 0.9, 30.4, brickDeep, { pos: [16, 0.45, -5] }),
     kit.box('pB', 20.4, 0.9, 38.4, brickDeep, { pos: [15, 0.45, 39] }),
-    kit.box('pC', 13.4, 0.9, 90.4, brickDeep, { pos: [-19.5, 0.45, 17] }),
+    // West-row plinth breaks at the roadway (z 10..20).
+    kit.box('pCs', 13.4, 0.9, 35.7, brickDeep, { pos: [-19.5, 0.45, -8.5] }),
+    kit.box('pCn', 13.4, 0.9, 41.7, brickDeep, { pos: [-19.5, 0.45, 41.5] }),
   ]).material = brickDeep;
 
   kit.merge('trimset', [
@@ -122,7 +131,8 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
     kit.box('coA', 23, 0.55, 31, trim, { pos: [16, 11.2, -5] }),
     kit.box('coB', 21, 0.6, 39, trim, { pos: [15, 14.75, 39] }),
     kit.box('coC1', 14, 0.5, 27, trim, { pos: [-19.5, 8.2, -13] }),
-    kit.box('coC2', 14, 0.5, 29, trim, { pos: [-19.5, 12.7, 16] }),
+    kit.box('coC2s', 14, 0.5, 10, trim, { pos: [-19.5, 12.7, 4.5] }),
+    kit.box('coC2n', 14, 0.5, 10, trim, { pos: [-19.5, 12.7, 25.5] }),
     kit.box('coC3', 14, 0.5, 31, trim, { pos: [-19.5, 9.2, 47] }),
     // Floor bands on the two hero facades.
     kit.box('bA1', 0.14, 0.32, 30.4, trim, { pos: [5, 4.3, -5] }),
@@ -156,11 +166,13 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
       }
     }
   };
-  addWindows(5, HALF_PI, [5.2, 8.4], -17.5, 8, 3.3, 0.5); // A upper floors
+  // A's rows sit ABOVE the sign band (sign top y≈5.15; frame bottom 6.05-0.8=5.25).
+  addWindows(5, HALF_PI, [6.05, 9.05], -17.5, 8, 3.3, 0.5); // A upper floors
   addWindows(5, HALF_PI, [5.0, 8.2, 11.4], 22.5, 10, 3.3, 0.45); // B
   // West row lights up harder — it carries the left third of the gate shot.
   addWindows(-13, -HALF_PI, [5.0], -24.5, 7, 3.6, 0.55); // C1
-  addWindows(-13, -HALF_PI, [5.0, 8.4], 3.8, 7, 3.6, 0.55); // C2
+  addWindows(-13, -HALF_PI, [5.0, 8.4], 1.9, 2, 3.6, 0.55); // c2 south of the street
+  addWindows(-13, -HALF_PI, [5.0, 8.4], 22.4, 2, 3.6, 0.55); // c2 north of the street
   addWindows(-13, -HALF_PI, [5.2], 33.8, 8, 3.6, 0.55); // C3
   kit.thin(frame, frames);
   // Warm variants per pane (instance color multiplies the glow) — kills the
@@ -203,7 +215,8 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
       ctx.fillText('LAGOON RECORDS', w / 2, h / 2 + 30);
     },
     undefined,
-    { pos: [4.9, 4.55, 3.8], rotY: HALF_PI },
+    // x=4.87: proud of the window glass plane (4.885) so nothing draws over the sign.
+    { pos: [4.87, 4.55, 3.8], rotY: HALF_PI },
   );
   kit.freeze(sign);
 
@@ -248,12 +261,20 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
     { pos: [-11.3, 0, 26], rotY: Math.PI },
   ];
   kit.thin(lamp, lampXf);
-  const halo = kit.sphere('halo', 0.6, lampHalo, undefined, 8);
+  // Lamp glow = bright bulb plate tight under the head + a small soft halo AROUND it
+  // (halo centered on the head, not floating below — the "orb" read is gone).
+  const headOffsets = lampXf.map(
+    (xf) => [xf.pos[0] + (xf.rotY ? 1.5 : -1.5), xf.pos[2]] as const,
+  );
+  const bulb = kit.box('bulb', 0.44, 0.05, 0.18, lampBulb);
+  kit.thin(
+    bulb,
+    headOffsets.map(([x, z]) => ({ pos: [x, 5.33, z] as [number, number, number] })),
+  );
+  const halo = kit.sphere('halo', 0.42, lampHalo, undefined, 8);
   kit.thin(
     halo,
-    lampXf.map((xf) => ({
-      pos: [xf.pos[0] + (xf.rotY ? 1.5 : -1.5), 5.35, xf.pos[2]] as [number, number, number],
-    })),
+    headOffsets.map(([x, z]) => ({ pos: [x, 5.4, z] as [number, number, number] })),
   );
 
   // --- parked cars (box-art, vertex-tinted parts, per-instance paint) --------
@@ -310,11 +331,14 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   );
 
   // --- street furniture --------------------------------------------------------
-  kit.freeze(
-    kit.cyl('hydrant', { h: 0.55, d: 0.3, dTop: 0.2, tess: 8 }, hydrantMat, {
-      pos: [3.9, 0.38, -9],
-    }),
-  );
+  // Hydrant: body + bonnet cap + side nozzles so it doesn't read as a traffic cone.
+  const hydrantParts = [
+    kit.tint(kit.cyl('hyBody', { h: 0.5, d: 0.3, dTop: 0.26, tess: 8 }, moduleWhite, { pos: [3.9, 0.35, -9] }), '#a33b2e'),
+    kit.tint(kit.sphere('hyCap', 0.22, moduleWhite, { pos: [3.9, 0.64, -9] }, 8), '#7d2b22'),
+    kit.tint(kit.cyl('hyNozL', { h: 0.14, d: 0.12, tess: 8 }, moduleWhite, { pos: [3.72, 0.42, -9], rotZ: HALF_PI }), '#7d2b22'),
+    kit.tint(kit.cyl('hyNozR', { h: 0.14, d: 0.12, tess: 8 }, moduleWhite, { pos: [4.08, 0.42, -9], rotZ: HALF_PI }), '#7d2b22'),
+  ];
+  kit.merge('hydrant', hydrantParts).material = moduleWhite;
   // Bench against the wall (faces the avenue) + corner street-sign pole.
   const benchParts = [
     kit.tint(kit.box('seat', 0.5, 0.09, 1.8, moduleWhite, { pos: [4.5, 0.55, -3.4] }), '#4a3b2c'),
@@ -379,17 +403,23 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   kit.freeze(skyline);
 
   // Lake glimpse down the cross street (west): cold water + a low-sun path.
-  kit.freeze(kit.ground('lake', 150, 150, waterMat, { pos: [-185, -0.06, 20] }));
-  kit.freeze(kit.ground('lakePath', 90, 7, sunPath, { pos: [-160, 0.0, 16] }));
+  // Water sits ABOVE the lot base (y -0.01) — it was previously buried under it —
+  // with a concrete shore lip where the roadway ends (x≈-75..-70).
+  kit.freeze(kit.ground('lake', 150, 150, waterMat, { pos: [-150, 0.01, 20] }));
+  kit.freeze(kit.ground('lakePath', 70, 6, sunPath, { pos: [-112, 0.025, 15] }));
+  kit.freeze(kit.box('shore', 5, 0.1, 150, concrete, { pos: [-72.5, 0.05, 20] }));
 
   // --- phase dressing ---------------------------------------------------------
   const applyNeon = (level: number): void => {
-    kit.setGlow(litGlass, U.warmWindow, 0.18 + 0.82 * level);
+    // Same 0.8 cap as the shop panes — no raw-quad blowout up close at LATE.
+    kit.setGlow(litGlass, U.warmWindow, 0.18 + 0.62 * level);
     // Caps at ~0.8 so the big display panes keep a hint of tone instead of
     // blowing out to raw white-yellow quads at LATE.
     kit.setGlow(shopGlass, '#ffd9a0', 0.3 + 0.5 * level);
-    // Halos square with level so they're shy at dusk and dominant only at night.
-    kit.setGlow(lampHalo, U.sodiumGlow, 0.1 + 0.9 * level * level, 0.03 + 0.45 * level * level);
+    // Halos square with level so they're shy at dusk and dominant only at night;
+    // the bulb plate carries the "lamp is ON" read, the halo just softens it.
+    kit.setGlow(lampBulb, U.sodium, 0.25 + 0.75 * level);
+    kit.setGlow(lampHalo, U.sodiumGlow, 0.1 + 0.7 * level * level, 0.02 + 0.3 * level * level);
     kit.setGlow(spill, U.warmWindow, 0.55 * level, 0.4 * level);
   };
   applyNeon(0.55); // EVE default
@@ -397,6 +427,8 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   return {
     applyNeon,
     playerSpawn: [0.9, 0.1, -5], // sidewalk, camera clear of the near lamp pole
-    bounds: { minX: -13.4, maxX: 4.3, minZ: -34, maxZ: 88 },
+    // minX reaches west along the cross street so the lake glimpse is walkable
+    // (M1 has no collision — the west row can be clipped through; fine until M2).
+    bounds: { minX: -60, maxX: 4.3, minZ: -34, maxZ: 88 },
   };
 }

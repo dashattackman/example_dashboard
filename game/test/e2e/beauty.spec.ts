@@ -28,3 +28,20 @@ for (const phase of ['EVE', 'LATE'] as const) {
     await page.screenshot({ path: `test-results/beauty-${phase.toLowerCase()}.png` });
   });
 }
+
+// Third signature framing (docs/01: lake = cold cyan water, pale gold light):
+// parked debug cam on the cross street looking west at the lake glimpse.
+test('lake glimpse framing at EVE: budgets green, screenshot captured', async ({ page }) => {
+  await page.goto('/?debug&phase=EVE&cam=-10,3.4,15,-120,1.5,15');
+  await expect(page.locator('#game-canvas')).toBeVisible();
+  await page.waitForFunction(() => (window.__twinDebug?.drawCalls ?? 0) > 0, undefined, {
+    timeout: 30_000,
+  });
+  await page.waitForTimeout(1200);
+
+  const stats = await page.evaluate(() => window.__twinDebug!);
+  expect(stats.drawCalls).toBeLessThanOrEqual(120);
+  expect(stats.tris).toBeLessThanOrEqual(300_000);
+
+  await page.screenshot({ path: 'test-results/beauty-lake.png' });
+});
