@@ -6,7 +6,7 @@
 
 ## 1. Vertical slice map — Uptown
 
-The slice is a **5×4-block street core plus the lakefront band (west) and the Greenway strip (north)** — a **9×7 streaming-cell footprint (~900×700 m)** anchored on the real **Hennepin Ave / Lagoon Ave** crossing, extending **west to the Lake Bde Maka Ska shoreline** (beach, parkway, jogging path, pier). The **downtown skyline** sits to the **northeast as a non-enterable backdrop silhouette** — blue-violet, lit windows at night, framed at the end of Hennepin looking north. It is the signature postcard shot; never let a building block that sightline from the Hennepin/Lagoon corner.
+The slice is a **4×4-block street core plus the corridor frontage east of Hennepin, the lakefront band (west), and the Greenway strip (north)** — a **9×7 streaming-cell footprint (~900×700 m)** anchored on the real **Hennepin Ave / Lagoon Ave** crossing, extending **west to the Lake Bde Maka Ska shoreline** (beach, parkway, jogging path, pier). The **downtown skyline** sits to the **northeast as a non-enterable backdrop silhouette** — blue-violet, lit windows at night, framed at the end of Hennepin looking north. It is the signature postcard shot; never let a building block that sightline from the Hennepin/Lagoon corner.
 
 New with the main arc (binding per `01-vision.md` "Premise" + "Controversy contract"): the **CIVIS Rogue Zone** occupies the slice's **south-southeast edge** — the Lake Street corridor east of Hennepin — inside the same 9×7 footprint. Its perimeter is **visible from our streets**: procurement-beige floodlight wash against our warm sodium-orange, and signage in glitched bureaucratese (see §7). The bots are fictional-contractor hardware (Paradigm Civic Systems "CIVIS" units) — no real organization's name or insignia, ever.
 
@@ -22,12 +22,13 @@ New with the main arc (binding per `01-vision.md` "Premise" + "Controversy contr
 
 Legend: `[##]` venue (numbered, see §2 — shells marked there) · `★` base · `♣` community garden · `≈` water · `..` greenway trench · `%%` beach/sand · `##` non-enterable filler facade (window-lit shells) · `═ ║ ╔ ╝` CIVIS perimeter (beige floodlight wash) · `GATE-A/B/C` checkpoints · `RAMP` holding/processing site · `M1–M4` rooftop Scanner relay masts (destroyable) · `⊙` induction charging pads · `·` unmarked safe-house node (dev-only marker — never rendered on the in-game map)
 
-Streaming-cell ruler: columns **A–I** west→east (A = water/swim band, B = beach + parkway band, C–G = the five street-block columns, **H–I = the Lake Street corridor east of Hennepin** — filler frontage north of Lake St, **CIVIS Rogue Zone in rows 5–7**). Rows **1–7** north→south (1 = Greenway strip, 7 = W 31st edge). Each cell ≈ 100m.
+Streaming-cell ruler: columns **A–I** west→east (A = water/swim band, B = beach + lake path, C = the parkway/park band west of James, **D–G = the four street-block columns** — the blocks between James / Irving / Humboldt / Holmes / Hennepin, **H–I = the Lake Street corridor east of Hennepin** — filler frontage north of Lake St, **CIVIS Rogue Zone in rows 5–7**). Rows **1–7** north→south (1 = Greenway strip, 7 = W 31st edge). Each cell ≈ 100m. **Column semantics (binding): avenue names in the figure mark column BOUNDARIES — each drawn column is the block between two avenues; a venue "on X Ave" fronts that labeled boundary.**
 
 ```
-   cells:  A    B       C          D          E          F          G          H          I    →
+   cells: A = water/swim · B = beach + path · C–I below (letters sit in each column's border)
+   ≈≈≈ %%+----C----+----D-----+----E-----+----F-----+----G-----+----H-----+----I-----+ →
             NE → downtown skyline silhouette (backdrop only, unreachable)  ▲
-          James      Irving    Humboldt    Holmes     Hennepin     (corridor east of Hennepin)
+                 James     Irving   Humboldt   Holmes   Hennepin  (corridor east of Hennepin)
  1 ≈≈≈ %%|.........|..........|..........|..........|..........|..........|..........|   MIDTOWN
    ≈≈≈ %%|... GREENWAY TRENCH (sunken, graffiti, underpasses) ..(trench continues east →)  GREENWAY
  2 ≈≈≈ %%+---------+----------+----------+----------+----------+----------+----------+
@@ -37,15 +38,15 @@ Streaming-cell ruler: columns **A–I** west→east (A = water/swim band, B = be
  4 ≈≈≈ %%| parkway | [17][28] | [11][12] | [09][10] | [04][05] |  ##  ##  |  ##  ##  |  LAGOON AVE
    ≈≈≈ %%| benches |  houses  |  ##  ##  |  ##  ##  | [06]  ## |  ##  ##  |  ##  ##  |
  5 ≈≈≈ %%+---------+----------+----------+----------+----------+═M2═══════════════M4══╗
-   ≈≈≈ %%| jogging | ♣ GARDEN | [19][20] | [21][22] | [07][08] GATE-A [30][31] M3 [29] GATE-C ═►  LAKE ST W
-   ≈≈≈ %%| loop    | (plots)  | [25]  ## | [23] ##  |  ##  ##  ║  CIVIS ROGUE ZONE   ⊙ ║  (corridor
+   ≈≈≈ %%| jogging | ♣ GARDEN | [19][20] | [21][22] | [07][08] GATE-A [30]M3 [31] [29] GATE-C ═►  LAKE ST W
+   ≈≈≈ %%| loop    | (plots)  |  ##  ##  | [23][25] |  ##  ##  ║  CIVIS ROGUE ZONE   ⊙ ║  (corridor
  6 ≈≈≈ %%+---------+----------+----------+----------+----------║  RAMP ⊙⊙  [32]· shut- ║   continues
    ≈≈≈ %%| firepits| [26] ##  | [27]  ## |  [24] ## |  ##  ##  ║  M1(roof)  tered ##   ║   east —
  7 ≈≈≈ %%| dog park|  houses  |  (rink)  |  ##  ##  |  ##  ##  ╚═GATE-B═══════════════╝   post-slice)
   LAKE BDE MAKA SKA (swimmable shallow band, no boats in slice)
 ```
 
-This figure is authoritative: **5×4 street blocks** (columns C–G between the named avenues × the four block rows between the Greenway and W 31st) inside a **9×7 cell footprint** — unchanged by the zone, which occupies **cells H5–I7** and continues east off-slice. All prose in this doc and §6 uses these numbers. The lake (swimmable shallow band, no boats in slice) bounds the footprint west and south-west.
+This figure is authoritative: a **4×4 street-block core** (columns D–G — the blocks between the labeled avenue boundaries — × the four block rows between the Greenway and W 31st) inside a **9×7 cell footprint** — unchanged by the zone, which occupies **cells H5–I7** and continues east off-slice. All prose in this doc and §6 uses these numbers. The lake (swimmable shallow band, no boats in slice) bounds the footprint west and south-west. Worked examples of the boundary rule: the base (column D) fronts **Irving**; the garden's plots gate at **Irving & Lake**; #26 (column D, row 6–7) sits on **W 31st between James & Irving** and faces #27 (column E) across **Irving**; #25 (column F, Lake row) sits on **Lake St W between Humboldt & Holmes** beside #23 at the **Holmes & Lake** corner.
 
 **Anchors:**
 - **★ Base — "The Fulton Works"**: converted brick warehouse on **Irving between W 28th & Lagoon**, half a block from the Greenway trench (private ramp down = your secret exit). Ground floor: garage/training room. Upper floor: squad loft. Roof: skyline view + future garden beds upgrade. This is the only player-owned interior at start.
@@ -54,10 +55,10 @@ This figure is authoritative: **5×4 street blocks** (columns C–G between the 
 
 ### The Rogue Zone — perimeter & furniture (geography layer)
 
-The zone's state model lives in `02-gameplay.md`; this is its physical anatomy. All of it sits in **cells H5–I7** and reads from our streets.
+The zone's state model lives in `02-game-design.md`; this is its physical anatomy. All of it sits in **cells H5–I7** and reads from our streets.
 
 - **Perimeter:** modular CIVIS barrier segments (procurement-beige, retroreflective chevrons, one per ~10m — instanced mesh). It crosses Lake St just east of Hennepin, runs east along the corridor's north curb, wraps the east map edge, and returns along W 31st. **Border light rule (binding):** inside/behind the wire the light wash is flat procurement-beige floodlight; our side keeps warm sodium-orange. The seam between the two is the arc's signature image — frame it from the Hotdish House windows.
-- **Checkpoint gates (3):** **GATE-A** — Lake St at Hennepin, the west gate; pedestrian queue lanes, a Scanner arch, a PR easel. This is the gate Uptown sees daily. **GATE-B** — W 31st at the zone's southwest corner (half a block from The Understory's cellar door — deliberately). **GATE-C** — Lake St at the east map edge; vehicle-scaled, where Detainer convoys exit toward the off-slice corridor.
+- **Checkpoint gates (3):** **GATE-A** — Lake St at Hennepin, the west gate; pedestrian queue lanes, a Scanner arch, a PR easel. This is the gate Uptown sees daily. **GATE-B** — W 31st at the zone's southwest corner (a couple short blocks down 31st from The Understory's cellar door — deliberately close, never touching). **GATE-C** — Lake St at the east map edge; vehicle-scaled, where Detainer convoys exit toward the off-slice corridor.
 - **Holding/processing site — "the Ramp":** a commandeered municipal parking structure mid-zone (cell H6–H7). Ground level: induction pads + processing kiosks. Upper decks: holding pens behind privacy scrim (we stage dread by implication, never spectacle — controversy contract rule 4). Roof: mast M1.
 - **Scanner relay masts (4, rooftop, destroyable):** M1 on the Ramp roof, M2 above GATE-A, M3 mid-corridor above [30], M4 on the mercado block roof. Each mast projects a visible scan-sweep cone at night; destroying one (per 02's BLIND missions) kills the beige floodlights block by block in its radius — the world's most legible progress bar.
 - **Induction charging pads:** two-bay pad cluster inside the Ramp (units dock ~20 min, eyes-down — stealth windows) and one street pad by GATE-C.
@@ -74,7 +75,7 @@ All names are lightly fictionalized — evocative of real Uptown institutions, l
 | # | Name | What it evokes | Function | Hours | Vibe (1 line) |
 |---|------|----------------|----------|-------|---------------|
 | 01 | **The Marquee** | Uptown Theater's landmark marquee, reborn as a music venue | SOCIAL · ROMANCE · JOB (stage crew) | EVE–LATE | Deco bones, sticky floor, the marquee's neon wash spills a block down Hennepin. |
-| 02 | **The CC Tap** | The beloved dive bar institution | SOCIAL · ROMANCE · FACTION (Commons' informal turf) | DAY–LATE | Wood-panel dive where Moe Okonkwo knows your order and your business. |
+| 02 | **The CC Tap** | The beloved dive bar institution | SOCIAL · ROMANCE · FACTION (Commons' informal turf) | DAY–LATE | Wood-panel dive where Moe Okonkwo knows your order and your business; locals of a certain age still call it the Wheelhouse (see `09-story-lore.md`). |
 | 03 | **Magers Row Books** | The indie bookstore | **SHELL (post-slice)** — SHOP · SOCIAL | MORN–EVE (sign) | Creaky shelves, a store cat named Ope, staff picks with feelings. |
 | 04 | **The Greenway Grocer Co-op** | The Wedge co-op | SHOP · JOB (stocker shifts) | MORN–EVE | Bulk bins, kombucha on tap, a bulletin board that seeds side quests. |
 | 05 | **The Velvet Antler** | The sex-positive-but-classy nightclub | SOCIAL · ROMANCE · vice storylines | LATE only | Magenta velvet, dancers, VIP rooms, a doorwoman who judges your outfit — heat, never sleaze; every fade-to-black in the game aspires to start here. |
@@ -100,9 +101,9 @@ All names are lightly fictionalized — evocative of real Uptown institutions, l
 | 25 | **Crown & Anchor Barbershop** | Corner barbershop | SOCIAL (gossip hub) · SHOP (cuts = minor charm buff) | DAY–EVE | Dre's chair — **Lake St W between Humboldt & Holmes**; two chairs, one wait bench, all of the neighborhood's news. Tiny, ships FULL. |
 | 26 | **Cedar Bend Yoga (Petra's studio)** | Storefront yoga studio | SOCIAL · ROMANCE | MORN–EVE | **W 31st between James & Irving**; its front glass faces the Ice Barn's doors across Irving — load-bearing sightline for the Ingrid–Petra story. |
 | 27 | **The Uptown Ice Barn** | Neighborhood ice arena ("the barn," as hockey people say) | **SHELL (post-slice)** — SOCIAL | MORN–LATE (sign) | **W 31st between Irving & Humboldt**, doors facing the yoga studio; rink hum, skate-bag kids, Zamboni visible through the glass. |
-| 28 | **Farhia's Halal Market** | Small halal grocery | SHOP | MORN–EVE | **Lagoon between Irving & Humboldt, two doors from Ope's (#17)** — its own storefront, its own owner; her version of any story and Ope's owner's version never match, and both are canon. |
+| 28 | **Farhia's Halal Market** | Small halal grocery | SHOP | MORN–EVE | **Lagoon between James & Irving, two doors from Ope's (#17)** — its own storefront, its own owner; her version of any story and Ope's owner's version never match, and both are canon. |
 | 29 | **Mercado Estrella del Norte** | Midtown-Global-Market-style mercado hall (the corridor's anchor) | SHOP · SOCIAL · JOB (stall shifts) · **arc-critical** | MORN–EVE, curfew-truncated under zone control; recovers LATE hours as the zone recedes | One big hall, many stalls — tamales and sambusas, a remittance window, a two-chair barber, a botánica; twenty flags on the rafters and zero intention of leaving. Inside the wire. FULL. |
-| 30 | **La Golondrina Panadería** | Corridor family bakery — **the kid's maternal family's store** (family names owned by `04-characters.md`) | SHOP · SOCIAL · **arc-critical** | MORN–DAY under occupation; MORN–EVE when freed | Conchas at dawn, a wall of family photos the camera lingers on, the good radio station; the back kitchen hosts more than baking. Inside the wire. FULL. |
+| 30 | **La Golondrina Panadería** | Corridor family bakery — **the kid's maternal family's store** (family names owned by `04-characters.md`) | SHOP · SOCIAL · **arc-critical** | MORN–DAY under occupation; MORN–EVE when freed — first-light bake starts at MORN open (6a); no 4 a.m. phase exists, hard sleep at 3a stands | Conchas at dawn, a wall of family photos the camera lingers on, the good radio station; the back kitchen hosts more than baking. Inside the wire. FULL. |
 | 31 | **Taquería El Relámpago** | Corridor taquería | **SHELL (post-slice)** — SHOP | shuttered at ship; exterior **re-opens** (shutters up, lightning bolt repainted, music on) as the zone recedes | Steel shutters and a hand-painted lightning bolt; the first light to come back on when you push the wire — the world thanking you, in storefront form. |
 | 32 | **The Quiet Door** | Safe-house network node | unmarked · story-revealed — no sign, no hours, no shop economy | story-gated | An unlisted door between corridor storefronts; one room — cots, coffee, a laminated map of routes nobody photographs. Micro-cell; never appears on the in-game map or minimap. |
 
@@ -134,7 +135,7 @@ Farhia's Halal Market (#28) is **not** an alias of Ope's Corner Store (#17) — 
 3. **2–5 interactable objects minimum per interior**, drawn from the object library: jukebox, pool table, arcade cabinet (toy: animation + buff), bar seats, dartboard, bookshelf, kitchen stove, fitting room, washer/dryer, stage, tattoo chair, barber chair, heavy bag, cash register, bulletin board, bed (save/rest in owned housing only), TV, plot bed (garden).
 4. **One "tell" object** — a unique prop that carries the venue's story (The CC Tap's polaroid wall; The Velvet Antler's velvet rope; the Pawn's chained display case).
 
-**Slice toy rule (binding):** in the slice, USE on arcade cabinets, pool tables, dartboards, and lanes plays an **animation + grants a buff only** — no playable minigame behind them. The two date minigames defined in `02-gameplay.md` are the only real minigames in the slice.
+**Slice toy rule (binding):** in the slice, USE on arcade cabinets, pool tables, dartboards, and lanes plays an **animation + grants a buff only** — no playable minigame behind them. The two date minigames defined in `02-game-design.md` are the only real minigames in the slice.
 
 **Interaction taxonomy (the complete verb set):**
 
@@ -186,7 +187,7 @@ Flips are driven by faction-rep thresholds + completed turf jobs, not real-time 
 
 ### The Rogue Zone overlay (NOT a fourth flip faction — implementers, read this twice)
 
-The CIVIS Rogue Zone is **its own overlay layer with its own state model** (defined in `02-gameplay.md`'s zone-system section). Zone cells carry zone-state (pressure / perimeter / patrol values) layered **on top of** whatever faction turf they sit on or border. **Do not wedge the zone into the banner/graffiti/flip pipeline** — separate data, separate renderer, separate progression. Territory-flip tech still ships for exactly 3 factions, unchanged. Truce rules unaffected: Spin Cycle (#22) and The Understory (#24) stay neutral; the Understory's 31st St cellar door sits half a block off the wire, on purpose.
+The CIVIS Rogue Zone is **its own overlay layer with its own state model** (defined in `02-game-design.md`'s zone-system section). Zone cells carry zone-state (pressure / perimeter / patrol values) layered **on top of** whatever faction turf they sit on or border. **Do not wedge the zone into the banner/graffiti/flip pipeline** — separate data, separate renderer, separate progression. Territory-flip tech still ships for exactly 3 factions, unchanged. Truce rules unaffected: Spin Cycle (#22) and The Understory (#24) stay neutral; the Understory's 31st St cellar door sits a couple short blocks off the wire, on purpose.
 
 **What each faction does at the border:**
 - **The Aldermen** signed the CIVIS procurement (Civic Shield co-signed; Odegaard's name is on Contract Amendment 14-C). They want it **quiet**: a PR easel at GATE-A, "pilot program" language on every flyer, and money spent keeping news vans on the far side of Hennepin. Their patrols do not approach the wire; their fixers do.
@@ -216,7 +217,7 @@ The CIVIS Rogue Zone is **its own overlay layer with its own state model** (defi
 
 ### The Rogue Zone in the world sim
 
-State model owned by `02-gameplay.md`'s zone system; this is the street-level rendering contract.
+State model owned by `02-game-design.md`'s zone system; this is the street-level rendering contract.
 
 **CIVIS patrols by phase:**
 
