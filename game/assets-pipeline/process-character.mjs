@@ -23,7 +23,8 @@
 //
 // Or import { processCharacter } and drive it from a table (build-cast.mjs).
 import { NodeIO, Primitive, getBounds } from '@gltf-transform/core';
-import { resample, dedup, prune } from '@gltf-transform/functions';
+import { resample, dedup, prune, simplifyPrimitive } from '@gltf-transform/functions';
+import { MeshoptSimplifier } from 'meshoptimizer';
 
 const DEFAULT_KEEP = [
   'Idle', 'Idle_Neutral', 'Walk', 'Run', 'Run_Back',
@@ -43,8 +44,17 @@ export async function processCharacter({
   dst,
   keep = DEFAULT_KEEP,
   strip,
+  // Primitive-level strip: regexes tested against `NodeName::MaterialName`
+  // (a node-level strip is too blunt for hair/beards/mohawks/hats, which are
+  // primitives INSIDE the head mesh). E.g. 'Punk_Head::Pink' de-mohawks the
+  // punk without touching the jacket's Pink accents. VERIFY visually — some
+  // accessories have no under-geometry (stripping can open a hole).
+  stripPrims = [],
   recolor = {},
   paint = [],
+  // Half-res inverted-hull outline (the hull doubles a body's tri cost; at
+  // 2cm shell thickness a 50% decimation is invisible at gameplay distance).
+  decimateHull = true,
   name,
   quiet = false,
 }) {
@@ -78,12 +88,14 @@ export async function processCharacter({
   if (!skin) throw new Error(`no skin found in ${src}`);
 
   const usedRecolors = new Set();
+  const stripRes = stripPrims.map((s) => new RegExp(s));
   const parts = [];
   for (const node of skinnedMeshNodes) {
     if (node.getSkin() !== skin) throw new Error('multiple skins — manual merge invalid');
     for (const prim of node.getMesh().listPrimitives()) {
       const mat = prim.getMaterial();
       const matName = mat ? mat.getName() : '';
+      if (stripRes.some((re) => re.test(`${node.getName()}::${matName}`))) continue;
       let col;
       if (matName in recolor) {
         col = hexBytes(recolor[matName]).map((b) => b / 255);
@@ -200,12 +212,24 @@ export async function processCharacter({
   const hullPrim = doc.createPrimitive()
     .setMode(Primitive.Mode.TRIANGLES)
     .setAttribute('POSITION', acc(HPOS, 'VEC3'))
-    .setAttribute('NORMAL', merged.getAttribute('NORMAL'))
-    .setAttribute('JOINTS_0', merged.getAttribute('JOINTS_0'))
-    .setAttribute('WEIGHTS_0', merged.getAttribute('WEIGHTS_0'))
+    // Own accessor copies (not shared with the body): the decimator below
+    // rewrites the hull's attributes in place — sharing would corrupt the body.
+    .setAttribute('NORMAL', acc(new Float32Array(NRM), 'VEC3'))
+    .setAttribute('JOINTS_0', acc(new Uint16Array(JNT), 'VEC4'))
+    .setAttribute('WEIGHTS_0', acc(new Float32Array(WGT), 'VEC4'))
     .setIndices(acc(HIDX, 'SCALAR'))
     .setMaterial(inkMat);
   const hullMesh = doc.createMesh(`${bodyName}Hull`).addPrimitive(hullPrim);
+
+  // Half-res hull: the outline shell doesn't need silhouette-perfect topology
+  // (it's a 2cm flat-ink shadow of the body). ~50% of the per-character hull
+  // tris back for zero visual cost at gameplay distance.
+  let hullTris = HIDX.length / 3;
+  if (decimateHull) {
+    await MeshoptSimplifier.ready;
+    simplifyPrimitive(hullPrim, { simplifier: MeshoptSimplifier, ratio: 0.5, error: 0.01 });
+    hullTris = hullPrim.getIndices().getCount() / 3;
+  }
 
   // Replace the first skinned node's mesh; drop the other skinned nodes.
   const keeper = skinnedMeshNodes[0];
@@ -223,17 +247,32 @@ export async function processCharacter({
   let tris = 0;
   for (const mesh of r.listMeshes())
     for (const prim of mesh.listPrimitives()) tris += prim.getIndices().getCount() / 3;
+  // Final baked palette per material region (sRGB 0..1 + vertex-count area
+  // proxy) — build-cast.mjs runs its bake-time palette asserts against this.
+  const palette = [];
+  {
+    const byMat = new Map();
+    for (const p of parts) {
+      const e = byMat.get(p.mat) ?? { name: p.mat, rgb: p.col.slice(0, 3), verts: 0 };
+      e.verts += p.pos.length / 3;
+      byMat.set(p.mat, e);
+    }
+    palette.push(...byMat.values());
+  }
+
   const report = {
     dst,
     clips: r.listAnimations().map((a) => a.getName()),
     tris: Math.round(tris),
+    hullTris: Math.round(hullTris),
     joints: r.listSkins()[0]?.listJoints().length,
     localToWorld: Math.round(localToWorld),
+    palette,
   };
   if (!quiet)
     console.log(
-      `${dst}: tris ${report.tris}, joints ${report.joints}, 1/${report.localToWorld} bind scale,` +
-        ` clips [${report.clips.join(', ')}]`,
+      `${dst}: tris ${report.tris} (hull ${report.hullTris}), joints ${report.joints},` +
+        ` 1/${report.localToWorld} bind scale, clips [${report.clips.join(', ')}]`,
     );
   return report;
 }
