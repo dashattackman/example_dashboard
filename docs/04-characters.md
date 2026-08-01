@@ -10,7 +10,7 @@
 
 **Vertical slice (binding):** the slice ships **6 recruitable heroes** — Marisol, August, Ingrid, Theo, Maggie, Camille — chosen for role spread (brawler / ranged control / control / mobility / tank / zone-support) and romance-style spread (exclusive-jealous, slow-burn, oriented-exclusive, skittish-open, friendship-only, non-exclusive). The other four are marked **POST-SLICE** in place, with the reason stated.
 
-**Control contract (binding, per hero):** each hero fields ONE equipped core move by default; the other two unlock at **Signature-Evolution tree nodes**; loadout is swappable at base. Signatures double as finishers (see §1.11). **Design note — no healer role by design:** Camille's Anneal is the only heal in the game and it's a *conversion*, not a pool. **Squad-viability flag:** all-melee squads (slice example: Marisol+Theo+Maggie; full-roster example: Marisol+Theo+Dom) vs dual-ranged enemy waves is a known tuning corner — combat doc owns the fix.
+**Control contract (binding, per hero):** each hero fields ONE equipped core move by default; the other two unlock at **Signature-Evolution tree nodes**; loadout is swappable at base. Signatures double as finishers (see §1.11). **Design note — no healer role by design:** Camille's Anneal is the only heal in the game and it's a *conversion*, not a pool. **Squad-viability flag:** all-melee squads (slice example: Marisol+Theo+Maggie; full-roster example: Marisol+Theo+Dom) vs dual-ranged enemy waves is a known tuning corner — `02-game-design.md` owns the fix.
 
 **Romance legend (applied to a fixed PC):** *Open* = romanceable by Eli. *Oriented* = the character's stated orientation is real and stays real: Dominic (men) is romanceable; Ingrid and Petra (women) are **not into you, and that's content** — their arcs (including the protected Ingrid–Petra geometry) run at full richness on the friendship/ally track, per the tone bible's "some NPCs just aren't into you." *Exclusive* = demands monogamy; the gossip system WILL get you caught. *Friendship-only* = not romanceable, and richer for it.
 
@@ -140,7 +140,7 @@
 - **Is-this-boring test:** she can feel the whole neighborhood's power draw like a pulse — she knows who's home, who left the stove on, whose grow-op is whose — and treats that omniscience with a lineworker's total professional discretion. The one time she breaks that code is a story arc, and it's because someone's pattern looked like her own worst year.
 
 ### 1.11 Finisher pairings (contract change, binding)
-**Each hero's Signature IS their finisher — one animation each.** Pairings no longer owe cinematics (02's 45-pair cinematic debt is cancelled). A pair finisher = the finishing hero's signature anim + the partner's **assist pose** + **one shared VO bark** — data, not animation. Bark table for all 15 pairs among the slice six:
+**Each hero's Signature IS their finisher — one animation each.** Pairings no longer owe cinematics (`02-game-design.md`'s 45-pair cinematic debt is cancelled). A pair finisher = the finishing hero's signature anim + the partner's **assist pose** + **one shared VO bark** — data, not animation. Bark table for all 15 pairs among the slice six:
 
 | Pair | Shared bark |
 |---|---|
@@ -182,7 +182,7 @@ Uptown's turf is a **three-way cold war** — the Iron Range Crew, the Commons, 
 ### CASS DELANE — The Iron Range Crew (nightlife, muscle, freight)
 - **Profile:** 44. The Crew runs Uptown's after-dark economy — clubs, freight that skips paperwork, muscle with Iron Range surnames who train at **Skål Gym**. Cass's front office is **The Velvet Antler** (venue #05 in 03) — taxidermy-chic club, magenta light, a VIP mezzanine everyone claims to hate and fights to get into. Cass is seduction as infrastructure: he remembers your drink, your ex, and your price, and quotes all three back at the exact wrong moment. **Personality:** patient, theatrical, transactional to the marrow — but pays debts to the penny, both kinds. **The dangerous part:** the Antler's back room runs a card game and a smuggling cache behind the cooler, and half of Uptown's off-book goods move through Crew garages. (The supers-only speakeasy, The Understory — #24 in 03 — is NOT his; it's neutral ground, and its neutrality is the one line even Cass won't test.) He has never thrown a punch; people volunteer.
 - **Turf:** the Greenway trench, the 28th St spine, and the garage block. Note the geography joke the whole neighborhood is in on: his front office sits on the Hennepin spine — *inside Aldermen turf.* He pays rent, in every sense.
-- **Offers the player:** club jobs (bouncing, debt collection with style clauses, "escort this idiot home alive"), the best fence/vendor in the game, after-dark intel on every other faction, and **followers:** Crew staff for the base — door staff, drivers, lookouts. Staffing and mission-support flavor, per 02: followers are not combat units; they make your businesses run and your night jobs smoother.
+- **Offers the player:** club jobs (bouncing, debt collection with style clauses, "escort this idiot home alive"), the best fence/vendor in the game, after-dark intel on every other faction, and **followers:** Crew staff for the base — door staff, drivers, lookouts. Staffing and mission-support flavor, per `02-game-design.md`: followers are not combat units; they make your businesses run and your night jobs smoother.
 - **Romance (COMMITTED):** Cass has a **full romance track — the hardest gates in the game.** He'll flirt like a five-alarm fire for free; the track itself opens only behind top-tier Crew rep, one kept secret, and one refused bribe. The arc is discovering whether there's a person under the proprietor. There is. He hates it.
 - **Rep rises:** completing night jobs, spending big, keeping his secrets, being interesting. **Rep falls:** violence inside the club (bad for business), talking to cops or the Aldermen, being boring — genuinely, repeated dull dialogue choices tick rep down. Cass's respect is a bandwidth issue.
 - **Conflicts:** Odegaard is his landlord in the only sense that matters — the Antler sits on the Aldermen's spine, and the inspection shakedowns are turf pressure with a clipboard; Bee considers him a landlord of vices; the Isles Trust launders through the Crew and he's one audit from owned.
@@ -282,9 +282,9 @@ Each ambient NPC also rolls **two quirks** from a pool (~60 entries: "always eat
 
 Opinion is a scale: **GRUDGE → WARY → NEUTRAL → WARM → CLOSE → SMITTEN.** Every line the dialogue system assembles carries (a) opinion tier, (b) up to two memory tags, (c) the speaker's dials. Rules for writers: memory references are *specific, never summarized* ("you caught the awning," never "you helped me"); higher opinion buys longer sentences and worse jokes; GRUDGE tier is short, cold, and never cartoonish; flirtation only generates at WARM+ AND player-initiated history (tone bible: opt-in, always).
 
-**Tier formula (binding here; math owned by the sim doc):** `tier = band(Trust + Respect)` — two axes, summed, cut into the six bands. **SMITTEN additionally requires Attraction ≥ threshold AND an active romance track** — no track, no SMITTEN, whatever the numbers say. Opinion tiers **derive from** 02's friendship/romance levels — one scale derives from the other; they are never authored separately and never allowed to drift.
+**Tier formula (binding here; math owned by `02-game-design.md` §5.5):** `tier = band(Trust + Respect)` — two axes, summed, cut into the six bands. **SMITTEN additionally requires Attraction ≥ threshold AND an active romance track** — no track, no SMITTEN, whatever the numbers say. Opinion tiers **derive from** `02-game-design.md`'s friendship/romance levels — one scale derives from the other; they are never authored separately and never allowed to drift.
 
-### Memory-tag registry (seed set — registry owned by this doc; decay/juice math owned by the sim doc)
+### Memory-tag registry (seed set — registry owned by this doc; decay/juice math owned by `02-game-design.md` §5.5)
 | Tag | Trigger event | Decay class | Juice class |
 |---|---|---|---|
 | `saw_you_fight_for_the_aldermen` | witnessed player on an Aldermen job | slow | betrayal |
@@ -300,7 +300,7 @@ Opinion is a scale: **GRUDGE → WARY → NEUTRAL → WARM → CLOSE → SMITTEN
 | `heard_the_handshake_photo` | Stage 1 Act-reveal item reached speaker (`09` §5) | medium | weirdness→betrayal (forks) |
 | `knows_the_registry_truth` | Stage 3 item reached speaker at fidelity above floor | never (re-priced, not decayed) | betrayal |
 | `family_flagged_by_civis` | speaker or 1-hop family member is on the CIVIS flag queue | never while zone active | context (co-fires; sharpens every other tag) |
-| `you_walked_the_accompaniment` | player escorted a flagged neighbor with Lola's network | very slow | generosity |
+| `you_walked_the_accompaniment` | player walked a flagged neighbor with Lola's network (MORN-open walks) | very slow | generosity |
 
 **Ten calibration lines** (the system's target voice — writers match these):
 
@@ -346,6 +346,7 @@ Opinion is a scale: **GRUDGE → WARY → NEUTRAL → WARM → CLOSE → SMITTEN
 - **Mutation FORKS:** a mutated item doesn't replace the original — **both versions propagate**, fidelity marking the fork. The player can encounter, and separately have to live down, two versions of the same night.
 - **Sinks (generalized rule):** any NPC can be a per-topic sink. Wren sinks *everything* (the absolute case). **Faction-affiliated NPCs sink gossip damaging to their own faction** — Crew staff don't pass Antler back-room items; Commons neighbors don't spread Bee's business; Civic Shield contractors' recollections malfunction on schedule, like their cameras.
 - **World triggers:** gossip reaching a **flagged NPC** can fire a world event, not just a dialogue change. Canonical example: any item about the player crossing Trust interests that reaches an estate-security ear fires Adelaide's response beat (see chain 5).
+- **"School" (authored pseudo-node):** the single conduit between the adult gossip graph and Lucía — a fixed, high-mutation, fidelity-floored pipe (everything arrives as garbled myth; nothing arrives at provable fidelity). **No child NPC entities exist** — the §4 age floor (21+) stands absolutely; "school" is a pipe, not a place with agents. It runs adult graph → Lucía (Stage 4 fuse, `09` §5) and Lucía → adult graph (the rubric leaks), and nothing else.
 - **Inferred provenance ("the behavioral tell"):** high-observation NPCs (Ronda, Moe, Farhia, Marcus) can emit gossip items generated from *visible state changes* rather than witnessed events — a changed seating chart, a standing order poured unprompted, credit quietly cut off. Inferred items carry `provenance: inferred`, a hard fidelity cap, and never name the trigger event — the room knows *something*, not *what*.
 - **Speed:** a typical juicy item saturates Uptown in ~2 in-game days; it hits your partner in hours if any hop touches a hub.
 
@@ -364,4 +365,4 @@ Opinion is a scale: **GRUDGE → WARY → NEUTRAL → WARM → CLOSE → SMITTEN
 
 ---
 
-*Ownership map: `05-combat.md` owns kit frame data and the all-melee tuning corner; `06-sim-systems.md` owns opinion/gossip math (this doc owns the tag registry and the voice); `03-world-minneapolis.md` owns turf boundaries and venues — The Velvet Antler (#05), the Fourplex (#15), The Shorehouse (#18), The Caucus Room (#21), The Understory (#24, neutral), plus Crown & Anchor on Lake St.*
+*Ownership map: `02-game-design.md` owns kit frame data, the all-melee tuning corner, and opinion/gossip math (§5.5 — this doc owns the tag registry and the voice); `05-architecture.md` and `06-mobile-performance.md` own the tech these systems run on; `03-world-minneapolis.md` owns turf boundaries and venues — The Velvet Antler (#05), the Fourplex (#15), The Shorehouse (#18), The Caucus Room (#21), The Understory (#24, neutral), Crown & Anchor (#25). Spoiler canon: `09-story-lore.md`.*
