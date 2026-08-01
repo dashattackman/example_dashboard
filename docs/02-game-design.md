@@ -21,7 +21,7 @@ Left thumb: **virtual joystick** (floating origin — appears where the thumb la
 | Button | Tap | Hold (≥300ms) | Context override |
 |---|---|---|---|
 | **ATTACK** | light attack (chains) — **always**, no context overrides on tap | heavy attack (launcher); near a flagged prop, the hold becomes the **environmental attack** instead | — |
-| **POWER** | fires the **currently-equipped power move** — heroes unlock up to 3 power moves (per `04-characters.md` / the `moves[3]` schema in 05) and equip exactly 1, swappable in the squad menu | charged version if the equipped move supports it | full meter: **signature finisher** (§1.3) |
+| **POWER** | fires the **currently-equipped power move** — heroes unlock up to 3 power moves (per `04-characters.md` / the `moves[3]` schema in `05-architecture.md`) and equip exactly 1, swappable in the squad menu | charged version if the equipped move supports it | full meter: **signature finisher** (§1.3) |
 | **DODGE/GRAB** | dodge roll in stick direction | — | adjacent stunned/grabbable enemy: throw |
 | **SWAP** | swap to next hero (portrait order) | radial: pick specific hero | downed ally targeted: swap-revive |
 
@@ -39,7 +39,7 @@ Rules that make this work on a phone:
 - **Team juggling:** AI allies are tuned to contribute one hit to your juggles when in range — the "splash page" moment (pillar 2). Swapping mid-juggle keeps the juggle alive; juggle counter is squad-wide.
 - **Throws:** grab a stunned/grabbed enemy → stick direction + release throws them 4m. Thrown enemies are projectiles: 1.5× impact damage to anything they hit, knockdown in a 1.5m radius. Throwing enemies into other enemies is the highest-skill, highest-reward crowd tool. Throw into a wall = wall-splat (2s stun).
 - **Environmental attacks:** flagged props (parking meters, patio chairs, trash cans, bike racks, café tables) show a subtle ink-outline pulse when in range. Triggered on **ATTACK-hold** near the prop — a tap never steals your light chain (input theft is a bug class, not a tradeoff). One input, big juicy result: parking meter uproot = 3-hit club with coin-spray VFX on break; patio chair = one throw. Props respawn per-fight, 4–8 per arena. Environmental kills grant +20% material drops.
-- **Signature finishers:** each **hero** has exactly ONE signature finisher (10 total — the anim budget in docs/06 caps unique animations at 3 power moves + 1 signature per hero; per-pairing cinematics are explicitly out of scope). Triggered via POWER at full meter: a 2.5s canned cinematic-lite move, 400% of a light hit in a 4m radius + guaranteed knockdown, costs the full power meter. **Pair flavor is garnish, not animation:** if an ally is within 5m, they snap a canned assist pose and the pairing fires a shared VO bark line — per-pairing *data* (pose ID + bark line rows in `04-characters.md`), zero unique animation. These are the screenshot moment — camera pulls in, time dilates to 0.5× for 0.8s.
+- **Signature finishers:** each **hero** has exactly ONE signature finisher (**11 total — the 10 roster heroes plus the Anchor's *Full Hands*, §1.8**; the anim budget in `06-mobile-performance.md` caps unique animations at 3 power moves + 1 signature per hero; per-pairing cinematics are explicitly out of scope). Triggered via POWER at full meter: a 2.5s canned cinematic-lite move, 400% of a light hit in a 4m radius + guaranteed knockdown, costs the full power meter. **Pair flavor is garnish, not animation:** if an ally is within 5m, they snap a canned assist pose and the pairing fires a shared VO bark line — per-pairing *data* (pose ID + bark line rows in `04-characters.md`), zero unique animation. These are the screenshot moment — camera pulls in, time dilates to 0.5× for 0.8s.
 
 ### 1.4 Stamina & power economy
 
@@ -84,41 +84,27 @@ Crowd composition budget: a standard brawl is **8–14 enemies total, ≤6 on sc
 
 ### 1.8 The Anchor — multithreading as a combat verb
 
-The Anchor doesn't have *a* power; he runs **THREADS** — sustained effects that keep working while he brawls. He is the only multithreader in the setting (01, Premise) and the only character whose kit works this way.
+**What threads ARE is owned by `04-characters.md` §1.0 and `09-story-lore.md` §5 (canonical). This section is the systems wrapper.** The Anchor is a **null holding other people's resonances**: his threads are **attunement echoes** of bonded squadmates' core moves. He has no generic power library — a generic library would re-break the one-resonance law (09 §2/§5). Everything he fields, someone let him hold.
 
-**Thread slots:** starts with **2**, upgrade tree grows toward **4**. A slot hosts one running effect until dropped or the fight ends.
+**Attunement:** a bonded roster hero **consents** (authored scene at **bond 2**) → unlocks an **echo** of one of their core moves for his palette. Echoes persist whether or not the source hero is currently fielded. Echo classes mirror the canonical move classes — **Stance / Field / Strike** — e.g., a running *Black Ice* Field echo under his feet while a *Payback* Strike echo runs in his hands (04 §1.0's own example).
 
-**Controls (two thumbs, zero gestures — same POWER button as everyone else):**
-- **Tap POWER:** fires his equipped active move, exactly like any hero (moves[3] schema unchanged).
-- **Hold POWER (≥300ms):** opens the **thread palette** — a radial around the thumb; game time dilates to **0.3× for up to 4s** while it's open. Drag to a sector and release: assigns that effect to an open slot, or drops it if it's already running. Left stick keeps steering the whole time. Same interaction pattern as the SWAP radial — nothing new to learn.
-- Threads are **fire-and-forget**: no aiming, no micromanagement. Force Hand auto-targets, auras follow him, barriers plant where he's facing at cast. The only decision is *which threads* — made at 0.3× time.
+**Slots — explicit mapping to the round-2 numbers:** displayed slots still read **2 → 4 total**, decomposed as **Slot Zero + 1 free slot at start → Slot Zero + 3 free slots late-tree**. **Slot Zero** (binding, 04 §1.0) is permanently occupied and permanently lit — Lucía's unset resonance, held since the Act: unspendable, never droppable, hosts nothing, and reserves **zero** stamina regen (what it costs him, the stamina bar can't measure). The UI never explains it until the story does.
 
-**Thread economics — the per-fight decision:** each running thread reserves **25% of his stamina regen** (Branch 1 improves to 20%). Two threads = half-speed dodges; four threads (late tree) = massive board control on a nearly dry stamina bar. More threads = thinner dodges, every fight, on purpose. Igniting a thread costs **20 power meter**; dropping one is free and instant — so thread uptime competes directly with his signature finisher.
+**Controls (unchanged):** tap POWER = fire the equipped **Strike echo**, exactly like any hero's tap; hold ≥300ms = the **thread palette** — a radial around the thumb, game time at **0.3× for up to 4s**; drag-release lights an echo on a free slot or drops a running one. Left stick keeps steering; same interaction pattern as the SWAP radial. Echoes are **fire-and-forget**: no aiming, no micromanagement — the only decision is *which echoes*, made at 0.3× time.
 
-**Thread library (slice ships 6 effects; Branch 2 unlocks/upgrades them):**
-
-| Thread | Effect (tunable defaults) |
-|---|---|
-| **Barrier** | 3m kinetic wall segment where he faces; blocks ranged fire; durability = 150% of his max HP |
-| **Force Hand** | autonomous force-hand: stagger-jab on nearest enemy every 2s (damage = 0.8 light hit); can pin one grunt in place |
-| **Slow-Field** | 4m radius field on him: enemies inside −40% move & attack speed |
-| **Mend** | 5m aura: squad regens 2% max HP/s |
-| **Haste** *(ally buff)* | hosted ON a squadmate: +20% attack speed |
-| **Ward** *(ally buff)* | hosted ON a squadmate: −25% damage taken |
-
-Buff threads make him the squad engine: an AI ally carrying Haste while you juggle is the multithread fantasy without any extra inputs.
+**Thread economics (unchanged — the per-fight decision):** each running **free** thread reserves **25% of his stamina regen** (Capacity branch improves to 20%). Two echoes = half-speed dodges; three free echoes (late tree) = massive board control on a nearly dry stamina bar. Igniting an echo costs **20 power meter**; dropping is free and instant — thread uptime competes directly with his signature.
 
 **Branch structure — REPLACES the standard 3-branch shape (§2.1), same 21 nodes and cost curve:**
 
 | Branch | Theme |
 |---|---|
-| **Capacity** | slot 3 (node 3), slot 4 (node 6), regen reservation 25%→20%, palette dilation duration |
-| **Library** | unlock Slow-Field/Mend/Ward (Barrier, Force Hand, Haste are starters) + potency modifiers |
-| **Braids** | cross-thread combos: two running threads within 4m merge into one stronger effect occupying both slots — Barrier+Force Hand = **Golem** (walking shield that shoves), Slow+Barrier = **Stasis Cage** (3s trap), Mend+Haste = **Overclock** (+40% ally attack speed for 5s, then both threads drop). Braid recipes are data rows, not new systems. |
+| **Capacity** | free slot 2 (node 3), free slot 3 (node 6); **class permissions** — Strike echoes at start, Stance unlocks at node 2, Field at node 4; reservation 25%→20%; palette duration |
+| **Echo Fidelity** *(replaces "Library")* | an echo's strength = the **source hero's bond level** through the fidelity curve: **60% of the source move's numbers at bond 2, 80% at bond 3–4, 100% at bond 5**; branch nodes raise the floor and push the cap to **120%** ("truer than the original — he's had time to listen"). **The synergy, stated plainly: bond XP now feeds combat twice** — roster-hero XP (§2.2) AND the Anchor's echo strength. Date your squad; your threads hit harder. |
+| **Braids** | two running echoes braided into one composite effect occupying both slots. Recipes are **data rows keyed to source-move pairs** — naming and flavor per pairing are owned by 04, not invented here. |
 
-**Signature finisher — "Full Braid":** collapses every running thread into a radial burst: 150% of a light hit per running thread, 5m radius, all threads drop. Standard 100-power cost; the assist-garnish rule (§1.3) applies.
+**Signature finisher — "Full Hands"** *(canon name; "Full Braid" is dead)*: for **5 seconds, every attuned echo in his loadout runs at once at full fidelity**, ignoring slot count and stamina reservation — the screen fills with everyone he's let in. Then every free thread drops. Standard 100-power cost; §1.3's assist-garnish rule applies, and 04 §1.11's Anchor barks fire off whichever hero's echo is lit.
 
-**AI rules when a roster hero is controlled:** the AI Anchor keeps threads running, never starts new ones, and drops Mend last. **Progression:** the Anchor levels on combat XP and story beats only — no bond-XP spigot on yourself (§2.2 applies to roster heroes).
+**AI rules when a roster hero is controlled:** the AI Anchor keeps echoes running, never lights new ones, and when stamina-starved drops the highest-reservation echo first. **Progression:** the Anchor levels on combat XP and story beats only — no bond-XP spigot on yourself (§2.2 applies to roster heroes).
 
 ### 1.9 Machine enemies — the CIVIS family
 
@@ -127,7 +113,7 @@ Parallel enemy class to §1.5, bound by the controversy contract in 01: **machin
 | Unit | Role | HP (× grunt) | Behavior | Counterplay |
 |---|---|---|---|---|
 | **Scanner** | force multiplier, priority kill | 0.75× | paints/flags targets: flagged targets take +20% damage from machines and Detainers path to them; hangs back, fragile | kill first, always; throwing anything at it works |
-| **Detainer** | the scary one | 3× | grabs a flagged NPC (or downed squadmate) and **tries to LEAVE** — a rescue timer (20s), never a DPS race; carrying slows it 30% | hits to its arm assembly break the grip; Slow-Field/Stasis Cage are counters by design |
+| **Detainer** | the scary one | 3× | grabs a flagged NPC (or downed squadmate) and **tries to LEAVE** — a rescue timer (20s), never a DPS race; carrying slows it 30% | hits to its arm assembly break the grip; Field-class echoes (§1.8) and the roster's control kits (04) are counters by design |
 | **Bulwark** | shield wall | 5× | frontal shield, immune from the front, anchors formations | environmental attacks and thrown bodies bypass the shield; bait the shield-raise, flank, or bowl it over |
 | **Swarm drone** | dodge practice | 0.2× | groups of 5–8, telegraphed dive attacks, one-hit satisfying pops | dodge timing; each pop feeds power meter — they're batteries |
 | **Warden-hand** | rare mini-boss | 10× | detached heavy manipulator chassis; grabs props and squadmates, uses the environment against YOU; the only machine that re-plans mid-fight | drops 5 flux containment cells + 12–20 scrap; capped 1 per mission |
@@ -146,7 +132,7 @@ Parallel enemy class to §1.5, bound by the controversy contract in 01: **machin
 
 ### 2.1 Per-hero upgrade trees
 
-Every **roster hero** has **3 branches × 7 nodes** (21 nodes/hero). The Anchor keeps the 21-node/cost-curve chassis but swaps the branch themes for Capacity/Library/Braids (§1.8):
+Every **roster hero** has **3 branches × 7 nodes** (21 nodes/hero). The Anchor keeps the 21-node/cost-curve chassis but swaps the branch themes for Capacity / Echo Fidelity / Braids (§1.8):
 
 | Branch | Theme | Example node types |
 |---|---|---|
@@ -161,7 +147,7 @@ Node costs: **cash + flux**, curve per node index within a branch (n = 0–6): `
 Hero levels (1–30) gate tree tiers (nodes 1–2 free at Lv1, 3–4 at Lv10, 5–7 at Lv20).
 
 - **Combat XP:** shared to the full squad of 3 (100% controlled hero, 70% AI allies) — swapping is never an XP tax. Benched roster heroes get 20% trickle.
-- **Bond XP:** each **bond level with that hero** (friendship or romance track, §5) grants a flat hero-XP grant equal to ~one tier-appropriate brawl *and* a permanent perk (e.g., bond 3 = that hero's signature finisher costs 90 power instead of 100). **Hanging out with your bruiser makes them a better bruiser.** This is pillar 3 and pillar 4 shaking hands; do not cut it for balance reasons — rebalance combat XP instead.
+- **Bond XP:** each **bond level with that hero** (friendship or romance track, §5) grants a flat hero-XP grant equal to ~one tier-appropriate brawl *and* a permanent perk (e.g., bond 3 = that hero's signature finisher costs 90 power instead of 100) — and, for attuned heroes, raises the Anchor's echo fidelity (§1.8). **Hanging out with your bruiser makes them a better bruiser.** This is pillar 3 and pillar 4 shaking hands; do not cut it for balance reasons — rebalance combat XP instead.
 - **Training room** (§3) adds passive XP as a third minor spigot, capped so it never outpaces play.
 
 ### 2.3 Player Reputation (account progression)
@@ -177,7 +163,7 @@ Hero levels (1–30) gate tree tiers (nodes 1–2 free at Lv1, 3–4 at Lv10, 5�
 | Currency | Sources | Sinks | Feel |
 |---|---|---|---|
 | **Cash** | brawl loot, jobs, businesses, crop/dish sales | upgrade nodes, base rooms, dates, gifts, fashion | fluid, always something worth buying |
-| **Flux** | brawl drops (crystallized from defeated supers), **flux crops** (§3), leader kills (3–8) | upgrade nodes (the real gate), signature evolutions, greenhouse seed tiers | scarcer; the combat↔farming bridge. **Parity rule: one flux plot-cycle ≈ one good brawl's flux take.** With the hard 4-plot cap (§3.2), farm and fight lanes both land on ~60 flux/real-hour mid-game — neither runs away. |
+| **Flux** | brawl drops (superpowered exertion sheds charge, and charge crystallizes on charged ground — you're sweeping the arena after a fight, not looting bodies; lore per 09 §2), **flux crops** (§3), leader kills (3–8) | upgrade nodes (the real gate), signature evolutions, greenhouse seed tiers | scarcer; the combat↔farming bridge. **Parity rule: one flux plot-cycle ≈ one good brawl's flux take.** With the hard 4-plot cap (§3.2), farm and fight lanes both land on ~60 flux/real-hour mid-game — neither runs away. |
 
 No premium currency. No energy system. Ever.
 
@@ -382,10 +368,28 @@ Hard rule: **every mission's objective is a state change** in the table above. "
 
 Every **3 in-game days** (tunable) the fleet re-syncs and its behavior **mutates**: new unit-mix weights, new patrol logic, and occasionally a hilarious new literal-minded directive (mutation deck is **12 authored entries** in the slice — e.g., patrols begin escorting food trucks after a "protect commerce" misparse; comedy per controversy contract rule 4: the bots' literal-mindedness, never anyone's fear). A zone-wide sync klaxon telegraphs it; spoofed terminals let you read the new directive early. **This is stated as the anti-boredom engine:** the zone never presents the same tactical problem two visits running, without hand-authoring new content.
 
+**Reconciliation with story canon (binding):** the mutation clock starts at **Patch Night** (09 §6). The story mutations **M1–M6** are **scheduled deck entries** injected at their act beats — when one fires, it **consumes that cycle's pull** (no comedic mutation stacks on a story mutation's cycle). The 12-entry comedic deck fills all remaining ticks. **09 owns M1–M6 narratively**; this section owns only cadence and pull mechanics; per-mutation bot combat-behavior changes are specced with the combat AI in `05-architecture.md`.
+
 ### 8.4 Zone pressure ↔ the NPC sim
 
 - **Pressure on:** flagged NPCs' schedules **contract** (LATE outings stop first, then EVE — they stop going out); corridor venues cut hours and lose stock; gossip carries fear tags that dent district Social buffs and date options.
 - **Player wins visibly reverse it:** on the next sleep tick after a win, schedules **re-expand**, venues re-light, rescued NPCs and their circles fire gratitude beats (+Respect/+Trust across their gossip neighborhood, bond XP). **The world thanks you by living more** — pillar 1's payoff, and the loudest reward signal the zone gives.
+
+### 8.5 Endings — the reveal ledger and zone-state resolution
+
+The four endings (canon: 09 §6 — Sunset Patch / Accounting / Custodian / Long Winter) read one variable: the **reveal ledger** — `reveal_ledger[stage] ∈ {face_it, bury_it}`, recorded at Stages 1, 2, 3, and 5 (**Stage 4 records the chosen opening, not a verb — it has no bury-it**, 09 §5). **Endings gate on the PATTERN, not any single pick:**
+
+- **Accounting** requires face-it at Stage 5 plus a face-it majority across Stages 1–3.
+- **Custodian** requires bury-it at Stage 5 (Adelaide's door); prior burials deepen it, none is individually required.
+- **Sunset Patch** is pattern-agnostic — available on any ledger and any reputation state (canon).
+- **Long Winter** is triggered by an *action* (brute-forcing the perimeter before Act 3 resolves), on any pattern.
+
+| Ending | `perimeter_integrity` | `patrol_density` | Fleet disposition | `registry_escrow` | Post-ending sim rules |
+|---|---|---|---|---|---|
+| **Sunset Patch** | 0 (dismantled) | 0 | bricked mid-sentence; corridor becomes salvage fields (scrap-rich harvest nodes for 2 in-game weeks) | **TRUE** — survives in backup escrow, and the ending says so | venues reopen on next sleep; schedules fully re-expand; Commons gratitude beats; sentiment normalizes on standard gossip decay |
+| **Accounting** | 0 | 0 | stands down by its own logic (one completed file), then decommissioned | **FALSE** — legally destroyed on camera | opinion craters, then rebuilds **house by house: the epilogue is the gossip system running in reverse** (authored positive items propagate on normal §5.5 hop rules); corridor reopens |
+| **Custodian** | 100 — repurposed, player-held | 1 zone-wide (his patrols) | active; answers to Eli | **TRUE** — he holds it | corridor machine fights end (mission board switches to directed-patrol variants); flagged schedules re-expand but GRUDGE greetings persist; Fear currency permanently live; Bee's board/vendor lockouts; Adelaide's card |
+| **Long Winter** | 0 (broken, not freed) | 0 in corridor; rare single-unit encounters citywide | Warden escaped into the municipal grid mid-sentence | **TRUE** — unresolved | corridor scarred: 30% of zone venues stay dark permanently; first-snow state locks in; no gratitude wave; sentiment normalizes at 2× decay time |
 
 ---
 
@@ -395,20 +399,30 @@ Every **3 in-game days** (tunable) the fleet re-syncs and its behavior **mutates
 
 City sentiment is **an aggregate readout of the existing per-NPC opinion axes (§5.1) propagated on the existing gossip graph (§5.5)**. There is no separate global opinion variable; the "street temperature" UI is a weighted sample of nearby NPCs' axes. State this in code review terms: any PR adding a global sentiment scalar is wrong by design.
 
-### 9.2 The reveal — staged, high-salience gossip
+### 9.2 The reveal — five stages, five different payloads
 
-The Act (01, Premise) surfaces in **3 authored stages: Rumor → Evidence → Testimony.** Each stage injects a **high-salience gossip event**: fidelity 1.0, 2 hops per sleep (vs. normal 1), half-speed decay. NPCs react per their own dials — the same event lands differently on every character (pillar 4).
+The Act surfaces in **FIVE named stages** (canon: `09-story-lore.md` §5 owns order, content, and scenes; this section owns the mechanical payload each stage drops into the sim). Stages that inject gossip items inject them **high-salience**: fidelity 1.0 at source, 2 hops per sleep (vs. normal 1), half-speed decay. Every stage writes its verb to the reveal ledger (§8.5).
+
+| Stage | Sim payload (mechanics) |
+|---|---|
+| **1. The Handshake Photo** | standard **forked gossip item**: enters weirdness-class, forks into betrayal-class on hops. **Hub curation is live** — named hub NPCs choose to amplify or refuse (Dre refuses; the Gopher Line amplifies): spread is shaped by the §5.5 graph, never scripted. |
+| **2. The Architecture** | **NO gossip item.** Squad-only flag `knows_architecture` on the current squad + August. **Explicit leak condition (bury-it gone bad):** if Stage 2 was buried (lied to August) AND later any flagged squadmate's bond drops below 2, OR the player uses Fear-intimidation on any squadmate, the item enters the graph as betrayal-class at **fidelity 0.7**. Face-it never leaks — the squad keeps it. |
+| **3. The Registry** | **phone-tree broadcast:** Bee's Commons tree re-tiers **every Commons NPC in one sleep tick** — the gossip system's designed maximum-load event — and plants the **`knows_the_registry_truth`** tag on every recipient. The tag gates dialogue variants and Stage-5 reactions; Adelaide's Stage-3 bury-it makes the data unprovable but **cannot remove the tag from anyone already carrying it**. |
+| **4. Lucía asks** | **out-of-system — the kid channel.** Sourced from schoolyard garble of Stage 3 (fidelity-floor, mutation-heavy items reaching kids as myth); the scene is hand-written, and **no opinion mechanics fire**. This one's just for the player. |
+| **5. The Ledger** | fully authored; injects the final public item and locks the ending fork against the accumulated ledger pattern (§8.5). |
+
+Gossip math for all of the above is owned by **§5.5** — including this arc's canonized rule that **high-MISCHIEF mutations can be accidentally true** (09 §5).
 
 **Reaction modifier table (per archetype, on reveal stages AND on bot-smashing news):**
 
 | NPC archetype / faction | Bot-smashing wins | Reveal stages |
 |---|---|---|
-| Flagged community & families | +Respect +Trust (strong) | +Trust ("he's one of ours now") unless monster path active |
-| Corridor small-biz owners | +Respect; −Trust if collateral property damage that mission | mixed; Testimony stage can win them back |
+| Flagged community & families | +Respect +Trust (strong) — **muted after Stage 3**: GRUDGE filters gratitude | Stages 1–2: benefit of the doubt. **Stage 3: trends GRUDGE across the corridor — they do NOT rally to him** (canon, 09 §5); a written minority defends him ("the ledger is complicated"); Stage 5 reactions gate on `knows_the_registry_truth` + the ledger pattern |
+| Corridor small-biz owners | +Respect; −Trust if collateral property damage that mission | mixed; a face-it Stage 5 can win them back, house by house |
 | Grievance types (radio callers, lawn-sign guy) | **−Respect +Fear** — they dock you for bot-smashing | −Respect −Trust, loudly; written as textured characters per controversy contract rule 3 |
-| Council / establishment | −Trust (you embarrass them) | −Trust +Fear |
-| Old-guard supers | per-faction (see 04/09) | +Respect from some — they knew pieces |
-| Most of the city | **+Respect (cheers it)** | watches which path you pick |
+| Council / establishment | −Trust (you embarrass them) | −Trust +Fear; Stage 3 panic is genuine (they signed things) |
+| Old-guard supers | per-faction (see 04/09) | +Respect from some — they knew pieces; Bee's Stage-3 fury is a mirror (09 §6) |
+| Most of the city | **+Respect (cheers it)** | watches which pattern you build, stage by stage |
 
 ### 9.3 Two paths, both with teeth, neither a game-over
 
