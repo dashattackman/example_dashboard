@@ -48,7 +48,10 @@ async function boot(): Promise<void> {
   const { minX, maxX, minZ, maxZ } = corner.bounds;
   let heading = 0;
   scene.onBeforeRenderObservable.add(() => {
-    const dt = Math.min((scene.deltaTime ?? 16) / 1000, 0.1);
+    // engine.getDeltaTime(), NOT scene.deltaTime — the latter is declared in
+    // Babylon's types but never assigned at runtime (playtest blocker B1:
+    // dt locked to 16ms made walk speed frame-rate dependent).
+    const dt = Math.min(engine.getDeltaTime() / 1000, 0.1);
     const mag = Math.hypot(input.x, input.y);
     if (mag > 0.12) {
       const step = (MOVE_SPEED * Math.min(mag, 1) * dt) / (mag || 1);

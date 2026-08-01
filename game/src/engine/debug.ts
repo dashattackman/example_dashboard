@@ -45,7 +45,7 @@ export function attachDebug(
       transport,
     };
     window.__twinDebug = stats;
-    acc += scene.deltaTime ?? 16;
+    acc += engine.getDeltaTime();
     if (el && acc > 250) {
       acc = 0;
       el.textContent =
