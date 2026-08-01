@@ -1,6 +1,11 @@
 // The ONLY layer that may import @babylonjs/* (docs/05 module rule).
 import { Engine } from '@babylonjs/core/Engines/engine';
 import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
+// WebGPUEngine ships its optional features as side-effect extension modules; without
+// these, the first DynamicTexture update / alpha-blended material THROWS at runtime on
+// the WebGPU path only — WebGL2 CI never sees it (the production blue-screen).
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.dynamicTexture';
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
 import { Scene } from '@babylonjs/core/scene';
 import { Color4 } from '@babylonjs/core/Maths/math.color';
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';

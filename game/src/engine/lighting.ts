@@ -82,14 +82,20 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     hemiSky: '#7286c2',
     hemiGround: '#5a4030', // warm street bounce — golden hour lives in the fill too
     hemiIntensity: 0.55,
-    fog: { color: '#c98a58', start: 110, end: 430 },
+    fog: { color: '#bd8b60', start: 110, end: 430 }, // a touch tealward off pure sodium
     skyStops: [
       // The Uptown signature: teal dusk over a sodium-gold horizon (docs/01).
-      [0, '#0e1e3a'],
-      [0.42, '#2a5d7c'],
-      [0.68, '#d98e4a'],
-      [0.84, '#f2b96b'],
-      [1, '#3a2b28'],
+      // Dome calibration (verified via shots): equator v≈0.5 sits at the horizon and
+      // the gate-shot frame sees v≈0.40-0.55 — teal fills that band, sodium hugs the
+      // rooflines at 0.52-0.58, ground-brown below.
+      [0, '#0e2038'],
+      [0.3, '#20506c'], // upper blend stays teal so the whole framed band reads teal
+      [0.425, '#2f6486'],
+      [0.458, '#e8a050'], // sodium rim right above the skyline's top edge
+      [0.478, '#f2b96b'],
+      [0.52, '#b06a38'],
+      [0.6, '#3a2b28'],
+      [1, '#241d18'],
     ],
     clear: '#16233f',
     rim: { color: '#ffcf8a', intensity: 1.0 },
@@ -104,11 +110,13 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     hemiIntensity: 0.52,
     fog: { color: '#0d1430', start: 80, end: 340 },
     skyStops: [
+      // Same dome calibration as EVE: violet city-glow rides just above the horizon.
       [0, '#05070f'],
-      [0.5, '#0d1530'],
-      [0.78, '#232a55'],
-      [0.92, '#41295c'], // violet city-glow horizon
-      [1, '#1a1030'],
+      [0.3, '#0d1530'],
+      [0.42, '#232a55'],
+      [0.47, '#41295c'], // violet city-glow clears the rooftops
+      [0.55, '#1a1030'],
+      [1, '#0d0a1a'],
     ],
     clear: '#05070f',
     rim: { color: '#8fb4ff', intensity: 0.85 },
@@ -135,6 +143,9 @@ export function createLightingRig(scene: Scene): LightingRig {
   const skyMat = new StandardMaterial('skyMat', scene);
   skyMat.backFaceCulling = false;
   skyMat.disableLighting = true;
+  // The dome sits beyond fogEnd — with fog on, the whole gradient washes to fog
+  // color and the EVE teal band can never reach the screen. Sky paints itself.
+  skyMat.fogEnabled = false;
   const skyTex = new DynamicTexture('skyTex', { width: 8, height: 256 }, scene, false);
   skyMat.emissiveTexture = skyTex;
   sky.material = skyMat;

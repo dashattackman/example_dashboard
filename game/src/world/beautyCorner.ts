@@ -41,8 +41,11 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const brickA = kit.envMat('brickA', U.brick);
   const brickB = kit.envMat('brickB', U.brickAged);
   const brickDeep = kit.envMat('brickDeep', U.brickDeep);
-  const tealGrey = kit.envMat('tealGrey', '#3f5560');
-  const warmGrey = kit.envMat('warmGrey', '#55483f');
+  // West-row masses sit in EVE shade (east facades face away from the low sun),
+  // so their diffuse runs lighter than the sunlit east side to keep structure readable.
+  const tealGrey = kit.envMat('tealGrey', '#50697a');
+  const brickWest = kit.envMat('brickWest', '#7d4033');
+  const warmGrey = kit.envMat('warmGrey', '#6a594a');
   const trim = kit.envMat('trim', U.trim);
   const inkMat = kit.envMat('inkMat', '#1f2126');
   const whitePaint = kit.envMat('whitePaint', '#b9b9b2');
@@ -104,7 +107,7 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const bldgA = kit.box('bldgA', 22, 11, 30, brickA, { pos: [16, 5.5, -5] }); // corner store
   const bldgB = kit.box('bldgB', 20, 14.5, 38, brickB, { pos: [15, 7.25, 39] });
   const c1 = kit.box('c1', 13, 8, 26, tealGrey, { pos: [-19.5, 4, -13] });
-  const c2 = kit.box('c2', 13, 12.5, 28, brickDeep, { pos: [-19.5, 6.25, 16] });
+  const c2 = kit.box('c2', 13, 12.5, 28, brickWest, { pos: [-19.5, 6.25, 16] });
   const c3 = kit.box('c3', 13, 9, 30, warmGrey, { pos: [-19.5, 4.5, 47] });
   kit.freeze(bldgA, bldgB, c1, c2, c3);
 
@@ -155,11 +158,14 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   };
   addWindows(5, HALF_PI, [5.2, 8.4], -17.5, 8, 3.3, 0.5); // A upper floors
   addWindows(5, HALF_PI, [5.0, 8.2, 11.4], 22.5, 10, 3.3, 0.45); // B
-  addWindows(-13, -HALF_PI, [5.0], -24.5, 7, 3.6, 0.4); // C1
-  addWindows(-13, -HALF_PI, [5.0, 8.4], 3.8, 7, 3.6, 0.4); // C2
-  addWindows(-13, -HALF_PI, [5.2], 33.8, 8, 3.6, 0.4); // C3
+  // West row lights up harder — it carries the left third of the gate shot.
+  addWindows(-13, -HALF_PI, [5.0], -24.5, 7, 3.6, 0.55); // C1
+  addWindows(-13, -HALF_PI, [5.0, 8.4], 3.8, 7, 3.6, 0.55); // C2
+  addWindows(-13, -HALF_PI, [5.2], 33.8, 8, 3.6, 0.55); // C3
   kit.thin(frame, frames);
-  kit.thin(glassLit, lit);
+  // Warm variants per pane (instance color multiplies the glow) — kills the
+  // "every window is the same yellow quad" read at LATE.
+  kit.thin(glassLit, lit, ['#ffffff', '#ffdba8', '#f5b96e', '#e2d8c0']);
   kit.thin(glassDark, dark);
 
   // --- the storefront (LAGOON RECORDS — corner of building A) ---------------
@@ -379,7 +385,9 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   // --- phase dressing ---------------------------------------------------------
   const applyNeon = (level: number): void => {
     kit.setGlow(litGlass, U.warmWindow, 0.18 + 0.82 * level);
-    kit.setGlow(shopGlass, '#ffd9a0', 0.35 + 0.65 * level);
+    // Caps at ~0.8 so the big display panes keep a hint of tone instead of
+    // blowing out to raw white-yellow quads at LATE.
+    kit.setGlow(shopGlass, '#ffd9a0', 0.3 + 0.5 * level);
     // Halos square with level so they're shy at dusk and dominant only at night.
     kit.setGlow(lampHalo, U.sodiumGlow, 0.1 + 0.9 * level * level, 0.03 + 0.45 * level * level);
     kit.setGlow(spill, U.warmWindow, 0.55 * level, 0.4 * level);
