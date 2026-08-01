@@ -21,6 +21,7 @@
 
 import { Scene } from '@babylonjs/core/scene';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { MaterialPluginBase } from '@babylonjs/core/Materials/materialPluginBase';
 import { MaterialDefines } from '@babylonjs/core/Materials/materialDefines';
 import { ShaderLanguage } from '@babylonjs/core/Materials/shaderLanguage';
@@ -227,16 +228,42 @@ export function createCharacterMaterial(scene: Scene, name: string): StandardMat
   return mat;
 }
 
+/** Surface texture reference for environment materials. Shipped street maps
+ *  (public/assets/textures, see assets-pipeline/process-street-textures.mjs)
+ *  are desaturated + normalized to mean luma ~0.55, so the palette hex keeps
+ *  owning the color: final ≈ texture(≈0.55 grey-ish) × (palette / 0.55). */
+export interface EnvTextureOpts {
+  url: string;
+  uScale?: number;
+  vScale?: number;
+}
+
+/** Mean luminance the texture pipeline normalizes shipped maps to. */
+const TEX_MEAN_LUMA = 0.55;
+
 /** Environment variant: smooth lighting, subtle rim, strong value contrast
  *  (the environment's "ink" is value structure, not outlines — docs/01). */
 export function createEnvironmentMaterial(
   scene: Scene,
   name: string,
   baseHex: string,
-  opts?: { emissiveHex?: string; emissiveLevel?: number; rimStrength?: number },
+  opts?: {
+    emissiveHex?: string;
+    emissiveLevel?: number;
+    rimStrength?: number;
+    texture?: EnvTextureOpts;
+  },
 ): StandardMaterial {
   const mat = new StandardMaterial(name, scene);
   mat.diffuseColor = Color3.FromHexString(baseHex);
+  if (opts?.texture) {
+    const tex = new Texture(opts.texture.url, scene);
+    tex.uScale = opts.texture.uScale ?? 1;
+    tex.vScale = opts.texture.vScale ?? 1;
+    mat.diffuseTexture = tex;
+    // Lift the tint so texture × tint lands back on the palette value.
+    mat.diffuseColor.scaleInPlace(1 / TEX_MEAN_LUMA);
+  }
   mat.specularColor = Color3.Black();
   if (opts?.emissiveHex) {
     mat.emissiveColor = Color3.FromHexString(opts.emissiveHex).scale(opts.emissiveLevel ?? 1);

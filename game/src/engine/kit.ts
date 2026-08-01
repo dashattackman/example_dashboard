@@ -16,7 +16,7 @@ import type { Material } from '@babylonjs/core/Materials/material';
 import type { ICanvasRenderingContext } from '@babylonjs/core/Engines/ICanvas';
 import '@babylonjs/core/Meshes/thinInstanceMesh'; // side-effect: thinInstance* on Mesh
 
-import { createEnvironmentMaterial } from './materials';
+import { createEnvironmentMaterial, type EnvTextureOpts } from './materials';
 
 /** Placement for kit meshes / thin instances. Position is the mesh center. */
 export interface Xform {
@@ -32,6 +32,16 @@ export interface Xform {
  *  object is a genuine 2D context, so we widen the type here once.) */
 export type Canvas2D = ICanvasRenderingContext & {
   textAlign: 'left' | 'right' | 'center' | 'start' | 'end';
+  ellipse(
+    x: number,
+    y: number,
+    radiusX: number,
+    radiusY: number,
+    rotation: number,
+    startAngle: number,
+    endAngle: number,
+    counterclockwise?: boolean,
+  ): void;
 };
 export type Draw2D = (ctx: Canvas2D, w: number, h: number) => void;
 
@@ -50,8 +60,14 @@ function apply(mesh: Mesh, xf?: Xform): Mesh {
 
 export interface Kit {
   readonly scene: Scene;
-  /** Graphic-novel environment material (smooth light, subtle rim). */
-  envMat(name: string, hex: string, opts?: { emissiveHex?: string; emissiveLevel?: number }): StandardMaterial;
+  /** Graphic-novel environment material (smooth light, subtle rim). Pass
+   *  `texture` for a real surface map — palette hex still owns the hue
+   *  (maps are normalized; see materials.ts EnvTextureOpts). */
+  envMat(
+    name: string,
+    hex: string,
+    opts?: { emissiveHex?: string; emissiveLevel?: number; texture?: EnvTextureOpts },
+  ): StandardMaterial;
   /** Unlit glow material (signs, lit glass, lamp heads, neon). */
   glowMat(name: string, hex: string, level?: number, alpha?: number): StandardMaterial;
   /** Re-tint a glow material — the lighting phase hook for neon dressing. */
@@ -74,7 +90,10 @@ export interface Kit {
   merge(name: string, parts: Mesh[]): Mesh;
   /** Thin-instance `mesh` at each xform; optional per-instance color hexes. */
   thin(mesh: Mesh, xfs: Xform[], colorHexes?: string[]): void;
-  /** Textured quad painted via canvas 2D (signs, skyline backdrop). */
+  /** Textured quad painted via canvas 2D (signs, skyline backdrop, murals).
+   *  `lit: true` runs the canvas through the graphic-novel environment material
+   *  (scene-lit, rim-graded) instead of the default unlit emissive — physical
+   *  painted surfaces (murals, posters, grates) belong in the lighting. */
   canvasPlane(
     name: string,
     w: number,
@@ -82,9 +101,18 @@ export interface Kit {
     texW: number,
     texH: number,
     draw: Draw2D,
-    opts?: { fog?: boolean; alpha?: boolean },
+    opts?: { fog?: boolean; alpha?: boolean; lit?: boolean },
     xf?: Xform,
   ): Mesh;
+  /** Redraw a canvasPlane's texture in place (phase dressing — e.g. the skyline
+   *  swaps lit/unlit windows instead of shipping a baked night texture). */
+  repaint(mesh: Mesh, draw: Draw2D): void;
+  /** Scale an UNLIT canvasPlane's emissive brightness (0..~1). Phase hook for
+   *  window rooms / blinds / shop displays without a repaint. */
+  setCanvasLevel(mesh: Mesh, level: number): void;
+  /** Multiply a mesh's UVs so a tiling texture repeats in world units. Call
+   *  BEFORE merge/thin. One factor per mesh: pick the dominant visible face. */
+  uv(mesh: Mesh, u: number, v: number): Mesh;
   freeze(...meshes: Mesh[]): void;
 }
 
@@ -193,11 +221,19 @@ export function createKit(scene: Scene): Kit {
       const tex = new DynamicTexture(`${name}Tex`, { width: texW, height: texH }, scene, true);
       draw(tex.getContext() as Canvas2D, texW, texH);
       tex.update(); // default invertY keeps canvas orientation upright on the plane
-      const m = new StandardMaterial(`${name}Mat`, scene);
-      m.disableLighting = true;
-      m.diffuseColor = Color3.Black();
-      m.specularColor = Color3.Black();
-      m.emissiveTexture = tex;
+      let m: StandardMaterial;
+      if (opts?.lit) {
+        // Scene-lit painted surface: canvas rides the diffuse slot of the
+        // graphic-novel env material, so murals/posters sit in the lighting.
+        m = createEnvironmentMaterial(scene, `${name}Mat`, '#ffffff');
+        m.diffuseTexture = tex;
+      } else {
+        m = new StandardMaterial(`${name}Mat`, scene);
+        m.disableLighting = true;
+        m.diffuseColor = Color3.Black();
+        m.specularColor = Color3.Black();
+        m.emissiveTexture = tex;
+      }
       if (opts?.alpha) {
         tex.hasAlpha = true;
         m.opacityTexture = tex;
@@ -206,6 +242,32 @@ export function createKit(scene: Scene): Kit {
       const mesh = MeshBuilder.CreatePlane(name, { width: w, height: h }, scene);
       mesh.material = m;
       return apply(mesh, xf);
+    },
+
+    repaint: (mesh, draw) => {
+      const m = mesh.material as StandardMaterial;
+      const tex = (m.emissiveTexture ?? m.diffuseTexture) as DynamicTexture;
+      const { width, height } = tex.getSize();
+      draw(tex.getContext() as Canvas2D, width, height);
+      tex.update();
+    },
+
+    setCanvasLevel: (mesh, level) => {
+      const m = mesh.material as StandardMaterial;
+      if (m.emissiveTexture) m.emissiveTexture.level = level;
+    },
+
+    uv: (mesh, u, v) => {
+      const data = mesh.getVerticesData(VertexBuffer.UVKind);
+      if (data) {
+        const scaled = new Float32Array(data.length);
+        for (let i = 0; i < data.length; i += 2) {
+          scaled[i] = data[i]! * u;
+          scaled[i + 1] = data[i + 1]! * v;
+        }
+        mesh.setVerticesData(VertexBuffer.UVKind, scaled);
+      }
+      return mesh;
     },
 
     freeze: (...meshes) => {

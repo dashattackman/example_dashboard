@@ -32,6 +32,17 @@ export interface PhaseLook {
   rim: { color: string; intensity: number };
   /** 0..1 — how hard signs / lit windows / lamps glow in this phase. */
   neon: number;
+  /** Procedural cloud layer painted into the skydome (docs/01: "gradient +
+   *  procedural cloud skydome"). `drift` = dome u-revolutions per second. */
+  clouds: {
+    style: 'wisps' | 'cumulus' | 'streaks';
+    /** Cloud body / underside-accent colors — authored per phase like the sky. */
+    body: string;
+    accent: string;
+    opacity: number;
+    drift: number;
+    stars?: boolean;
+  };
 }
 
 // World axes: +X east, +Z north (the beauty-corner vista looks north up the avenue).
@@ -54,6 +65,8 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     clear: '#4a72ae',
     rim: { color: '#ffe7c2', intensity: 0.5 },
     neon: 0,
+    // High thin morning wisps, barely-pink off the low sun.
+    clouds: { style: 'wisps', body: '#f6e4cc', accent: '#ffd2a8', opacity: 0.4, drift: 0.0022 },
   },
   DAY: {
     sunDir: [-0.3, -0.88, 0.28], // high summer sun
@@ -72,6 +85,7 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     clear: '#2e6cb8',
     rim: { color: '#eef4ff', intensity: 0.32 },
     neon: 0,
+    clouds: { style: 'cumulus', body: '#f4f8fc', accent: '#9fb0c0', opacity: 0.85, drift: 0.0025 },
   },
   EVE: {
     // Golden hour — sun low in the west, ahead-left of the default camera so
@@ -100,6 +114,8 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     clear: '#16233f',
     rim: { color: '#ffcf8a', intensity: 1.0 },
     neon: 0.55,
+    // The money-shot clouds: violet-grey cumulus catching sodium on the belly.
+    clouds: { style: 'cumulus', body: '#6e5a80', accent: '#f2b06b', opacity: 0.7, drift: 0.0018 },
   },
   LATE: {
     sunDir: [0.3, -0.72, -0.5], // moon-ish key, barely there
@@ -121,6 +137,8 @@ export const LOOKS: Record<Phase, PhaseLook> = {
     clear: '#05070f',
     rim: { color: '#8fb4ff', intensity: 0.85 },
     neon: 1,
+    // Thin high cirrus over stars — motion keeps LATE alive without light.
+    clouds: { style: 'streaks', body: '#3a426e', accent: '#232a55', opacity: 0.5, drift: 0.0008, stars: true },
   },
 };
 
@@ -136,7 +154,10 @@ export function createLightingRig(scene: Scene): LightingRig {
   const hemi = new HemisphericLight('hemi', new Vector3(0, 1, 0), scene);
   const sun = new DirectionalLight('sun', new Vector3(-0.5, -0.3, 0.7), scene);
 
-  // Gradient skydome — inverted sphere, redrawn (8x256 texture) on phase change.
+  // Gradient + cloud skydome — inverted sphere, redrawn (512x256) on phase change.
+  // The gradient is horizontally uniform, so animating the texture's uOffset
+  // drifts ONLY the clouds around the dome: motion for one uniform per frame,
+  // zero extra draw calls, no repaints (docs/01 "skies do heavy lifting").
   const sky = MeshBuilder.CreateSphere('sky', { diameter: 900, sideOrientation: 1 }, scene);
   sky.isPickable = false;
   sky.infiniteDistance = true;
@@ -146,22 +167,112 @@ export function createLightingRig(scene: Scene): LightingRig {
   // The dome sits beyond fogEnd — with fog on, the whole gradient washes to fog
   // color and the EVE teal band can never reach the screen. Sky paints itself.
   skyMat.fogEnabled = false;
-  const skyTex = new DynamicTexture('skyTex', { width: 8, height: 256 }, scene, false);
+  const SKY_W = 512;
+  const SKY_H = 256;
+  const skyTex = new DynamicTexture('skyTex', { width: SKY_W, height: SKY_H }, scene, false);
   skyMat.emissiveTexture = skyTex;
   sky.material = skyMat;
 
   scene.fogMode = Scene.FOGMODE_LINEAR;
 
   let phase: Phase = 'EVE';
+  let cloudDrift = 0;
+
+  // Deterministic PRNG — cloud layouts stay stable across runs (screenshot diffs).
+  const makeRand = (seed: number): (() => number) => {
+    let s = seed >>> 0;
+    return () => {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return s / 4294967296;
+    };
+  };
+
+  const rgba = (hex: string, a: number): string => {
+    const c = Color3.FromHexString(hex);
+    return `rgba(${Math.round(c.r * 255)},${Math.round(c.g * 255)},${Math.round(c.b * 255)},${a})`;
+  };
+
+  /** Clouds live in the y 24..116 band (horizon sits at y≈128 — dome v0.5).
+   *  Everything paints at x and x±SKY_W so the dome's u-seam never shows. */
+  const paintClouds = (ctx: ReturnType<DynamicTexture['getContext']>, look: PhaseLook): void => {
+    const { style, body, accent, opacity, stars } = look.clouds;
+    const r = makeRand(0xc10d5);
+    const blob = (x: number, y: number, rad: number, color: string, squash: number): void => {
+      for (const dx of [0, -SKY_W, SKY_W]) {
+        const g = ctx.createRadialGradient(x + dx, y / squash, 0, x + dx, y / squash, rad);
+        g.addColorStop(0, color);
+        g.addColorStop(1, rgba(body, 0));
+        ctx.save();
+        ctx.scale(1, squash);
+        ctx.fillStyle = g;
+        ctx.fillRect(x + dx - rad, y / squash - rad, rad * 2, rad * 2);
+        ctx.restore();
+      }
+    };
+    if (stars) {
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      for (let i = 0; i < 70; i++) {
+        const sx = r() * SKY_W;
+        const sy = 6 + r() * 100;
+        ctx.globalAlpha = 0.25 + r() * 0.6;
+        ctx.fillRect(sx, sy, r() < 0.15 ? 2 : 1, 1);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (style === 'cumulus') {
+      // Soft stacked puffs with a lit accent along the belly. The band hugs the
+      // 70..118 range — low enough that the street framings actually SEE them
+      // over the rooflines (horizon = 128; verified via gate/lake shots).
+      for (let i = 0; i < 8; i++) {
+        const cx = r() * SKY_W;
+        const cy = 80 + r() * 40;
+        const puffs = 5 + Math.floor(r() * 3);
+        for (let p = 0; p < puffs; p++) {
+          const px = cx + (r() - 0.5) * 74;
+          const py = cy + (r() - 0.5) * 14;
+          blob(px, py, 16 + r() * 20, rgba(body, opacity * (0.55 + r() * 0.35)), 0.55);
+        }
+        for (let p = 0; p < 3; p++) {
+          blob(cx + (r() - 0.5) * 56, cy + 12, 10 + r() * 9, rgba(accent, opacity * 0.55), 0.4);
+        }
+      }
+      // A couple of small far puffs right on the horizon band for depth.
+      for (let i = 0; i < 4; i++) {
+        blob(r() * SKY_W, 116 + r() * 6, 8 + r() * 6, rgba(body, opacity * 0.4), 0.4);
+      }
+    } else if (style === 'wisps') {
+      for (let i = 0; i < 10; i++) {
+        const cx = r() * SKY_W;
+        const cy = 66 + r() * 56;
+        blob(cx, cy, 34 + r() * 36, rgba(i % 3 ? body : accent, opacity * (0.6 + r() * 0.4)), 0.14);
+      }
+    } else {
+      // streaks — long thin cirrus bands.
+      for (let i = 0; i < 6; i++) {
+        const cx = r() * SKY_W;
+        const cy = 56 + r() * 64;
+        blob(cx, cy, 48 + r() * 46, rgba(i % 2 ? body : accent, opacity * (0.55 + r() * 0.35)), 0.09);
+      }
+    }
+  };
 
   const paintSky = (look: PhaseLook): void => {
     const ctx = skyTex.getContext();
-    const grad = ctx.createLinearGradient(0, 0, 0, 256);
+    const grad = ctx.createLinearGradient(0, 0, 0, SKY_H);
     for (const [pos, hex] of look.skyStops) grad.addColorStop(pos, hex);
     ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 8, 256);
+    ctx.fillRect(0, 0, SKY_W, SKY_H);
+    paintClouds(ctx, look);
     skyTex.update(false);
   };
+
+  // Cloud drift — the one always-on scene animation the sky owns.
+  scene.onBeforeRenderObservable.add(() => {
+    if (cloudDrift > 0) {
+      const dt = scene.getEngine().getDeltaTime() / 1000;
+      skyTex.uOffset = (skyTex.uOffset + cloudDrift * dt) % 1;
+    }
+  });
 
   const applyPhase = (p: Phase): PhaseLook => {
     phase = p;
@@ -177,6 +288,7 @@ export function createLightingRig(scene: Scene): LightingRig {
     scene.fogEnd = look.fog.end;
     scene.clearColor = Color4.FromHexString(`${look.clear}ff`);
     paintSky(look);
+    cloudDrift = look.clouds.drift;
     setRimLook(look.rim.color, look.rim.intensity);
     return look;
   };
