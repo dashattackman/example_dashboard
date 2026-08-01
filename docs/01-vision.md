@@ -4,7 +4,24 @@
 
 ## The pitch
 
-Minneapolis, but everyone has powers — and everyone has *lives*. You lead a squad of three superpowered locals through street brawls, turf politics, business ventures, farming plots, and messy, flirty, complicated relationships in a faithful, stylized, fully-enterable Twin Cities. Think **Invincible's grounded-supers world** crossed with **Streets of Rage combat**, run on a **Stardew daily rhythm**, with **Sims-depth people** who remember what you did last summer — and hold it against you at the club.
+Minneapolis, but everyone has powers — and everyone has *lives*. You're a single dad raising a bi-racial kid in Uptown, leading a squad of three superpowered locals through street brawls, turf politics, business ventures, farming plots, and messy, flirty, complicated relationships in a faithful, stylized, fully-enterable Twin Cities. Think **Invincible's grounded-supers world** crossed with **Streets of Rage combat**, run on a **Stardew daily rhythm**, with **Sims-depth people** who remember what you did last summer — and hold it against you at the club.
+
+## The premise (the dad, the act, the zone)
+
+- **You are the Anchor** *(working alias)* — the only known super who **multithreads**: where everyone else carries one power, you can run multiple power-threads in parallel. Your whole upgrade tree is literally your mind learning to hold more threads at once. It made you the most studied, most wanted, most *feared* person in the Cities.
+- **You did something horrific to protect your kid.** Years ago, cornered, out of options, you made a trade — and the fallout of that trade is woven into the city's present-day wound (see the lore doc). The game opens with it buried. Some people know pieces. As the story escalates, it surfaces in stages — and the city's opinion of you fractures. You can spend the game earning back trust, or leaning into being the monster they say you are. Both are playable. Neither is free.
+- **The Rogue Zone is the slice's main arc.** A fleet of privatized robotic enforcement units — autonomous ICE contractors, all chrome and procurement-contract beige — glitched during a firmware sync and never came back. They've seized the Lake Street corridor, run their own perimeter, and enforce a corrupted version of their directives: scanning, flagging, detaining. **They are machines.** Punching them is guilt-free, crowd-pleasing, cathartic — the finest punching bags in the game. The *stakes* are the people they flag: immigrant neighbors, mixed-status families, people your kid loves. That contrast — joyful robot-smashing wrapped around a threat that is deadly serious for specific people — is the arc's engine, and the game's biggest swing.
+- **There is deep lore.** Powers have an origin, a history, and rules (Witcher/X-Men-grade worldbuilding — see `09-story-lore.md`): where flux comes from, why Minnesota, why the lakes matter, what the first generation of supers did and covered up. The lore is discoverable in play — bar stories, archives, old-timer NPCs, artifacts — never front-loaded exposition.
+
+## The controversy contract (how we write the Rogue Zone)
+
+This storyline is designed to be exciting *and* controversial — that's the point. The rules that keep it sharp instead of cheap:
+
+1. **Machines are punchable; people are people.** Combat catharsis is aimed at robots, procurement fraud, and glitched bureaucracy — never at human beings as a class. The humans on every side are written as specific individuals.
+2. **The threatened community is written with specificity and dignity** — named characters, businesses, interiority, jokes, flaws, agency. They are protagonists of their own stories who *act*, not props who wait for rescue.
+3. **The game has a point of view.** It does not both-sides whether families should be safe. In-world detractors of your robot-smashing exist (grievance-radio callers, one memorable lawn-sign guy) and are written as characters with texture — but the narrative isn't neutral about the stakes.
+4. **Cruelty is never the joke.** The comedy lives in the bots' glitched literal-mindedness, the contractor's PR nightmare, the city council's cowardice — never in anyone's fear.
+5. **No real organization's name or insignia** appears on the bots — they're "CIVIS" units run by a fictional contractor. The satire reads loud and clear without borrowing a single trademark.
 
 ## Design pillars
 

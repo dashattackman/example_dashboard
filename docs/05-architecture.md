@@ -41,6 +41,9 @@ game/
       gossip.ts             # event propagation across relationship graph, per sleep tick
       relationships.ts      # NPC<->NPC and NPC<->player edges; romance state machines
       factions.ts           # territory, rep, leader logic, patrols
+      zone.ts               # Rogue Zone overlay: perimeter/checkpoint/patrol state,
+                            # firmware-mutation ticks, flagged-NPC pressure, mission grammar
+                            # (own state model — NOT a faction; see 02/03)
       clock.ts              # game time, day phases, calendar, sleep/advance
     base/
       rooms.ts              # room slots, levels, staffing, passive yields
@@ -65,7 +68,8 @@ game/
       npcs/*.json           # named NPCs + archetype templates
       dialogue/*.json       # line pools tagged by speaker/context/opinion-range/memory-flags
       venues/*.json         # interiors: layout recipe, props, hours, staff, faction
-      city/uptown.json      # block layout, streets, venue placement, territory map
+      city/uptown.json      # block layout, streets, venue placement, territory map, zone footprint
+      story/*.json          # main-arc acts, Act-reveal stages, zone mission templates, lore fragments
       items.json  crops.json  economy.json  tuning.json
   test/
     unit/                   # vitest: sim logic (memory, gossip, opinion, economy) — pure TS
@@ -106,7 +110,7 @@ Venue     { id, name, kind: 'bar'|'club'|'shop'|'home'|..., cell, hours: PhaseRa
             layout: InteriorRecipe, props: PropPlacement[], staff: NpcId[], factionId? }
 MemoryEvent { type, actors, venueId?, tick, salience, decayRate }
 Opinion   { respect, attraction, fear, trust }   // -100..100 each
-SaveGame  { version, clock, player, heroes, npcs, factions, base, farm, flags }
+SaveGame  { version, clock, player, heroes, npcs, factions, zone, story, base, farm, flags }
 ```
 
 ### Save/versioning
