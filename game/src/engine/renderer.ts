@@ -26,12 +26,18 @@ export async function createRenderer(canvas: HTMLCanvasElement): Promise<Rendere
   const forceWebGl2 = new URLSearchParams(location.search).has('webgl2');
   if (!forceWebGl2 && navigator.gpu) {
     try {
-      const gpu = new WebGPUEngine(canvas, { antialias: true });
-      await gpu.initAsync();
-      engine = gpu;
-      transport = 'webgpu';
+      // Pre-probe the adapter: constructing WebGPUEngine on a device with no
+      // adapter makes Babylon log a "fatal error" even though we fall back
+      // cleanly (playtest m2 — keep the zero-error console bar reachable).
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter) {
+        const gpu = new WebGPUEngine(canvas, { antialias: true });
+        await gpu.initAsync();
+        engine = gpu;
+        transport = 'webgpu';
+      }
     } catch {
-      engine = null; // software/CI environments advertise navigator.gpu but fail init
+      engine = null; // adapter present but init failed — fall back quietly
     }
   }
   if (!engine) {
