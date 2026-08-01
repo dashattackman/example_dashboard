@@ -12,10 +12,13 @@ required; we keep provenance honest per CLAUDE.md.
   via media.githubusercontent.com) — files carry ambientCG's canonical
   asset-ID names, verified as JPEG images after LFS resolution.
 - **Modifications** (ours — `game/assets-pipeline/process-street-textures.mjs`,
-  sharp): downsample to 512/1024, desaturate ×0.6, mean-luma normalize to
-  ~0.55 (gain-capped 1.8×) so the district palette tint in
-  `createEnvironmentMaterial` owns the hue; baked overlays (sidewalk expansion
-  joints; asphalt patch scars / cracks / oil stains); JPEG q78 progressive.
+  sharp): downsample to 512/1024, desaturate ×0.6 (brick_a ×0.35, brick_aged
+  ×0.4), mean-luma normalize to ~0.55 (gain-capped 1.8×) so the district
+  palette tint in `createEnvironmentMaterial` owns the hue; post-normalize
+  contrast squeeze toward the tile mean on brick_a (×0.55), brick_aged (×0.6)
+  and asphalt (×0.62) to calm per-brick confetti / crackle corduroy; baked
+  overlays (sidewalk expansion joints; asphalt patch scars / cracks / oil
+  stains); JPEG q78 progressive.
   KTX2/basis deferred — no encoder in this container; noted in docs/06 terms
   as the sanctioned jpg-at-512/1024 fallback for this round.
 

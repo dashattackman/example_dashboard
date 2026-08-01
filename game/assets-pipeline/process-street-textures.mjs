@@ -14,19 +14,26 @@
 //  4. Emit progressive JPEG q78 (KTX2/basis deferred — no encoder in this
 //     container; jpg-at-512/1024 is the sanctioned fallback this round).
 //
-// Usage:  node assets-pipeline/process-street-textures.mjs <srcDir> [outDir]
+// Usage:  node assets-pipeline/process-street-textures.mjs <srcDir> [outDir] [--only=a.jpg,b.jpg]
 //   srcDir must hold the raw ambientCG *_1K_Color.jpg files listed in RECIPES.
-//   outDir defaults to public/assets/textures.
+//   outDir defaults to public/assets/textures. --only regenerates a subset
+//   (targeted fixes shouldn't churn every shipped map's bytes).
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const srcDir = process.argv[2];
-const outDir = process.argv[3] ?? path.join(here, '..', 'public', 'assets', 'textures');
+const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const only = process.argv
+  .slice(2)
+  .find((a) => a.startsWith('--only='))
+  ?.slice(7)
+  .split(',');
+const srcDir = args[0];
+const outDir = args[1] ?? path.join(here, '..', 'public', 'assets', 'textures');
 if (!srcDir) {
-  console.error('usage: node process-street-textures.mjs <srcDir> [outDir]');
+  console.error('usage: node process-street-textures.mjs <srcDir> [outDir] [--only=a.jpg,...]');
   process.exit(1);
 }
 
@@ -53,7 +60,7 @@ const asphaltOverlay = (s) => `
       fill="#0f0f12" opacity="0.35" transform="rotate(7 ${s * 0.73} ${s * 0.27})"/>
   </g>
   <!-- crack web -->
-  <g stroke="#08080a" fill="none" stroke-linecap="round" opacity="0.8">
+  <g stroke="#101014" fill="none" stroke-linecap="round" opacity="0.55">
     <path d="M ${s * 0.02} ${s * 0.3} q ${s * 0.12} ${s * 0.05} ${s * 0.2} ${s * 0.0}
              t ${s * 0.22} ${s * 0.08} t ${s * 0.2} -${s * 0.04}" stroke-width="${s * 0.007}"/>
     <path d="M ${s * 0.34} ${s * 0.33} q ${s * 0.03} ${s * 0.12} -${s * 0.02} ${s * 0.2}"
@@ -83,13 +90,21 @@ const sidewalkOverlay = (s) => `
   <rect x="0" y="0" width="${s}" height="${s * 0.05}" fill="#22201c" opacity="0.12"/>
 </svg>`;
 
-// name → { src, size, overlay }.  All srcs are ambientCG 1K color maps (CC0).
+// name → { src, size, overlay, sat, squeeze }.  All srcs are ambientCG 1K color maps (CC0).
+// sat: saturation multiplier (default 0.6). squeeze: per-brick value-jitter compression —
+// out = mean + (in − mean) × squeeze, applied before the luma normalize. The near-wall
+// brick mixes (Bricks030 / Bricks073C) carry huge per-brick hue+value swings that read
+// as orange checker confetti at street distance and smear at glancing angles (ART r2);
+// squeezing them keeps the coursing/mortar structure while calming the patchwork.
 const RECIPES = {
-  'brick_a.jpg': { src: 'Bricks030_1K_Color.jpg', size: 1024 }, // warm red mix — bldg A hero wall
+  'brick_a.jpg': { src: 'Bricks030_1K_Color.jpg', size: 1024, sat: 0.35, squeeze: 0.55 }, // warm red mix — bldg A hero wall
   'brick_b.jpg': { src: 'Bricks074_1K_Color.jpg', size: 1024 }, // red + pale mortar — bldg B
-  'brick_aged.jpg': { src: 'Bricks073C_1K_Color.jpg', size: 1024 }, // sooty aged — west row + plinths
+  'brick_aged.jpg': { src: 'Bricks073C_1K_Color.jpg', size: 1024, sat: 0.4, squeeze: 0.6 }, // sooty aged — west row + plinths
   'brick_grey.jpg': { src: 'Bricks034_1K_Color.jpg', size: 512 }, // blue-grey — teal-tinted c1
-  'asphalt.jpg': { src: 'Asphalt016_1K_Color.jpg', size: 1024, overlay: asphaltOverlay },
+  // Asphalt gets a squeeze too: the source's pale crackle bands are directional
+  // and high-contrast — repeated 4m down a road they cohere into corduroy
+  // streaks at distance (playtest r2 m4). Overlay bakes AFTER the squeeze.
+  'asphalt.jpg': { src: 'Asphalt016_1K_Color.jpg', size: 1024, squeeze: 0.62, overlay: asphaltOverlay },
   'sidewalk.jpg': { src: 'Concrete037_1K_Color.jpg', size: 1024, overlay: sidewalkOverlay },
   'wood.jpg': { src: 'Planks013_1K_Color.jpg', size: 512 }, // grimy dark planks — storefront band
   'stucco.jpg': { src: 'Concrete006_1K_Color.jpg', size: 512 }, // smooth render — c3 massing
@@ -102,13 +117,26 @@ const TARGET_LUMA = 0.55 * 255;
 const MAX_GAIN = 1.8;
 
 for (const [out, r] of Object.entries(RECIPES)) {
+  if (only && !only.includes(out)) continue;
   const srcPath = path.join(srcDir, r.src);
   // Desaturate first so the normalize pass measures the shipped grey balance.
-  let img = sharp(srcPath).resize(r.size, r.size, { fit: 'cover' }).modulate({ saturation: 0.6 });
+  let img = sharp(srcPath)
+    .resize(r.size, r.size, { fit: 'cover' })
+    .modulate({ saturation: r.sat ?? 0.6 });
   const stats = await sharp(await img.toBuffer()).stats();
   const luma =
     0.299 * stats.channels[0].mean + 0.587 * stats.channels[1].mean + 0.114 * stats.channels[2].mean;
   img = sharp(await img.linear(Math.min(TARGET_LUMA / luma, MAX_GAIN), 0).toBuffer());
+  if (r.squeeze) {
+    // Compress values toward the tile mean (per channel, shared luma pivot) —
+    // kills confetti without flattening mortar lines. MUST run AFTER the luma
+    // normalize: dark sources hit the gain cap and the gain would multiply the
+    // contrast right back (asphalt: ×1.8 ate a 0.72 squeeze almost exactly).
+    const post = await sharp(await img.toBuffer()).stats();
+    const mean =
+      0.299 * post.channels[0].mean + 0.587 * post.channels[1].mean + 0.114 * post.channels[2].mean;
+    img = sharp(await img.linear(r.squeeze, mean * (1 - r.squeeze)).toBuffer());
+  }
   if (r.overlay) {
     img = img.composite([{ input: Buffer.from(r.overlay(r.size)) }]);
   }

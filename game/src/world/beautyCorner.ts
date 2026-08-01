@@ -77,7 +77,7 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const darkGlass = kit.envMat('darkGlass', '#182030');
   const moduleWhite = kit.envMat('moduleWhite', '#ffffff'); // vertex/instance-colored modules
   const waterMat = kit.envMat('waterMat', PALETTE.lake.deepWater, {
-    emissiveHex: '#0e2836',
+    emissiveHex: '#123c50', // cold-cyan self-light so near water reads teal, not tar
     emissiveLevel: 0.6,
   });
 
@@ -88,16 +88,29 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   const lampHalo = kit.glowMat('lampHalo', U.sodiumGlow, 0.8, 0.5);
   const lampBulb = kit.glowMat('lampBulb', U.sodium, 0.6);
   const spill = kit.glowMat('spill', U.warmWindow, 0.5, 0.35);
-  const sunPath = kit.glowMat('sunPath', PALETTE.lake.paleGold, 0.5, 0.55);
 
   // --- ground, streets, markings -------------------------------------------
   const base = kit.ground('lotBase', 420, 520, kit.envMat('lotBase', '#232529'), {
     pos: [0, -0.01, 100],
   });
   const avenue = kit.uv(kit.box('avenue', 10, 0.04, 240, asphalt, { pos: [-6, 0.02, 80] }), 2.5, 60);
-  // Cross street runs west to the lake shore (water edge x≈-75).
-  const crossSt = kit.uv(kit.box('crossSt', 150, 0.04, 10, asphalt, { pos: [5, 0.02, 15] }), 37.5, 2.5);
-  kit.freeze(base, avenue, crossSt);
+  // Cross street runs west to the lake shore (water edge x≈-75). Two segments
+  // that BUTT the avenue (x -11 / -1) instead of one slab through it — the old
+  // coplanar overlap z-fought a hard seam into the intersection (playtest r2
+  // m4). Texel density matches the avenue (4m per repeat) and rotY turns the
+  // asphalt's directional crackle grain ACROSS the roadway like the avenue's —
+  // grain running down-length cohered into corduroy streaks at distance.
+  const crossW = kit.uv(
+    kit.box('crossW', 10, 0.04, 59, asphalt, { pos: [-40.5, 0.02, 15], rotY: HALF_PI }),
+    2.5,
+    14.75,
+  );
+  const crossE = kit.uv(
+    kit.box('crossE', 10, 0.04, 81, asphalt, { pos: [39.5, 0.02, 15], rotY: HALF_PI }),
+    2.5,
+    20.25,
+  );
+  kit.freeze(base, avenue, crossW, crossE);
 
   // Sidewalks (0.1m curb) — non-overlapping slabs merged into one static.
   // UVs pre-scaled per slab so the baked 2m expansion-joint grid stays true
@@ -323,8 +336,10 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   // --- street dressing: the stuff that proves people live here ----------------
 
   // Flyer board by the record store door — gig posters, lost cat, tear-tabs.
+  // x=4.89: proud of the woodfront gfBand slab (x 4.90..5.02) — at 4.93 the
+  // board was buried inside the wood and never rendered (playtest r2 M3).
   const flyers = kit.canvasPlane('flyers', 1.5, 1.1, 192, 144, drawFlyers, { lit: true }, {
-    pos: [4.93, 1.7, -1.6],
+    pos: [4.89, 1.7, -1.6],
     rotY: HALF_PI,
   });
   kit.freeze(flyers);
@@ -339,8 +354,11 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   ]);
 
   // Mural on building B's blank south wall — Minneapolis-flavored, faces the
-  // corner. Scene-lit (it's paint, not neon): shade at EVE, brick-dark at LATE.
-  const mural = kit.canvasPlane('mural', 11, 8.5, 512, 396, drawMural, { lit: true }, {
+  // corner. Scene-lit (it's paint, not neon) — but a south face in EVE/LATE
+  // shade collapsed to a dead navy rectangle (ART r2), so it carries a `lift`:
+  // a sodium-multiplied emissive copy of the SAME painting, raised with the
+  // neon level in applyNeon. Reads as streetlight catching paint, not a screen.
+  const mural = kit.canvasPlane('mural', 11, 8.5, 512, 396, drawMural, { lit: true, lift: '#ffb877' }, {
     pos: [14.5, 7.4, 19.93],
   });
   kit.freeze(mural);
@@ -352,9 +370,11 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   kit.freeze(tag);
 
   // Utility poles (west walk curbline, clear of the -13.0 NPC lane).
+  // Crossarm is 1.0m — the old 1.7m arm reached x -13.25 and stabbed through
+  // the west facades at x -13 (playtest r2 m3); wire runs below moved inboard.
   const poleParts = [
     kit.tint(kit.cyl('upole', { h: 7.2, d: 0.26, tess: 8 }, moduleWhite, { pos: [0, 3.6, 0] }), '#4b3a2a'),
-    kit.tint(kit.box('uarm', 1.7, 0.1, 0.12, moduleWhite, { pos: [0, 6.75, 0] }), '#3e3022'),
+    kit.tint(kit.box('uarm', 1.0, 0.1, 0.12, moduleWhite, { pos: [0, 6.75, 0] }), '#3e3022'),
     kit.tint(kit.cyl('utfm', { h: 0.85, d: 0.55, tess: 8 }, moduleWhite, { pos: [0.42, 5.9, 0] }), '#4a5054'),
   ];
   const upole = kit.merge('upoleMod', poleParts);
@@ -391,7 +411,7 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
       });
     }
   };
-  for (const ax of [-13.1, -11.7]) {
+  for (const ax of [-12.85, -11.95]) {
     wireSpan([ax, 6.72, -22], [ax, 6.72, 21.5], 0.5);
     wireSpan([ax, 6.72, 21.5], [ax, 6.72, 62], 0.55);
   }
@@ -492,7 +512,9 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
       { pos: [0.2, 0.1, 24.8], rotY: 4.1 },
       { pos: [-12.3, 0.1, 33], rotY: 2.4, scale: [0.9, 0.9, 0.9] },
     ],
-    ['#ffffff', '#e8ddc8', '#d8e0d0', '#e0d0c0'],
+    // Near-white, green-leaning variants only: instance color multiplies EVERY
+    // vertex tint, and the old tan/cream set turned the bushes straw (r2 p1).
+    ['#ffffff', '#f1f6ea', '#e7f0e0', '#f4f2ea'],
   );
 
   // Storm drains at the gutters (flat lit decals) + painted no-parking curb.
@@ -700,8 +722,24 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   // Water sits ABOVE the lot base (y -0.01) — it was previously buried under it —
   // with a concrete shore lip where the roadway ends (x≈-75..-70).
   kit.freeze(kit.ground('lake', 150, 150, waterMat, { pos: [-150, 0.01, 20] }));
-  kit.freeze(kit.ground('lakePath', 70, 6, sunPath, { pos: [-112, 0.025, 15] }));
   kit.freeze(kit.uv(kit.box('shore', 5, 0.1, 150, concrete, { pos: [-72.5, 0.05, 20] }), 2.5, 75));
+  // Sun glint on the water (docs/01: "cold cyan water, pale gold light"). The old
+  // solid glow plane read as a concrete triangle dead-center of the lake framing
+  // (ART r2) — now it's a painted streak field: broken pale-gold dashes with a
+  // soft alpha falloff, so the glancing angle compresses it into sparkle, not a
+  // slab. Brightness follows the phase in applyNeon (peaks at EVE's low sun).
+  const glint = kit.canvasPlane('sunGlint', 110, 13, 256, 64, drawGlint, { alpha: true }, {
+    pos: [-134, 0.035, 15],
+    rotX: HALF_PI, // face-up: canvas x → +X (east), canvas y → Z
+  });
+  kit.freeze(glint);
+  // Foam band along the shore lip — the hard black water-edge line dies under a
+  // wobbly bright-edge gradient (lit-side of the lip meets water in light foam).
+  const foam = kit.canvasPlane('shoreFoam', 5.5, 150, 64, 512, drawFoam, { alpha: true }, {
+    pos: [-77.6, 0.025, 20],
+    rotX: HALF_PI,
+  });
+  kit.freeze(foam);
 
   // --- phase dressing ---------------------------------------------------------
   let skylineLit = true;
@@ -725,6 +763,14 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
     // painted-sign read by day, tube glow after dusk.
     kit.setCanvasLevel(sign, 0.55 + 0.45 * level);
     kit.setCanvasLevel(blade, 0.25 + 0.75 * level);
+    // Mural lift: sodium spill catching the paint — EVE/LATE only (0 by day),
+    // capped low so it stays paint, never screen.
+    kit.setCanvasLevel(mural, 0.45 * level);
+    // Lake dressing: the glint peaks with EVE's low western sun (level 0.55),
+    // drops to a faint sky-sheen by day (sun's east/high) and a moon path at
+    // LATE; foam is brightest by day, faint under the moon.
+    kit.setCanvasLevel(glint, 0.25 + 0.75 * (1 - Math.abs(level - 0.55) / 0.55));
+    kit.setCanvasLevel(foam, 0.85 - 0.4 * level);
     // Skyline windows follow the phase (lit only when the city would be) —
     // repaint only on the lit/unlit flip, not per call.
     const lit = level > 0.15;
@@ -739,9 +785,11 @@ export function buildBeautyCorner(kit: Kit): BeautyCorner {
   return {
     applyNeon,
     playerSpawn: [0.9, 0.1, -5], // sidewalk, camera clear of the near lamp pole
-    // minX reaches west along the cross street so the lake glimpse is walkable
-    // (M1 has no collision — the west row can be clipped through; fine until M2).
-    bounds: { minX: -60, maxX: 4.3, minZ: -34, maxZ: 88 },
+    // minX stops just past the west row (faces at x -13..-26): the lake stays a
+    // FRAMED vista — beyond -36 is an undressed void (flat lot base, bare back
+    // faces) until M2 dresses the shore, and walking into it killed the frame
+    // (playtest r2 m5: chose the vista over a placeholder shore strip).
+    bounds: { minX: -36, maxX: 4.3, minZ: -34, maxZ: 88 },
   };
 }
 
@@ -1066,6 +1114,76 @@ function drawTag(ctx: Canvas2D, w: number, h: number): void {
   ctx.font = `700 ${Math.round(h * 0.16)}px system-ui, sans-serif`;
   ctx.fillText('sorry', w * 0.3, h * 0.36);
   ctx.restore();
+}
+
+/** Sun glint on the lake: a soft pale-gold lens at the far (sunward) end that
+ *  breaks up into sparkle dashes toward the viewer. Canvas x runs west→east
+ *  (left = far water), y spans the streak's width in Z. All alpha-feathered —
+ *  the glancing angle must compress this into light on water, never a slab. */
+function drawGlint(ctx: Canvas2D, w: number, h: number): void {
+  ctx.clearRect(0, 0, w, h);
+  const r = makeRandLocal(0x91147);
+  // Hot core where the sun column meets the horizon (far/west = canvas left).
+  const squash = 0.3;
+  ctx.save();
+  ctx.scale(1, squash);
+  const cy = (h * 0.5) / squash;
+  const hot = ctx.createRadialGradient(w * 0.08, cy, 1, w * 0.08, cy, w * 0.22);
+  hot.addColorStop(0, 'rgba(255,224,150,0.95)');
+  hot.addColorStop(0.55, 'rgba(255,196,110,0.5)');
+  hot.addColorStop(1, 'rgba(255,196,110,0)');
+  ctx.fillStyle = hot;
+  ctx.fillRect(0, cy - w * 0.25, w * 0.4, w * 0.5);
+  ctx.restore();
+  // Path wash: wide flat lens running the streak's length.
+  const sq2 = 0.16;
+  ctx.save();
+  ctx.scale(1, sq2);
+  const cy2 = (h * 0.5) / sq2;
+  const g = ctx.createRadialGradient(w * 0.2, cy2, 2, w * 0.2, cy2, w * 0.78);
+  g.addColorStop(0, 'rgba(255,216,132,0.8)');
+  g.addColorStop(0.5, 'rgba(250,200,116,0.34)');
+  g.addColorStop(1, 'rgba(250,200,116,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, cy2 - w * 0.64, w, w * 1.28);
+  ctx.restore();
+  // Sparkle dashes: dense and tight near the sun column, looser toward shore.
+  for (let i = 0; i < 64; i++) {
+    const t = r() * r(); // bias toward the far (left) end
+    const x = w * (0.04 + 0.92 * t);
+    const spread = 0.09 + 0.3 * t;
+    const y = h * 0.5 + (r() + r() - 1) * h * spread;
+    const len = w * (0.015 + r() * 0.05);
+    const th = 1 + r() * 1.8;
+    const a = (0.3 + r() * 0.55) * (1 - 0.4 * t);
+    ctx.fillStyle = r() < 0.3 ? `rgba(255,236,178,${a})` : `rgba(252,206,124,${a})`;
+    ctx.fillRect(x - len / 2, y - th / 2, len, th);
+  }
+}
+
+/** Shore foam: shallow-water lightening toward the lip with a wobbly broken
+ *  foam edge — kills the hard black line where roadway grade meets water.
+ *  Canvas x runs west→east (right edge tucks under the concrete lip). */
+function drawFoam(ctx: Canvas2D, w: number, h: number): void {
+  ctx.clearRect(0, 0, w, h);
+  const r = makeRandLocal(0xf0a37);
+  const g = ctx.createLinearGradient(0, 0, w, 0);
+  g.addColorStop(0, 'rgba(178,214,220,0)');
+  g.addColorStop(0.55, 'rgba(178,214,220,0.16)');
+  g.addColorStop(0.85, 'rgba(196,226,228,0.38)');
+  g.addColorStop(1, 'rgba(214,236,234,0.6)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 3) {
+    const wob = Math.sin(y * 0.045) * 2.2 + Math.sin(y * 0.013) * 3.4 + (r() - 0.5) * 1.6;
+    const x0 = w * 0.86 + wob;
+    ctx.fillStyle = `rgba(226,240,238,${0.5 + r() * 0.3})`;
+    ctx.fillRect(x0, y, w - x0, 3);
+    if (r() < 0.4) {
+      ctx.fillStyle = `rgba(210,232,230,${0.2 + r() * 0.25})`;
+      ctx.fillRect(x0 - 4 - r() * 7, y, 3 + r() * 3, 2);
+    }
+  }
 }
 
 /** Storm drain grate decal. */

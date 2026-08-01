@@ -32,6 +32,7 @@ export interface Xform {
  *  object is a genuine 2D context, so we widen the type here once.) */
 export type Canvas2D = ICanvasRenderingContext & {
   textAlign: 'left' | 'right' | 'center' | 'start' | 'end';
+  globalCompositeOperation: string;
   ellipse(
     x: number,
     y: number,
@@ -93,7 +94,11 @@ export interface Kit {
   /** Textured quad painted via canvas 2D (signs, skyline backdrop, murals).
    *  `lit: true` runs the canvas through the graphic-novel environment material
    *  (scene-lit, rim-graded) instead of the default unlit emissive — physical
-   *  painted surfaces (murals, posters, grates) belong in the lighting. */
+   *  painted surfaces (murals, posters, grates) belong in the lighting.
+   *  `lift: '#hex'` (lit planes only) adds a warm-multiplied emissive copy of
+   *  the same painting at level 0 — setCanvasLevel then raises it so paint can
+   *  pick up ambient sign/lamp spill at dusk WITHOUT reading as a screen (the
+   *  lift is the artwork itself, tinted, never a flat glow). */
   canvasPlane(
     name: string,
     w: number,
@@ -101,7 +106,7 @@ export interface Kit {
     texW: number,
     texH: number,
     draw: Draw2D,
-    opts?: { fog?: boolean; alpha?: boolean; lit?: boolean },
+    opts?: { fog?: boolean; alpha?: boolean; lit?: boolean; lift?: string },
     xf?: Xform,
   ): Mesh;
   /** Redraw a canvasPlane's texture in place (phase dressing — e.g. the skyline
@@ -227,6 +232,21 @@ export function createKit(scene: Scene): Kit {
         // graphic-novel env material, so murals/posters sit in the lighting.
         m = createEnvironmentMaterial(scene, `${name}Mat`, '#ffffff');
         m.diffuseTexture = tex;
+        if (opts.lift) {
+          // Emissive lift copy: same painting, multiplied by a warm tint, level 0
+          // until a phase hook (setCanvasLevel) raises it. Because the emissive IS
+          // the artwork, the lift reads as warm light ON paint, not backlit plastic.
+          const etex = new DynamicTexture(`${name}LiftTex`, { width: texW, height: texH }, scene, true);
+          const ectx = etex.getContext() as Canvas2D;
+          draw(ectx, texW, texH);
+          ectx.globalCompositeOperation = 'multiply';
+          ectx.fillStyle = opts.lift;
+          ectx.fillRect(0, 0, texW, texH);
+          ectx.globalCompositeOperation = 'source-over';
+          etex.update();
+          etex.level = 0;
+          m.emissiveTexture = etex;
+        }
       } else {
         m = new StandardMaterial(`${name}Mat`, scene);
         m.disableLighting = true;
@@ -246,7 +266,9 @@ export function createKit(scene: Scene): Kit {
 
     repaint: (mesh, draw) => {
       const m = mesh.material as StandardMaterial;
-      const tex = (m.emissiveTexture ?? m.diffuseTexture) as DynamicTexture;
+      // Diffuse first: lit planes paint there (their emissive may be a lift
+      // copy); unlit planes have no diffuse texture and fall through.
+      const tex = (m.diffuseTexture ?? m.emissiveTexture) as DynamicTexture;
       const { width, height } = tex.getSize();
       draw(tex.getContext() as Canvas2D, width, height);
       tex.update();
