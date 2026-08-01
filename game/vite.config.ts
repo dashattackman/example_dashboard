@@ -70,6 +70,14 @@ export default defineConfig({
               expiration: { maxEntries: 40, maxAgeSeconds: 60 * 60 * 24 * 90 },
             },
           },
+          {
+            urlPattern: /\/assets\/audio\/.*\.(mp3|ogg)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'audio',
+              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 90 },
+            },
+          },
         ],
       },
     }),
