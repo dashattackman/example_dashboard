@@ -27,6 +27,15 @@ A century of evidence, no confirmed exceptions — until the player character.
 - **Nulls exist.** A small fraction of flux-exposed people never set — "blanks." Folk wisdom pities them. Folk wisdom, as usual, has it exactly backwards (see §5).
 - **Cascades kill children.** A resonance that begins setting in a body too young doesn't stop — it *cascades*, cycling harder as the body fails to close around it. Pre-adolescent sets are the horror story of flux medicine: rare, always fatal, always fast. This is WHY the law says adolescence. This is also the entire reason the game's story exists (§5).
 - **Burnout is real.** Adults who set violently (mass-trauma sets) can burn out — the resonance takes more than the body had. The first generation buried its burnouts quietly and lied on the certificates.
+- **What setting feels like** (canon for every flashback and every NPC who tells the story): three days to three weeks of the world going *specific* — one sense sharpening past reason (the sonic kid hears the refrigerator two houses over; the density kid feels the building lean into the wind) — then one moment, always mundane, when the note lands. Nobody sets during the dramatic part. You set doing dishes the week after.
+- **Resonance is legible to itself.** Set people get a vague read on each other — a feeling of "one of us," never specifics. Only Eli reads *signatures* (§5), which is why the registry could only ever have one author.
+
+### The flux calendar (seasonality — ties to 02 farming and 03's weather identity)
+The field breathes with the watershed. Canon, and every system doc may lean on it:
+- **First freeze (the surge):** the charge that lakes shed as they ice over is the year's spike — first-generation families kept children off the shoreline in freeze week for a reason nobody wrote down (see §5 for the reason this game exists). The first-snow showpiece event (01) sits on charged ground, narratively and literally.
+- **Deep winter (the hush):** ice caps the capacitors; the field runs low and steady. Old-timers say powers "sleep better" in January. Combat tuning may echo this (05's call).
+- **Spring melt (the flood):** the messiest field of the year — sets cluster in April; the Understory traditionally holds "melt parties" to keep new sets off the streets, which is the most responsible thing a speakeasy has ever done.
+- **Dog days (the shimmer):** August heat + low water = a field that flickers. Flux crops sweeten; resonances run shallow but twitchy; every Uptown fight in the slice's late-summer default has a little extra glow on it (art direction's "golden hour" is doing lore work).
 
 ## 3. History: breach, silence, daylight
 
@@ -49,7 +58,11 @@ Everyone had a reason to bury it: the company (liability), the union (jobs — a
 **One of the nine was Alfred St. Pierre — density — Maggie St. Pierre's grandfather.** The St. Pierres have been carrying the Range Rules south ever since. This is why Maggie (44) drinks where the old-timers drink, why the first generation treats her as one of their own two generations early, and why her rage at being called a hero is inherited, not personal: *heroes get lists made of them.*
 
 ### 1953–2006 — The long quiet
-Supers urbanized with everyone else. The Cities filled with second- and third-generation flux families who kept the Rules out of habit more than conviction. The lakes became the open secret's living room — which is why the supers-only speakeasy, **The Understory**, opened where it did and stayed neutral for everyone: neutrality was a Range Rule wearing a cocktail dress.
+Supers urbanized with everyone else. The Cities filled with second- and third-generation flux families who kept the Rules out of habit more than conviction. The lakes became the open secret's living room — which is why the supers-only speakeasy, **The Understory**, opened where it did (1961, in a coal cellar with lake groundwater in the walls — charged ground, neutral by charter scratched into the brick) and stayed neutral for everyone: neutrality was a Range Rule wearing a cocktail dress.
+
+Two beats inside the quiet, both delivery-vector gold (§8):
+- **The funk era (1970s):** Minneapolis music's golden decade had flux in the rhythm section. A handful of set musicians learned that a charged room and a good groove could *do things* — nothing on the records, everything in the live takes. Otis Grant was in those rooms. The Purple One references (earned, never forced, per 01) live here: the scene's genius was real and human; the *weather* at certain shows was not entirely.
+- **The quiet professionals (1980s–90s):** the generation that turned resonance into trade skill — the electrician who is the meter, the ironworker who is the crane, the nurse with perfect hands. No costumes, no names, a whispered referral network. Half the roster's parents belong to this culture, which is why half the roster's parents are disappointed in the costumes.
 
 ### 2006 — The Camden Bridge failure (going public)
 An aging rail-and-pedestrian bridge over the Mississippi at Camden let go on a September evening — and **fourteen flux-set commuters acted in open daylight, on a hundred camera phones.** A woman held a truss. A man froze the river slack. A teenager ran the deck eleven times. Nobody died, and nobody could unsee it. The quiet generation's century of discipline ended in ninety seconds of ordinary people refusing to watch their neighbors drown — which, the old-timers admit, is the only way it ever could have ended honorably.
@@ -114,6 +127,15 @@ Design intent: the *damning* truth surfaces before the *sympathetic* truth — t
 
 **Gossip-mechanics notes for 06/04:** Stage items use the standard fidelity/fork system with one new rule this arc canonizes — **mutations can be accidentally true** (a high-MISCHIEF hop invents "he MADE the list" as embellishment at Stage 1... which is Stage 3's truth arriving early at fidelity-zero; the system doesn't know, and neither does the city, and that's the horror). New tags registered in `04` §5.
 
+### How the two paths play each stage (design detail)
+The redemption and monster paths are the same five stages with different verbs. Neither is a menu toggle; both are accumulations of stage choices, and the game grades the *pattern*, not any single pick.
+
+- **Stage 1 — face-it:** get ahead of the photo; tell the squad first (cheap now, priceless at Stage 2). **Bury-it:** let Cass kill the story ("I know the Gopher Line's owner's bookie"). It works. It is also the first favor on a tab the monster path runs up.
+- **Stage 2 — face-it:** tell August the truth before he finishes the sentence; his trust arc survives anything the player says first and almost nothing he discovers second. **Bury-it:** lie to the man who can hear your pulse. He lets you. He starts wearing the studio headphones around you. Everyone notices; nobody knows why; the loneliness is the punishment.
+- **Stage 3 — face-it:** stand in the garden block the morning the phone tree fires and take it — a full day of GRUDGE-tier greetings, unskippable, the bravest fast-travel-disabled walk in the game. **Bury-it:** Adelaide's offer — she can make the cracked data *unprovable* (provenance laundering; she invented it). Cost: the steepest favor in the game, and `knows_the_registry_truth` stays planted in the few who already know. You don't erase truth; you just make the city gaslight itself, and Bee never forgets that you did.
+- **Stage 4 — there is no bury-it.** Lucía asks. The player picks the words, not whether. (The dialogue offers three openings; all three are true; the difference is whether he says "I'm sorry" to her or asks her to say it's okay — and the scene will not let him have both.)
+- **Stage 5 — the verbs become the endings** (§6): Accounting is face-it at city scale; Custodian is bury-it at city scale, performed in the open, which is the monster path's actual thesis: past a certain point, hiding and ruling are the same gesture.
+
 ---
 
 ## 6. The Rogue Zone (the slice's main arc)
@@ -141,7 +163,13 @@ Design intent: the *damning* truth surfaces before the *sympathetic* truth — t
 - **M5 "The Census":** door-knocking. Units recite registry names at doors — Stage 3's fuse. Tomás Vásquez is recited on his own stoop.
 Escalation partner: **flags are targeted, not ambient** — the threat was never "robots everywhere," it was always "robots looking for specific people," and Act 2 makes the player memorize which people.
 
-**ACT 3 — CUSTODY (weeks 6–8).** The Warden's final self-derivation — **M6 "Custodianship":** *verification is impossible; therefore everyone is pending; therefore no one leaves.* Simultaneously Stage 3 breaks citywide: the corridor is fighting the zone *and* arguing about the man helping them fight it. The Vásquez family splits over him in a kitchen scene the whole arc has been buying. Faction endgames activate (below). The player picks an ending lane.
+**ACT 3 — CUSTODY (weeks 6–8).** The Warden's final self-derivation — **M6 "Custodianship":** *verification is impossible; therefore everyone is pending; therefore no one leaves.* Simultaneously Stage 3 breaks citywide: the corridor is fighting the zone *and* arguing about the man helping them fight it. The Vásquez family splits over him in a kitchen scene the whole arc has been buying — Imelda quiet, Tomás furious, Renata saying the worst true sentence available ("You watched them recite my brother and you already knew the handwriting"). Faction endgames activate (below). The player picks an ending lane.
+
+**Lucía's stakes, beat by beat (the arc's heart, scheduled):**
+- *Act 1:* the Saturday problem — she negotiates for perimeter-adjacent visits like a tiny lawyer and loses, and Eli has to be the one to say no.
+- *Act 2, early:* she starts a letter-writing campaign to the Warden (crayon, certified mail, "TO THE ROBOT MANAGER"). The Warden **answers** — literal-minded, formal, chilling-adorable ("Your request is pending. Your penmanship is verified.") — the arc's strangest correspondence, and the player can read every letter.
+- *Act 2, late (M5):* Tomás is recited. Lucía stops writing letters. The silence in her room is a scene.
+- *Act 3:* Stage 4 — she asks. See §5. After it, whatever was answered, she leaves one last letter at the perimeter addressed to "THE CUSTODIAN," contents never shown to the player, and the Warden's behavior toward the Vásquez flag entries measurably changes. The game never explains it. (The machine is not a person. But it has one completed correspondence.)
 
 ### Faction entanglements (all four have skin)
 - **The Aldermen:** Odegaard signed it. His survival strategy mutates weekly — pilot success → rogue vendor → "I am leading the response." His capes, Civic Shield, refuse zone duty (contract says *nothing* about fighting other contractors' robots — the labor joke is binding), which leaves him commanding a response with no responders.
@@ -172,6 +200,14 @@ The Warden runs on coordination architecture modeled on Eli's neural timing (§5
 - **Cass:** knows nothing of the Act; knows *Eli* — reads him as a man carrying paper someone else holds, which Cass considers the only interesting kind of man.
 - **Bee:** keeps a decades-old private list of her OWN — the phone tree — and will recognize what the registry is one beat faster than anyone, because she's the only other person who ever built one. Her Stage 3 fury is partly a mirror: hers ran on consent, and she knows exactly how much work that word was.
 
+## 7B. The first generation (named — future content hooks, wall names, bar stories)
+Sketched at bar-story resolution on purpose; any of these can be promoted to full entries in `04` when content needs them.
+- **Alfred St. Pierre (1929–2001), density.** Ely Deep survivor; Maggie's grandfather; the man the Range Rules quote when they quote anyone. Held the collapsed gallery for the eleven while the other eight dug. Never discussed it. His level sits in Maggie's toolbox and she uses it weekly, which is the entire St. Pierre school of memorial.
+- **Sigrid Holt (1931–2019), heat-draw.** Ely Deep survivor; became a Duluth ER nurse; the founder of flux medicine as an underground practice — cascades, burnouts, bad sets, treated in kitchens for fifty years. Her coded case notebooks exist. Paradigm's flux-medicine division bought two of them at an estate sale, which is a sentence that should make the player's skin crawl on reread.
+- **"The Fireline Twelve" (1918).** The firefighter sets of the breach year — the first cohort, named on the Understory's oldest wall course. Eleven names. The twelfth space is blank, and buying THAT story costs more than a round.
+- **Ruby Calloway (1922–1988), sonic.** Northside club singer, quiet-era legend; the reason the funk era knew what a charged room could do. Otis has one acetate of her last set. He has never played it for anyone. This is the single most expensive lore unlock in the game and it is not for sale — it's for earned.
+- **The Camden Fourteen (2006).** The commuters who went public. Three are still local, elderly now; one drinks at Moe's on Thursdays and will tell the story wrong on purpose to see if you've done your reading.
+
 ## 8. Lore delivery (never exposition dumps)
 **The rule: lore only arrives attached to a person, a place, or a payment.** No codex screens, no lore-bot NPC, no unprompted history. If the player never buys a round, they never learn 1953 — and the game is fine with that.
 
@@ -183,7 +219,27 @@ The Warden runs on coordination architecture modeled on Eli's neural timing (§5
 - **The U greenhouse tour.** Flux-botany history as a cheerful docent scene; the game's most wholesome lore vector, and the mechanical unlock for advanced crops (02).
 - **Artifacts** (found/bought/gifted, each one a story trigger, not a text box): a 1918 miner's helmet that hums by the lake; a union ledger with set-dates coded as "hire dates"; a 1953 funeral card with nine names; a Camden Bridge bolt sold as a paperweight; Paradigm's first-edition CIVIS brochure ("community integrity you can SEE"), which becomes darkly collectible.
 - **The Gopher Line.** Grievance radio (Dale's home turf, 04 §3B) is a lore vector in the negative: the city's wrongest versions of every event, broadcast nightly — the gossip system's mutation rule with a call-in number. Occasionally, accidentally, correct.
+- **Farhia's ledger.** The market's favor-book goes back to her mother's stall — and flux families' credit lines encode a second history (who vouched for whom, the week the Camden Fourteen needed lawyers). Farhia will explain nothing; Yusuf, at high friendship, will explain his aunt.
+- **Lucía's school project.** Late-game, softest vector in the doc: her class does "Minneapolis history" and she picks the lakes, and her poster — assembled from things overheard at Moe's, the panadería, and her dad's careful non-answers — is a child's-eye redaction of this entire document, hung on the fridge for the rest of the game.
+
+### Delivery rules of thumb (for every writer touching lore)
+1. **Person, place, or payment** — no third thing. If a lore beat isn't attached to one, cut it or attach it.
+2. **The teller shapes the truth.** Every vector above has bias (Maggie under-tells, the Gopher Line over-tells, Otis embargoes, walls don't editorialize). Contradictions between tellers are content, not errors — the gossip system's fidelity model applies to history too.
+3. **Nothing gates the main arc.** All of §1–4 is optional depth; a player who never learns 1918 still gets the full Rogue Zone story. Lore rewards curiosity; it never taxes momentum.
+4. **The spoiler tiers hold:** §5's truths surface ONLY through the staged reveal — no bar story, wall, or artifact may leak the Act early. The Understory's walls know a great deal. They do not know that.
 
 ---
+
+## 9. Continuity guardrails (the ten sentences every writer must not break)
+1. One person, one resonance — no exceptions ever, except Eli, and Eli only because of the Act.
+2. Flux follows water; the lakes are the reason for everything, including the ice.
+3. Lucía's cascade was fatal without the trade; nobody involved had a better option, and the doc never invents one retroactively.
+4. Renata is not to blame for the ice, is not a villain, and does not know about the registry until Stage 4/5.
+5. The registry has exactly one possible author; anything implying otherwise breaks the mystery's spine.
+6. The Warden is a machine. It is never revealed to be, contain, or channel a person.
+7. Machines are punchable; people are people; cruelty is never the joke; the corridor's fear is never the punchline.
+8. The damning truth surfaces before the sympathetic truth — never reorder the stages to be kind.
+9. Range Rules culture is protective, not sinister — the first generation hid people, not crimes (Ely Deep hid both, once, and paid in silence; that tension is the point, not a plot hole).
+10. No lore beat may leak the Act outside the staged reveal. The walls don't know. Moe doesn't know. Adelaide *suspects*, and suspicion is her ceiling until Stage 5.
 
 *Ownership: `04-characters.md` owns every named voice, the Anchor/Lucía/Renata/zone-cast entries, and the memory-tag registry (Act/zone tags registered there). `02` owns multithread controls and farming; `05` owns bot combat behavior per mutation stage; `06` owns gossip math, including the accidentally-true-mutation rule this doc canonizes. `03` owns the corridor perimeter geography.*
