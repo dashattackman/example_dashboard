@@ -33,6 +33,10 @@ Superpowered open-world life-sim/brawler set in a stylized Minneapolis. Mobile-f
 - Milestone gates are **played** (Playwright player-zero + Paul on phone), not just reviewed. Feel before content.
 - Commit per surviving package, push daily. Branch: whatever Paul's current feature branch is.
 
+## Current focus (Paul's directive)
+
+**Deepen the beauty corner before expanding the map.** Iterate aesthetics + aliveness on the current setting only: environment fidelity (real surfaces, dressing, atmosphere per the standing rulings) and ambient PEOPLE who look great and move naturally (walkers, a bench sitter, storefront browsers — small cast, high quality). The full Uptown grid (M2 breadth) waits until this corner feels alive and Paul signs off. Combat core logic (pure TS) continues in parallel — it's not world content.
+
 ## Settled cross-doc decisions (do not relitigate)
 
 - **Factions:** 3 territorial (The Commons — Bee Toliver, lakefront; Iron Range Crew — Cass Delane, Greenway/28th; The Aldermen — Odegaard, Hennepin spine) + the non-territorial **Isles Trust** (Adelaide Wray — holds paper, not corners; no banners/flips). Final before M2.
