@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -6,10 +7,23 @@ const base = process.env.BASE_PATH ?? '/';
 
 export default defineConfig({
   base,
+  define: {
+    __BUILD_ID__: JSON.stringify(
+      `${new Date().toISOString().slice(0, 16)}Z-${process.env.CF_PAGES_COMMIT_SHA?.slice(0, 7) ?? 'local'}`,
+    ),
+  },
   build: {
     target: 'es2022',
     sourcemap: false,
     chunkSizeWarningLimit: 4096,
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('index.html', import.meta.url)),
+        // Standalone character-rig review harness (art/anim QA + e2e). Not part
+        // of the game boot path and excluded from the PWA precache below.
+        rig: fileURLToPath(new URL('rig.html', import.meta.url)),
+      },
+    },
   },
   plugins: [
     VitePWA({
@@ -39,6 +53,9 @@ export default defineConfig({
       workbox: {
         // Perf doc: first-playable precache; heavier assets lazy-load later.
         globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
+        // The rig harness (and its loader-only chunk) is a dev/QA surface —
+        // keep it and the lazy-loaded character glb out of the precache budget.
+        globIgnores: ['rig.html', '**/rig-*.js', '**/assets/characters/**'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },
     }),

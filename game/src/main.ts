@@ -65,8 +65,45 @@ async function boot(): Promise<void> {
   });
 }
 
-// Phone-side failures must be visible, not a silent blue screen.
+// Phone-side failures must be visible AND phoned home (device telemetry →
+// /api/report → GitHub issue → readable by the build session without screenshots).
+const errorLog: string[] = [];
+let reported = false;
+
+function deviceReport(kind: 'error' | 'perf'): Record<string, unknown> {
+  return {
+    kind,
+    build: __BUILD_ID__,
+    url: location.href,
+    ua: navigator.userAgent,
+    transport: window.__twinDebug?.transport ?? 'boot',
+    stats: window.__twinDebug ?? null,
+    errors: errorLog.slice(0, 5),
+    ts: new Date().toISOString(),
+  };
+}
+
+function phoneHome(kind: 'error' | 'perf'): void {
+  if (kind === 'error' && reported) return; // one error report per session
+  if (kind === 'error') reported = true;
+  const body = JSON.stringify(deviceReport(kind));
+  try {
+    if (!navigator.sendBeacon?.(`${import.meta.env.BASE_URL}api/report`, body)) {
+      void fetch(`${import.meta.env.BASE_URL}api/report`, {
+        method: 'POST',
+        body,
+        keepalive: true,
+        headers: { 'content-type': 'application/json' },
+      }).catch(() => void 0);
+    }
+  } catch {
+    /* telemetry must never break the game */
+  }
+}
+
 function showFatal(msg: string): void {
+  errorLog.push(msg);
+  phoneHome('error');
   let el = document.getElementById('fatal-banner');
   if (!el) {
     el = document.createElement('div');
@@ -74,12 +111,20 @@ function showFatal(msg: string): void {
     el.style.cssText =
       'position:fixed;top:0;left:0;right:0;z-index:999;padding:10px 14px;' +
       'background:#7a1f1f;color:#ffe;font:12px/1.4 monospace;pointer-events:auto;' +
-      'white-space:pre-wrap;word-break:break-word';
+      'white-space:pre-wrap;word-break:break-word;max-height:60vh;overflow:auto';
     document.body.appendChild(el);
   }
-  el.textContent = `TWIN CITIES error — screenshot this:\n${msg}`;
+  // FIRST error is the root cause — always keep it on top; later ones append.
+  el.textContent =
+    `TWIN CITIES error (auto-reported)\n— first/root:\n${errorLog[0]}` +
+    (errorLog.length > 1 ? `\n— then (${errorLog.length - 1} more):\n${errorLog[errorLog.length - 1]}` : '');
 }
 window.addEventListener('error', (e) => showFatal(String(e.error?.stack ?? e.message)));
 window.addEventListener('unhandledrejection', (e) => showFatal(String(e.reason?.stack ?? e.reason)));
+
+// One perf snapshot per session, 20s in — real-device fps without screenshots.
+setTimeout(() => {
+  if (errorLog.length === 0 && window.__twinDebug) phoneHome('perf');
+}, 20_000);
 
 boot().catch((err: unknown) => showFatal(String((err as Error)?.stack ?? err)));
