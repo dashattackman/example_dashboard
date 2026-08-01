@@ -4,15 +4,37 @@
 
 ---
 
-## 1. The Hero Roster (10 supers — you ARE one, you recruit 2)
+## 1. The Anchor & The Hero Roster (the PC + 10 recruitable supers)
 
-**Player identity (binding):** At new game, the player **chooses their hero from this roster — that hero IS the player.** Romance, reputation, dialogue identity, opinion tiers, and gossip all attach to the player-hero. They then recruit **two squadmates** from the remaining roster. Deeds done by squadmates credit the squad; personal credit — and personal consequences — land on the player-hero. Unrecruited heroes don't vanish: they keep their schedules, their opinions, and their feelings about not getting picked.
+**Player identity (binding — supersedes all earlier rulings):** The player character IS **the Anchor — Elias "Eli" Monroe (§1.0)**: single dad, the only known multithreader, carrier of the buried Act (`09-story-lore.md` is the spoiler canon). Romance, reputation, dialogue identity, opinion tiers, and gossip all attach to him. All 10 roster heroes are **recruitable** (6 in the slice) — the squad is the Anchor + 2 recruits — and **romanceable per their existing flags.** Deeds done by squadmates credit the squad; personal credit — and personal consequences — land on Eli. Unrecruited heroes don't vanish: they keep their schedules, their opinions, and their feelings about not getting picked.
 
-**Vertical slice (binding):** the slice ships **6 playable/recruitable heroes** — Marisol, August, Ingrid, Theo, Maggie, Camille — chosen for role spread (brawler / ranged control / control / mobility / tank / zone-support) and romance-style spread (exclusive-jealous, slow-burn, oriented-exclusive, skittish-open, friendship-only, non-exclusive). The other four are marked **POST-SLICE** in place, with the reason stated.
+**Vertical slice (binding):** the slice ships **6 recruitable heroes** — Marisol, August, Ingrid, Theo, Maggie, Camille — chosen for role spread (brawler / ranged control / control / mobility / tank / zone-support) and romance-style spread (exclusive-jealous, slow-burn, oriented-exclusive, skittish-open, friendship-only, non-exclusive). The other four are marked **POST-SLICE** in place, with the reason stated.
 
 **Control contract (binding, per hero):** each hero fields ONE equipped core move by default; the other two unlock at **Signature-Evolution tree nodes**; loadout is swappable at base. Signatures double as finishers (see §1.11). **Design note — no healer role by design:** Camille's Anneal is the only heal in the game and it's a *conversion*, not a pool. **Squad-viability flag:** all-melee squads (slice example: Marisol+Theo+Maggie; full-roster example: Marisol+Theo+Dom) vs dual-ranged enemy waves is a known tuning corner — combat doc owns the fix.
 
-**Romance legend:** *Open* = romanceable by any player-hero. *Oriented* = romanceable, with a stated orientation. *Exclusive* = demands monogamy; the gossip system WILL get you caught. *Friendship-only* = not romanceable, and richer for it.
+**Romance legend (applied to a fixed PC):** *Open* = romanceable by Eli. *Oriented* = the character's stated orientation is real and stays real: Dominic (men) is romanceable; Ingrid and Petra (women) are **not into you, and that's content** — their arcs (including the protected Ingrid–Petra geometry) run at full richness on the friendship/ally track, per the tone bible's "some NPCs just aren't into you." *Exclusive* = demands monogamy; the gossip system WILL get you caught. *Friendship-only* = not romanceable, and richer for it.
+
+---
+
+### 1.0 THE ANCHOR — Elias "Eli" Monroe (the player character)
+- **Age:** 39. Single dad; Lucía's father (§1.0a); Renata's ex (§1.0b). Full spoiler canon: `09-story-lore.md` §5.
+- **Power kit — Multithread (the only one on Earth):** everyone else carries one power; Eli *holds threads* — sustained echo-resonances that **keep running while he acts.** On the POWER button, a thread is a program, not a spell: light it and it persists (a running *Black Ice* echo under his feet while he brawls with a *Payback* echo in his hands). **Threads come from attunement:** a bonded squadmate consents to let him read their resonance, unlocking an echo of one of their core moves — deeper bond, higher-fidelity echo (relationship systems feed combat; pillar 3). **Signature/finisher — "Full Hands":** every equipped thread runs at once for a few seconds; the screen fills with everyone he's let in. **Upgrade tree (binding):** thread COUNT (1 → 2 → 3...) and thread CLASS (which move types may run on a thread: Stance, Field, Strike echoes). **Slot Zero (binding UI storytelling):** his first slot is permanently occupied and permanently lit — Lucía's unset resonance, held since the Act, unspendable, undropputable. Players will ask what the locked glowing slot is for hours before the story answers. Loadout swappable at base, per the control contract.
+- **Personality (written for a player-avatar — strong silhouette, room for choice):** steady under load — the man you want holding the door; dry Minnesota deflection as a first language; and a guilt he has built an entire functioning life around, which the game slowly makes load-bearing. Dialogue tones (warm / wry / hard) all read true to him; what never changes is that he shows up, he counts exits, and he lies only by omission — the specific omission being the plot.
+- **Day job / hangout:** runs the base (property management, officially); school pickup line at 2:50; Moe's when Lucía's at her mom's — where the "no capes on shift" rule suits him better than anyone, because he's the one cape who's grateful for a room where nobody asks what he can do.
+- **Romance:** he's the player — every flag in this doc points at him. What's authored on his side: exes exist, the co-parenting calendar is real, and Lucía has a rubric (§1.0a). Fade-to-black discipline absolute, per 01.
+- **Is-this-boring test:** the most studied, most wanted, most feared person in the Cities reads, at the school potluck, as a quiet dad with good hotdish and tired eyes — and both things are completely true. The game is about which one the city decides to believe, stage by stage.
+
+### 1.0a THE KID — Lucía Monroe-Vásquez
+- **Age:** 9. Bi-racial (Eli + the Vásquez family); her maternal family is rooted in the **Lake Street corridor** — abuela Imelda's panadería (§3B) is the center of her Saturdays, which makes the Rogue Zone a custody-calendar catastrophe before it's ever politics. **Never in combat, never harmed on screen — binding.** The threat to her is structural: a perimeter between her and half her family.
+- **Wants:** a dog (active lobbying campaign, laminated slides, cost projections in marker); to bike the Greenway alone ("Theo does it" is not, she has been told, an argument); her Saturdays back.
+- **Opinions (the dating-sim friction gold):** she rates Eli's dates on a hidden five-star system she calls *the rubric* and files reports with her mother. Current standings — **Maggie: her favorite person alive** (cribbage, no baby-talk, taught her the word "load-bearing"), and Maggie's friendship-only track is half Lucía content by volume. **Camille:** adored (glass beads, glitter, treats her like an apprentice with standards). **Ingrid:** approached with awed FORMALITY (a legend from the arena; Lucía skates better every winter to be worth talking to). **August:** made her a falling-asleep mix once; permanent status. **Theo:** considered a peer (correct). She is deeply suspicious of any adult who is nice to her *strategically* — "you're using me as a level" — and her rubric leaks to the gossip graph through school, mutation-heavy.
+- **Her own mini-track:** squad heroes accrue Lucía-approval separately from Eli's bonds; her approval unlocks scenes (she is a gate to warmth, never a veto on romance — she's a kid, not a mechanic). All Lucía content is strictly non-romantic in every direction, hard line, obviously.
+- **What she knows/suspects about the Act:** she knows dad "holds her power for her" — coat-check, she's always been told, hers when she's grown. She has started asking *when.* And she has noticed two things she hasn't told anyone: the robots know her cousins' names, and her dad can't look at them while they recite.
+
+### 1.0b THE EX — Renata Vásquez
+- **Age:** 36. Pediatric ICU nurse (the irony is load-bearing and never joked about). Co-parents Lucía on alternating weeks with a competence that makes new partners on both sides nervous. Her family's panadería sits inside the Rogue Zone perimeter; her brother Tomás is flagged (§3B). **Not a villain. Not fridged. Alive, busy, and right about most things.**
+- **History with Eli:** eight years. The ice (`09` §5) didn't end them — she went in after Lucía and carries that afternoon in her lungs and hands, and nobody in this game will ever blame her for thirty seconds. What ended them was the *silence after*: she co-signed the Paradigm consent, knew about the study, and never got the rest — she does NOT know about the registry, and learning it (Stage 4/5) is her authored, out-of-system scene, in both its versions (told by him / told by the news).
+- **Texture for the dating sim:** she has opinions about who Eli dates, delivered deadpan at handoffs ("The glassblower. Huh. Lucía says four stars. Steep rubric this quarter."), and the kid reports in both directions with the fidelity of a court stenographer. Renata is dating Ben, an orthopedic surgeon of catastrophic niceness (Lucía's rating: two stars, "no upside"). **No romance track in the slice** — one authored "what are we" scene exists on the far side of the main arc, in both directions, and the game promises nothing.
 
 ---
 
@@ -67,7 +89,7 @@
 - **Is-this-boring test:** his perception of a romantic moment lasts, subjectively, about an hour. He has experienced every kiss of his life in slow motion, alone, and has never once told anyone that. **Staged (binding):** his Romance-3 almost-moment plays at **0.1x time — the game's only non-combat slow-motion scene** — and when time snaps back, he tells you. Breaking the "never once told anyone" IS the scene.
 
 ### 6. Maggie St. Pierre — "BALLAST" *(SLICE — protected: do not soften her.)*
-- **Age:** 38.
+- **Age:** 44. Granddaughter of Alfred St. Pierre — Ely Deep, 1953 (`09` §3); the first generation treats her as one of their own two generations early, and the Range Rules she carries are inherited, not adopted.
 - **Power kit — Density tank:** Maggie doesn't dodge. **Core moves:** *Set* (roots in place, density up: damage taken drops 80%, enemies who melee her stagger themselves), *Beam Walk* (a slow unstoppable advance that shoves the whole enemy front line back — territory control as a punch), *Spotter's Call* (taunts everything in a cone; the squad takes zero damage from taunted enemies for 4 seconds). **Signature/finisher — "Topping Out":** maximum density, one jump, one landing. Unconditional knockdown on everything — **binding differentiation: the longest windup in the game**; the squad's job is buying her the seconds, and everyone in Uptown knows the pose by now. Car alarms three blocks over, filed by the gossip system under "Ballast again."
 - **Control contract:** Equipped default: *Set*; *Beam Walk*/*Spotter's Call* unlock at Signature-Evolution tree nodes; loadout swappable at base.
 - **Personality:** unshockable; generous with time, stingy with sympathy ("you'll live"); the driest one-liners in the roster, delivered at load-bearing volume.
@@ -137,7 +159,18 @@
 | Theo × Camille | CAMILLE: "You smudged my glass, fast boy." / THEO: "Signed it, you mean!" |
 | Maggie × Camille | CAMILLE: "You didn't even flinch." / MAGGIE: "Was I supposed to?" |
 
-**Post-slice naming formula:** bark asset ID = `bark_finisher_{alias-A}_{alias-B}`, aliases lowercase, alphabetical. Adding a hero adds exactly N−1 new bark lines (one per existing hero), written in this doc, in-voice, before the hero ships.
+**Anchor pairings (the PC is always fielded):** the Anchor gets one bark per slice hero — fired when Eli's *Full Hands* finishes with that hero's echo thread lit:
+
+| Pair | Shared bark |
+|---|---|
+| Anchor × Marisol | MARISOL: "That's MY move!" / ELI: "It's a loaner." |
+| Anchor × August | AUGUST: "Weird, hearing my sound in your hands." / ELI: "I'll treat it nice." |
+| Anchor × Ingrid | INGRID: "Careful with the cold." / ELI: "Always am." *(she looks at him a beat too long — she knows careful when she hears it)* |
+| Anchor × Theo | THEO: "You run it SLOWER than me and it still works?!" / ELI: "That's the trick, yeah." |
+| Anchor × Maggie | MAGGIE: "Don't hold it like it's heavy." / ELI: "It IS heavy." / MAGGIE: "Everything is." |
+| Anchor × Camille | CAMILLE: "You held my fire without flinching, sugar." / ELI: "Flinched on the inside." |
+
+**Post-slice naming formula:** bark asset ID = `bark_finisher_{alias-A}_{alias-B}`, aliases lowercase, alphabetical ("anchor" sorts as written). Adding a hero adds one bark per already-shipped hero plus one Anchor bark, written in this doc, in-voice, before the hero ships.
 
 ---
 
